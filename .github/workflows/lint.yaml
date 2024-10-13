@@ -1,5 +1,9 @@
 name: Lint Files
-'on': push
+'on':
+  push:
+    branches:
+      - '*'
+      - '!master'
 jobs:
   lint-files:
     runs-on: ubuntu-latest
