@@ -1,8 +1,8 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
-const authController = require("./auth/authController");
-const db = require("./db/db");
+const authController = require("./src/controllers/auth/authController.js");
+const db = require("./src/configs/db/db");
 
 const app = express();
 
