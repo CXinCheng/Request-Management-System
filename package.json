@@ -1,0 +1,11 @@
+{
+    "name": "root",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+      "start": "concurrently \"npm run dev --prefix client\" \"npm run start --prefix server\""
+    },
+    "devDependencies": {
+      "concurrently": "^7.0.0"
+    }
+  }
