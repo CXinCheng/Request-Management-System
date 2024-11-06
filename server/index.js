@@ -1,8 +1,7 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const bodyParser = require("body-parser");
-const authController = require("./src/controllers/auth/authController.js");
-const db = require("./src/configs/db/db");
+import express from "express";
+import dotenv from "dotenv";
+import bodyParser from "body-parser";
+import authRoutes from "./src/routes/authRoute.js";
 
 const app = express();
 
@@ -12,8 +11,8 @@ app.use(bodyParser.json());
 // Access .env file
 dotenv.config();
 
-// Login endpoint
-app.post("/api/login", authController.login);
+// Routes
+app.use("/api/v1/auth", authRoutes);
 
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () => {

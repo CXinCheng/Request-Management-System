@@ -1,8 +1,8 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const db = require("../../configs/db/db");
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import db from "../../configs/db/db.js";
 
-const login = async (req, res) => {
+export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -27,7 +27,7 @@ const login = async (req, res) => {
         }
         
         // Verify password
-        const isValidPassword = password === user.password;
+        const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
             return res.status(401).json({ 
                 error: "Invalid email or password" 
@@ -63,8 +63,4 @@ const login = async (req, res) => {
             error: "Internal server error" 
         });
     }
-};
-
-module.exports = {
-    login
 };

@@ -1,7 +1,9 @@
-const pgp = require("pg-promise")();
-const dotenv = require("dotenv");
+import pgPromise from "pg-promise";
+import dotenv from "dotenv";
 
 dotenv.config();
+
+const pgp = pgPromise();
 
 const databaseConfig = {
     host: process.env.DATABASE_URL,
@@ -13,4 +15,4 @@ const databaseConfig = {
 
 const db = pgp(databaseConfig);
 
-module.exports = db;
+export default db;
