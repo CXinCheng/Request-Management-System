@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-      "postinstall": "(cd client && npm install) && (cd server\\auth && npm install)",
+      "postinstall": "concurrently \"cd client && npm install\" \"cd server/auth && npm install\"",
       "start": "concurrently \"npm run dev --prefix client\" \"npm run start --prefix server\\auth\""
     },
     "devDependencies": {

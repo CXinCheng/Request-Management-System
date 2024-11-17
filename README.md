@@ -15,19 +15,18 @@ This system facilitates interaction between students and teachers by allowing st
 1. Clone the repository
 2. Install dependencies:
 ```
+npm install --ignore-scripts
 npm run postinstall
 ```
 
 ### Set up
-Create a `.env` file in the `server` directory with the following content:
+Create a `.env` file in the `server\<service>` directory with the following content:
 ```properties
 DATABASE_URL=<url_to_database>
 DATABASE_PORT=<database_port>
 DATABASE_NAME=<database_name>
 DATABASE_USERNAME=<username>
 DATABASE_PASSWORD=<password>
-JWT_SECRET=<JWT_secret> # ramdom seed for JWT token generation
-PORT=8081 # server running port
 ```
 
 Database Setup

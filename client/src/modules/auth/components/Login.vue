@@ -62,7 +62,7 @@ const showPassword = defineModel('showPassword');
 
 const handleLogin = async () => {
     try {
-        const response = await axios.post("/api/login", {
+        const response = await axios.post("/api/v1/auth/login", {
             email: email.value,
             password: password.value,
         });
