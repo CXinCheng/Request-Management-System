@@ -2,9 +2,7 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vuetify from 'vite-plugin-vuetify'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -15,10 +13,10 @@ export default defineConfig({
     }
   },
   server: {
-    port: 8082,
+    port: 3000,
     proxy: {
-      '/api': {
-        target: 'http://localhost:8081',
+      '/api/auth': {
+        target: 'http://localhost:3001',
         changeOrigin: true,
       }
     }

@@ -10,7 +10,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import Login from "../components/Login.vue";
-import Register from "./Register.vue";
+import Register from "../components/Register.vue";
 //import ResetPassword from "./ResetPassword.vue";
 
 const route = useRoute();
