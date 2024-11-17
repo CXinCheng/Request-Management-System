@@ -10,7 +10,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import Login from "../components/Login.vue";
-//import Register from "./Register.vue";
+import Register from "./Register.vue";
 //import ResetPassword from "./ResetPassword.vue";
 
 const route = useRoute();
@@ -38,7 +38,6 @@ const currentComponent = computed(() => {
 
 .auth-box {
     width: 100%;
-    max-width: 400px;
     padding: 2rem;
 }
 </style>
