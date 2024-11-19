@@ -13,7 +13,7 @@ const register = async (req, res) => {
         }
 
         // Check if email already exists
-        const existingUser = await db.oneOrNone(
+        const existingUser = await db.manyOrNone(
             "SELECT * FROM request_management.users WHERE email = $1 OR matrix_id = $2",
             [email, matrix_id]
         );
