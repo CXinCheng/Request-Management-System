@@ -1,13 +1,12 @@
 import { createMemoryHistory, createRouter } from 'vue-router'
 
-import AuthView from './modules/auth/views/AuthView.vue'
-// import DashboardView from './modules/dashboard/DashboardView.vue'
-// import RequestView from './modules/request/RequestView.vue'
+import LoginView from './modules/auth/views/LoginView.vue'
+import RegisterView from './modules/auth/views/RegisterView.vue'
 
 const routes = [
-  { path: '/', component: AuthView },
-  //{ path: '/dashboard', component: DashboardView },
-  //{ path: '/request', component: RequestView },
+  { path: '/', component: LoginView },
+  { path: '/login', component: LoginView },
+  { path: '/register', component: RegisterView },
 ]
 
 const router = createRouter({

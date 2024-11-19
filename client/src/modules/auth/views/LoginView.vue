@@ -42,6 +42,7 @@
             color="primary"
             variant="outlined"
             id="signup-btn"
+            to="/register"
             >Sign up</v-btn
         >
         <v-btn class="text-none text-subtitle-1" color="primary" variant="outlined"
@@ -74,6 +75,7 @@ const handleLogin = async () => {
 
 <style scoped>
 .login-container {
+    width: 100%;
     max-width: 600px;
     margin: 0 auto;
     padding: 2rem;
@@ -86,22 +88,12 @@ const handleLogin = async () => {
     padding-bottom: 1rem;
 }
 
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-}
-
-input {
-    width: 100%;
-    border-radius: 4px;
-}
-
 #signup-btn {
     margin-top: 1rem;
     margin-bottom: 3rem;
 }
 
-button {
+.v-btn {
     width: 100%;
     border-radius: 2px;
 }

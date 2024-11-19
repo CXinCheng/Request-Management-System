@@ -105,11 +105,21 @@ const handleRegister = async () => {
 
 <style scoped>
 .register-container {
+    width: 100%;
     max-width: 600px;
     margin: 0 auto;
     padding: 2rem;
     border: 1px solid #ccc;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.v-btn {
+    width: 100%;
+    border-radius: 2px;
+}
+
+.title {
+    padding-bottom: 1rem;
 }
 </style>
