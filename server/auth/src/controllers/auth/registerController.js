@@ -18,7 +18,7 @@ const register = async (req, res) => {
             [email, matrix_id]
         );
 
-        if (existingUser) {
+        if (existingUser.length > 0) {
             return res.status(400).json({
                 error: "User with this email or matrix ID already exists"
             });
