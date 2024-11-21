@@ -1,10 +1,9 @@
 import pgPromise from "pg-promise";
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({ path: '.env' });
 
 const pgp = pgPromise();
-
 const databaseConfig = {
     host: process.env.DATABASE_URL,
     port: process.env.DATABASE_PORT || 5432,
