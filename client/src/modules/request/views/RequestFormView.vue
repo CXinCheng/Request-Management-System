@@ -66,7 +66,7 @@
       </div>
 
       <!-- File Upload -->
-      <div class="form-group">
+      <!-- <div class="form-group">
         <label for="fileUpload">Upload Supporting Document:</label>
         <input
           type="file"
@@ -74,7 +74,7 @@
           @change="handleFileUpload"
           required
         />
-      </div>
+      </div> -->
 
       <!-- Submit Button -->
       <button type="submit">Submit</button>
@@ -107,24 +107,26 @@ export default {
     };
   },
   methods: {
-    handleFileUpload(event) {
-      this.formData.file = event.target.files[0];
-    },
+    // handleFileUpload(event) {
+    //   this.formData.file = event.target.files[0];
+    // },
     async submitForm() {
       try {
-        // Prepare data for submission
-        const formDataToSubmit = new FormData();
-        formDataToSubmit.append("student", this.formData.student);
-        formDataToSubmit.append("reasonOfLeave", this.formData.reasonOfLeave);
-        formDataToSubmit.append("startDateOfLeave", this.formData.startDateOfLeave);
-        formDataToSubmit.append("endDateOfLeave", this.formData.endDateOfLeave);
-        formDataToSubmit.append("modules", this.formData.modules);
-        formDataToSubmit.append("approvers", this.formData.approvers);
-        formDataToSubmit.append("file", this.formData.file);
+        const formDataToSubmit = {
+          student: 1, // hardcoded for now since users still not available
+          reasonOfLeave: this.formData.reasonOfLeave,
+          startDateOfLeave: this.formData.startDateOfLeave,
+          endDateofLeave: this.formData.endDateOfLeave,
+          modules: this.formData.modules.split(","), // Convert to an array
+          approvers: this.formData.approvers.split(","), // Convert to an array
+          // file: base64File, // Attach base64-encoded file
+        };
 
-        const response = await axios.post("/api/v1/requests/submit", formDataToSubmit, {
+        console.log(formDataToSubmit)
+
+        const response = await axios.post("http://localhost:3001/api/v1/requests/submit", formDataToSubmit, {
           headers: {
-            "Content-Type": "multipart/form-data",
+            'Content-Type': 'application/json',
           },
         });
 
@@ -134,6 +136,7 @@ export default {
         };
         this.resetForm();
       } catch (error) {
+        console.log(error)
         this.submitStatus = {
           success: false,
           message: "Error submitting form. Please try again.",
