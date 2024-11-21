@@ -2,17 +2,19 @@ import { createWebHistory, createRouter } from 'vue-router'
 
 import AuthView from './modules/auth/views/AuthView.vue'
 import DashboardView from './modules/dashboard/views/DashboardView.vue'
-import RequestView from './modules/request/views/RequestFormView.vue'
+import RequestView from './modules/request/views/RequestView.vue'
+import LeaveModuleSelection from './modules/request/views/LeaveModuleSelection.vue'
 
 const routes = [
-  { path: '/', component: AuthView },
-  { path: '/dashboard', component: DashboardView },
-  { path: '/leave', component: RequestView },
-]
+  { path: '/', component: AuthView, name: 'AuthView' },
+  { path: '/dashboard', component: DashboardView, name: 'DashboardView' },
+  { path: '/leave', component: LeaveModuleSelection, name: 'LeaveModuleSelection' },
+  { path: '/leaveDetails', component: RequestView, name: 'RequestView' },
+];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
-})
+});
 
 export default router
