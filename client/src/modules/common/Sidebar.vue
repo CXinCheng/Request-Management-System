@@ -4,6 +4,7 @@
         <li><a href="/dashboard">Dashboard</a></li>
         <li><a href="/modules">Modules</a></li>
         <li><a href="/leave">Leave Applications</a></li>
+        <li><a href="/requests">All Requests</a></li>
       </ul>
     </div>
   </template>

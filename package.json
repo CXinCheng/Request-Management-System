@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "postinstall": "concurrently \"cd client && npm install\" \"cd server/auth && npm install\"",
-        "start": "concurrently \"npm run dev --prefix client\" \"npm run start --prefix server\\auth\""
+        "start": "concurrently \"npm run dev --prefix client\" \"npm run start --prefix server/auth\" \"npm run start --prefix server/request-service\""
     },
     "devDependencies": {
         "concurrently": "^7.0.0"

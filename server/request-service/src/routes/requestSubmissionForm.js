@@ -1,8 +1,11 @@
 import express from 'express';
 import { submitForm, upload } from '../controllers/requestForm/formController.js';
+import { getAllRequests } from '../controllers/requestController.js';
 import { body } from "express-validator";
 
 const router = express.Router();
+
+router.get('/student/:studentId', getAllRequests);
 
 // router.post('/submit', upload.single("file"),
 router.post('/submit',
