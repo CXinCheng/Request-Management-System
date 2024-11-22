@@ -2,7 +2,7 @@ import db from "../configs/db/db.js";
 
 
 // API to get all requests for a student
-export const getAllRequests = async (req, res) => {
+export const getAllRequestsByStudent = async (req, res) => {
     console.log('API hit for getAllRequests:');
 
     const { studentId } = req.params;
