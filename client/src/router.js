@@ -1,12 +1,15 @@
 import { createWebHistory, createRouter } from 'vue-router'
 
-import AuthView from './modules/auth/views/AuthView.vue'
+import LoginView from './modules/auth/views/LoginView.vue'
+import RegisterView from './modules/auth/views/RegisterView.vue'
 import DashboardView from './modules/dashboard/views/DashboardView.vue'
 import RequestView from './modules/request/views/RequestView.vue'
 import LeaveModuleSelection from './modules/request/views/LeaveModuleSelection.vue'
 
 const routes = [
-  { path: '/', component: AuthView, name: 'AuthView' },
+  { path: '/', component: DashboardView, name: 'DashboardView' },
+  { path: '/login', component: LoginView },
+  { path: '/register', component: RegisterView },
   { path: '/dashboard', component: DashboardView, name: 'DashboardView' },
   { path: '/leave', component: LeaveModuleSelection, name: 'LeaveModuleSelection' },
   { path: '/leaveDetails', component: RequestView, name: 'RequestView' },
