@@ -89,6 +89,7 @@
 </template>
   
 <script>
+import { requestApiService } from "@/core/services/ApiService";
 import axios from "axios";
 
 export default {
@@ -138,13 +139,7 @@ methods: {
 
     console.log(formDataToSubmit);
 
-    const response = await axios.post("api/v1/requests/submit", 
-    formDataToSubmit,
-    {
-      headers: {
-        'Content-Type': 'application/json',},
-      }
-    );
+    const response = await requestApiService.submit(formDataToSubmit);
     this.submitStatus = {
       success: true,
       message: "Leave request submitted successfully!",

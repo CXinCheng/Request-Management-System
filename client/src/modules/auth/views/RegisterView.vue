@@ -109,6 +109,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { authApiService } from "@/core/services/ApiService";
 
 const router = useRouter();
 const email = ref("");
@@ -132,7 +133,7 @@ const handleRegister = async () => {
     }
 
     isLoading.value = true;
-    const response = await axios.post("/api/v1/auth/register", {
+    const response = await authApiService.register({
       name: name.value,
       email: email.value,
       password: password.value,
@@ -140,15 +141,12 @@ const handleRegister = async () => {
       role: role.value,
     });
 
-    if (response.data.success) {
+    if (response.success) {
       successMessage.value = "Registration successful! Redirecting to login...";
       errorMessage.value = "";
       setTimeout(() => {
         router.push("/login");
       }, 1000);
-    } else {
-      errorMessage.value = response.data.error || "Registration failed";
-      successMessage.value = "";
     }
   } catch (error) {
     errorMessage.value = error.response?.data?.error || "Registration failed";

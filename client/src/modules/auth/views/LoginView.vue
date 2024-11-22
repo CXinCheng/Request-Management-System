@@ -72,7 +72,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+import { authApiService } from "@/core/services/ApiService";
 
 const router = useRouter();
 const email = defineModel("email");
@@ -88,14 +88,14 @@ const handleLogin = async () => {
     isLoading.value = true;
     errorMessage.value = "";
 
-    const response = await axios.post("/api/v1/auth/login", {
+    const response = await authApiService.login({
       email: email.value,
       password: password.value,
     });
 
-    if (response.data.success) {
+    if (response.success) {
       // Store token
-      const { token, user } = response.data.data;
+      const { token, user } = response.data;
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
@@ -106,8 +106,6 @@ const handleLogin = async () => {
       setTimeout(() => {
         router.push("/dashboard");
       }, 1000);
-    } else {
-      errorMessage.value = response.data.error || "Login failed";
     }
   } catch (error) {
     errorMessage.value = error.response?.data?.error || "Login failed";
