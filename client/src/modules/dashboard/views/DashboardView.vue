@@ -18,7 +18,7 @@
   
   <script>
   import { useRoute } from "vue-router";
-  import Sidebar from "../components/Sidebar.vue";
+  import Sidebar from "../../common/Sidebar.vue";
   import Header from "../components/Header.vue";
   import EnrolledModules from "../components/EnrolledModules.vue";
   import LeaveApplication from "../components/LeaveApplication.vue";

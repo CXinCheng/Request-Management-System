@@ -28,5 +28,5 @@ app.use("/api/v1/requests", formRoutes);
 
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
+    console.log(`Request service is running on port ${PORT}.`);
 });
