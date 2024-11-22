@@ -7,7 +7,10 @@
         <v-col cols="12" md="6">
           <!-- Pie Chart -->
           <div class="chart-wrapper">
-            <PieChart :chart-data="pieChartData" :chart-options="chartOptions" />
+            <Doughnut
+              :data="doughnutChartData"
+              :options="chartOptions"
+            />
           </div>
         </v-col>
         <v-col cols="12" md="6">
@@ -16,9 +19,9 @@
             This chart shows the distribution of leave applications by status:
           </p>
           <ul>
-            <li>Approved: {{ pieChartData.datasets[0].data[0] }}%</li>
-            <li>Rejected: {{ pieChartData.datasets[0].data[1] }}%</li>
-            <li>Pending: {{ pieChartData.datasets[0].data[2] }}%</li>
+            <li>Approved: {{ doughnutChartData.datasets[0].data[0] }}%</li>
+            <li>Rejected: {{ doughnutChartData.datasets[0].data[1] }}%</li>
+            <li>Pending: {{ doughnutChartData.datasets[0].data[2] }}%</li>
           </ul>
         </v-col>
       </v-row>
@@ -29,7 +32,7 @@
 <script>
 import { defineComponent } from "vue";
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from "chart.js";
-import { Pie } from "vue-chartjs";
+import { Doughnut } from "vue-chartjs";
 
 // Register Chart.js components
 ChartJS.register(Title, Tooltip, Legend, ArcElement);
@@ -37,24 +40,36 @@ ChartJS.register(Title, Tooltip, Legend, ArcElement);
 export default defineComponent({
   name: "LeaveApplication",
   components: {
-    PieChart: Pie,
+    Doughnut: Doughnut,
   },
   data() {
     return {
-      // Placeholder pie chart data
-      pieChartData: {
-  labels: ["Approved", "Rejected", "Pending"],
-  datasets: [
-    {
-      label: "Leave Applications",
-      data: [75, 10, 15], // Placeholder values
-      backgroundColor: ["rgb(76, 175, 80)", "rgb(244, 67, 54)", "rgb(255, 152, 0)"], // RGB Colors
-      hoverBackgroundColor: ["rgb(56, 142, 60)", "rgb(211, 47, 47)", "rgb(245, 124, 0)"], // Hover Colors
-      borderColor: ["rgb(255, 255, 255)", "rgb(255, 255, 255)", "rgb(255, 255, 255)"], // White borders
-      borderWidth: 2,
-    },
-  ],
-},
+      // Placeholder chart data
+      doughnutChartData: {
+        labels: ["Approved", "Rejected", "Pending"],
+        datasets: [
+          {
+            label: "Leave Applications",
+            data: [75, 10, 15], // Placeholder values
+            backgroundColor: [
+              "rgb(76, 175, 80)",
+              "rgb(244, 67, 54)",
+              "rgb(255, 152, 0)",
+            ], // RGB Colors
+            hoverBackgroundColor: [
+              "rgb(56, 142, 60)",
+              "rgb(211, 47, 47)",
+              "rgb(245, 124, 0)",
+            ], // Hover Colors
+            borderColor: [
+              "rgb(255, 255, 255)",
+              "rgb(255, 255, 255)",
+              "rgb(255, 255, 255)",
+            ], // White borders
+            borderWidth: 2,
+          },
+        ],
+      },
       // Chart options
       chartOptions: {
         responsive: true,
