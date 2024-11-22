@@ -1,6 +1,6 @@
 <template>
     <header class="header">
-      <h1>Welcome, User!</h1>
+      <h1>Welcome, {{ username }}!</h1>
       <div class="header-controls">
         <input type="text" placeholder="Search" />
         <div class="icons">
@@ -15,6 +15,18 @@
   <script>
   export default {
     name: 'Header',
+    data() {
+      return {
+        username: 'User'
+      }
+    },
+    created() {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData)
+        this.username = user.name || 'User'
+      }
+    }
   };
   </script>
   
