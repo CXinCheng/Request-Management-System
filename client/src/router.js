@@ -7,7 +7,7 @@ import RequestView from './modules/request/views/RequestView.vue'
 import LeaveModuleSelection from './modules/request/views/LeaveModuleSelection.vue'
 
 const routes = [
-  { path: '/', component: DashboardView, name: 'DashboardView' },
+  { path: '/', component: DashboardView},
   { path: '/login', component: LoginView },
   { path: '/register', component: RegisterView },
   { path: '/dashboard', component: DashboardView, name: 'DashboardView' },

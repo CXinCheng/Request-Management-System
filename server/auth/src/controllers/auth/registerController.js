@@ -8,6 +8,7 @@ const register = async (req, res) => {
         // Input validation
         if (!name || !email || !password || !matrix_id || !role) {
             return res.status(400).json({
+                success: false,
                 error: "All fields are required"
             });
         }
@@ -20,6 +21,7 @@ const register = async (req, res) => {
 
         if (existingUser.length > 0) {
             return res.status(400).json({
+                success: false,
                 error: "User with this email or matrix ID already exists"
             });
         }
@@ -37,13 +39,21 @@ const register = async (req, res) => {
         );
 
         res.status(201).json({
+            success: true,
             message: "User registered successfully",
-            user: newUser
+            data : {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role,
+                matrix_id: newUser.matrix_id
+            }
         });
 
     } catch (error) {
         console.error("Registration error:", error);
         res.status(500).json({
+            success: false,
             error: "Internal server error"
         });
     }

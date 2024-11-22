@@ -9,6 +9,7 @@ export const login = async (req, res) => {
         // Input validation
         if (!email || !password) {
             return res.status(400).json({ 
+                success: false,
                 error: "Email and password are required" 
             });
         }
@@ -22,15 +23,17 @@ export const login = async (req, res) => {
         // Check if user exists
         if (!user) {
             return res.status(401).json({ 
-                error: "Invalid email or password" 
+                success: false,
+                error: "Invalid email or password"
             });
         }
         
         // Verify password
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
-            return res.status(401).json({ 
-                error: "Invalid email or password" 
+            return res.status(401).json({
+                success: false,
+                error: "Invalid email or password"
             });
         }
 
@@ -47,19 +50,24 @@ export const login = async (req, res) => {
 
         // Return success response
         res.json({
-            token,
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                matrix_id: user.matrix_id
+            success: true,
+            message: "Login successful",
+            data: {
+                token,
+                user: {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    matrix_id: user.matrix_id
+                }
             }
         });
 
     } catch (error) {
         console.error("Login error:", error);
         res.status(500).json({ 
+            success: false,
             error: "Internal server error" 
         });
     }

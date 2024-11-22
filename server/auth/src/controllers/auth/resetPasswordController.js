@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import db from '../../configs/db/db.js';
 
 // Request password reset
 const requestReset = async (req, res) => {
@@ -8,7 +7,10 @@ const requestReset = async (req, res) => {
         const { email } = req.body;
 
         if (!email) {
-            return res.status(400).json({ error: 'Email is required' });
+            return res.status(400).json({
+                success: false,
+                error: 'Email is required'
+            });
         }
 
         // Check if user exists
@@ -18,7 +20,10 @@ const requestReset = async (req, res) => {
         );
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
         }
 
         // Generate reset token
@@ -31,13 +36,17 @@ const requestReset = async (req, res) => {
         // TODO: Send reset email with token
         // For development, return token in response
         res.json({
+            success: true,
             message: 'Password reset link sent',
             resetToken // Remove in production
         });
 
     } catch (error) {
         console.error('Reset password request error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
     }
 };
 
@@ -47,8 +56,9 @@ const resetPassword = async (req, res) => {
         const { token, newPassword } = req.body;
 
         if (!token || !newPassword) {
-            return res.status(400).json({ 
-                error: 'Token and new password are required' 
+            return res.status(400).json({
+                success: false,
+                error: 'Token and new password are required'
             });
         }
 
@@ -65,14 +75,23 @@ const resetPassword = async (req, res) => {
             [hashedPassword, decoded.userId]
         );
 
-        res.json({ message: 'Password reset successful' });
+        res.json({
+            success: true,
+            message: 'Password reset successful',
+            data: {}
+        });
 
     } catch (error) {
         if (error.name === 'JsonWebTokenError') {
-            return res.status(400).json({ error: 'Invalid or expired token' });
+            return res.status(400).json({ 
+                success: false,
+                error: 'Invalid or expired token' });
         }
         console.error('Reset password error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
     }
 };
 
