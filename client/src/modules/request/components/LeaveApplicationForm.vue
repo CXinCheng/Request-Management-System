@@ -138,7 +138,7 @@ methods: {
 
     console.log(formDataToSubmit);
 
-    const response = await axios.post("http://localhost:3001/api/v1/requests/submit", 
+    const response = await axios.post("api/v1/requests/submit", 
     formDataToSubmit,
     {
       headers: {

@@ -18,6 +18,10 @@ export default defineConfig({
       '/api/v1/auth': {
         target: 'http://localhost:3001',
         changeOrigin: true,
+      },
+      '/api/v1/requests': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
       }
     }
   },
