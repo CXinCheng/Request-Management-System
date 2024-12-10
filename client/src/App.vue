@@ -1,15 +1,16 @@
 <template>
-    <main>
-        <RouterView />
-    </main>
+    <v-app class="rounded rounded-md">
+        <Sidebar></Sidebar>
+        <v-main
+            class="d-flex align-center justify-center"
+            style="min-height: 300px"
+        >
+            <router-view></router-view>
+        </v-main>
+    </v-app>
 </template>
 
-<style>
-main {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    width: 100%;
-}
-</style>
+<script setup>
+import Sidebar from "./components/Sidebar.vue";
+
+</script>

@@ -1,11 +1,7 @@
 <template>
     <div class="dashboard-container">
-      <!-- Sidebar -->
-      <Sidebar />
   
       <div class="main-content">
-        <!-- Header -->
-        <Header />
   
         <!-- Enrolled Modules Section -->
         <EnrolledModules />
@@ -18,16 +14,12 @@
   
   <script>
   import { useRoute } from "vue-router";
-  import Sidebar from "../../common/Sidebar.vue";
-  import Header from "../components/Header.vue";
   import EnrolledModules from "../components/EnrolledModules.vue";
   import LeaveApplication from "../components/LeaveApplication.vue";
   
   export default {
     name: "DashboardView",
     components: {
-      Sidebar,
-      Header,
       EnrolledModules,
       LeaveApplication,
     },

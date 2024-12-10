@@ -1,7 +1,5 @@
 <template>
     <div class="requests-view-container">
-        <!-- Sidebar -->
-        <Sidebar />
 
         <div class="main-container">
             <!-- Requests Table -->
@@ -12,13 +10,11 @@
   
   <script>
     import { useRoute } from "vue-router";
-    import Sidebar from "../../common/Sidebar.vue";
     import RequestsTable from "../components/RequestsTable.vue";
 
     export default {
         name: "DashboardView",
         components: {
-        Sidebar,
         RequestsTable,
         },
         setup() {
