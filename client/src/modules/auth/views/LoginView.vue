@@ -104,7 +104,7 @@ const handleLogin = async () => {
 
       // Redirect to dashboard or home
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push(router.currentRoute.value.query.redirect || { name: 'Dashboard' });
       }, 1000);
     }
   } catch (error) {
