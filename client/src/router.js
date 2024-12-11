@@ -15,6 +15,7 @@ const routes = [
     {
         path: "/",
         component: DashboardView,
+        name: "Dashboard",
         meta: { requiresAuth: true },
     },
     {
@@ -38,19 +39,19 @@ const routes = [
         path: "/leave",
         component: LeaveModuleSelection,
         name: "LeaveModuleSelection",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true , title: "Leave Application"},
     },
     {
         path: "/leaveDetails",
         component: RequestView,
         name: "RequestView",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, title: "Request Details" },
     },
     {
         path: "/requests",
         component: RequestListView,
         name: "RequestListView",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, title: "Request List" },
     },
 ];
 
