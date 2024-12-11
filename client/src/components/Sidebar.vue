@@ -23,7 +23,9 @@
         </v-list>
         <template v-slot:append>
             <v-list nav>
-                <v-list-subheader class="text-caption ml-4" style="color: inherit"
+                <v-list-subheader
+                    class="text-caption ml-4"
+                    style="color: inherit"
                     >SETTINGS</v-list-subheader
                 >
                 <v-list-item
@@ -39,7 +41,12 @@
             </v-list>
             <v-divider class="border-opacity-25"></v-divider>
             <div class="pa-2">
-                <v-btn variant="text" prepend-icon="mdi-logout" block>
+                <v-btn
+                    variant="text"
+                    prepend-icon="mdi-logout"
+                    block
+                    @click="handleLogout"
+                >
                     Log Out
                 </v-btn>
             </div>
@@ -49,8 +56,21 @@
 </template>
 
 <script>
+import { useRouter } from "vue-router";
+
 export default {
     name: "Sidebar",
+    setup() {
+        const router = useRouter();
+
+        const handleLogout = () => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            router.push("/login");
+        };
+
+        return { handleLogout };
+    },
     data() {
         return {
             items: [
