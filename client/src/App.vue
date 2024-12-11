@@ -25,7 +25,7 @@ const isAuthRoute = computed(() => {
 const pageTitle = computed(() => {
     if (route.path === '/' || route.path === '/dashboard') {
         const userData = localStorage.getItem('user');
-        return `Welcome, ${JSON.parse(userData).name || 'User'}`;
+        return `Welcome, ${JSON.parse(userData)?.name || 'User'}`;
     }
     return route.meta?.title;
 });
