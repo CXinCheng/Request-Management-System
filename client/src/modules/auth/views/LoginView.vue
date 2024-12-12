@@ -72,9 +72,11 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { authApiService } from "@/core/services/ApiService";
+import { authApiService } from "@/utils/ApiService";
+import { useNotificationStore } from "@/utils/NotificationStore";
 
 const router = useRouter();
+const notificationStore = useNotificationStore();
 const email = defineModel("email");
 const password = defineModel("password");
 const successMessage = ref("");
@@ -94,21 +96,24 @@ const handleLogin = async () => {
     });
 
     if (response.success) {
-      // Store token
       const { token, user } = response.data;
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      // Show success message
       successMessage.value = "Login successful! Redirecting...";
 
-      // Redirect to dashboard or home
       setTimeout(() => {
         router.push(router.currentRoute.value.query.redirect || { name: 'Dashboard' });
       }, 1000);
     }
-  } catch (error) {
+} catch (error) {
     errorMessage.value = error.response?.data?.error || "Login failed";
+    if (error.response?.status >= 500) {
+        notificationStore.showNotification({
+            message: errorMessage.value,
+            color: "error",
+        });
+    }
   } finally {
     isLoading.value = false;
   }

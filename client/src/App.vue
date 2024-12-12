@@ -8,6 +8,7 @@
         >
             <router-view></router-view>
         </v-main>
+        <Snackbar />
     </v-app>
 </template>
 
@@ -16,8 +17,10 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import Sidebar from "./components/Sidebar.vue";
 import Header from "./components/Header.vue";
+import Snackbar from './components/Snackbar.vue';
 
 const route = useRoute();
+
 const isAuthRoute = computed(() => {
     return ['/login', '/register'].includes(route.path);
 });
@@ -29,5 +32,4 @@ const pageTitle = computed(() => {
     }
     return route.meta?.title;
 });
-
 </script>

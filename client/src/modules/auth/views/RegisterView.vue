@@ -109,7 +109,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { authApiService } from "@/core/services/ApiService";
+import { authApiService } from "@/utils/ApiService";
 
 const router = useRouter();
 const email = ref("");

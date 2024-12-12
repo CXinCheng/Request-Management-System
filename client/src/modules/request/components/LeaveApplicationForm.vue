@@ -89,7 +89,7 @@
 </template>
   
 <script>
-import { requestApiService } from "@/core/services/ApiService";
+import { requestApiService } from "@/utils/ApiService";
 import axios from "axios";
 
 export default {
