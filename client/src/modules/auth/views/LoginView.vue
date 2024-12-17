@@ -1,6 +1,6 @@
 <template>
     <div class="login-container">
-        <h4 class="text-h4 font-weight-bold title">Login</h4>
+        <h4 class="text-h4 font-weight-bold mb-5">Login</h4>
         <form @submit.prevent="handleLogin">
             <v-text-field
                 label="Email Address"
@@ -49,7 +49,6 @@
                 variant="flat"
                 type="submit"
                 block
-                @click="handleLogin"
             >
                 {{ isLoading ? "Logging in..." : "Login" }}
             </v-btn>
@@ -57,7 +56,7 @@
         <v-alert
             v-if="successMessage"
             type="success"
-            variant="tonal"
+            variant="tonal" 
             class="mt-4"
         >
             {{ successMessage }}
@@ -68,7 +67,7 @@
         </v-alert>
 
         <v-btn
-            class="text-none text-subtitle-1"
+            class="text-none text-subtitle-1 mt-4 mb-10"
             color="primary"
             variant="outlined"
             id="signup-btn"
@@ -150,18 +149,5 @@ const handleLogin = async () => {
     border: 1px solid #ccc;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.title {
-    padding-bottom: 1rem;
-}
-
-#signup-btn {
-    margin-top: 1rem;
-    margin-bottom: 3rem;
-}
-
-.error {
-    color: red;
 }
 </style>
