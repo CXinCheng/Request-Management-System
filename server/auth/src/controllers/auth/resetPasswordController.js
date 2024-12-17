@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import db from "../../configs/db/db.js";
 
 // Request password reset
 const requestReset = async (req, res) => {
@@ -85,7 +86,7 @@ const resetPassword = async (req, res) => {
         if (error.name === 'JsonWebTokenError') {
             return res.status(400).json({ 
                 success: false,
-                error: 'Invalid or expired token' });
+                error: 'Invalid or expired token' })
         }
         console.error('Reset password error:', error);
         res.status(500).json({
