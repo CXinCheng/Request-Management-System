@@ -98,7 +98,7 @@ export default {
 };
 </script>
   
-<style>
+<style scoped>
 .leave-application {
   max-width: 900px;
   width: 90%;

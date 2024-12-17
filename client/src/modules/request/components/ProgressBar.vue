@@ -12,7 +12,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .progress-bar {
     display: flex;
     justify-content: space-between;
