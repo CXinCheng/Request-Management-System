@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import authRoutes from "./src/routes/authRoute.js";
+import { cleanupService } from './src/services/cleanupService.js';
 
 const app = express();
 
@@ -13,6 +14,8 @@ dotenv.config();
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
+
+cleanupService.start();
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
