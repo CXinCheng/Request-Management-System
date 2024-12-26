@@ -14,7 +14,7 @@ router.post('/submit',
             .withMessage("Start Date of leave is required")
             .isISO8601()
             .withMessage("Start Date of leave must be in ISO 8601 format (YYYY-MM-DD)"),
-        body("endDateofLeave")
+        body("endDateOfLeave")
             .notEmpty()
             .withMessage("End Date of leave is required")
             .isISO8601()
