@@ -25,14 +25,14 @@ export default {
   },
   setup() {
     const route = useRoute();
-    const modules = ref([]); // Module data for EnrolledModules
-    const leaveData = ref([]); // Leave application data for LeaveApplication
-
+    const userId = route.params.userId; // Assume the route includes User_ID
+    const modules = ref([]); // User's enrolled modules
+    const leaveData = ref([]); // Leave application data for user's modules
+    
     const fetchDashboardData = async () => {
       try {
-        // Fetch aggregated data for the dashboard
         const { modules: moduleData, leaveData: leaveAppData } =
-          await aggregateDashboardData();
+          await aggregateDashboardData(userId); // Pass User_ID to aggregator
         modules.value = moduleData;
         leaveData.value = leaveAppData;
       } catch (error) {

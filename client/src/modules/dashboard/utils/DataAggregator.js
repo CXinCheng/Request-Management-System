@@ -1,13 +1,15 @@
 const REQUEST_BASE_URL = "http://localhost:3002"; // Request service base URL
-const MODULE_BASE_URL = "http://localhost:3003"; // Module service base URL (adjust if separate)
+const USER_MODULE_BASE_URL = "http://localhost:3003"; // Base URL for User_Module API
 
 /**
- * Fetch module data from the Module Service.
- * @returns {Promise<Array>} List of modules
+ * Fetch enrolled module data for a specific user.
+ * @param {number} userId - User ID
+ * @returns {Promise<Array>} List of modules the user is enrolled in
  */
-const fetchModules = async () => {
-  const response = await fetch(`${MODULE_BASE_URL}/api/modules`);
-  if (!response.ok) throw new Error("Failed to fetch modules");
+
+const fetchUserModules = async (userId) => {
+  const response = await fetch(`${USER_MODULE_BASE_URL}/api/userModules?userId=${userId}`);
+  if (!response.ok) throw new Error("Failed to fetch user modules");
   return await response.json();
 };
 
@@ -22,35 +24,37 @@ const fetchLeaveApplications = async () => {
 };
 
 /**
- * Aggregate leave data by joining modules and leave applications.
- * @returns {Promise<Array>} Aggregated leave data
+ * Aggregate data for the dashboard.
+ * - Fetches enrolled modules and leave data for a specific user.
+ * @param {number} userId - User ID
+ * @returns {Promise<{ modules: Array, leaveData: Array }>} Aggregated data
  */
-export const aggregateDashboardData = async () => {
+export const aggregateDashboardData = async (userId) => {
   try {
-    // Fetch data in parallel
+    // Fetch user-specific modules and leave applications in parallel
     const [modules, leaveApplications] = await Promise.all([
-      fetchModules(),
+      fetchUserModules(userId),
       fetchLeaveApplications(),
     ]);
 
-    // Transform leaveApplications to group by module_id
+    // Transform leave applications to group by module_id
     const leaveDataByModule = leaveApplications.reduce((acc, leave) => {
-      if (!acc[leave.Module_Id]) {
-        acc[leave.Module_Id] = { approved: 0, rejected: 0, pending: 0 };
+      if (!acc[leave.Module_ID]) {
+        acc[leave.Module_ID] = { approved: 0, rejected: 0, pending: 0 };
       }
-      acc[leave.Module_Id][leave.Status.toLowerCase()] += 1;
+      acc[leave.Module_ID][leave.Status.toLowerCase()] += 1;
       return acc;
     }, {});
 
     // Aggregate data by joining with modules
-    const aggregatedLeaveData = modules.map((module) => ({
-      module: module.Name,
-      approved: leaveDataByModule[module.ID]?.approved || 0,
-      rejected: leaveDataByModule[module.ID]?.rejected || 0,
-      pending: leaveDataByModule[module.ID]?.pending || 0,
+    const leaveData = modules.map((module) => ({
+      module: module.module_name,
+      approved: leaveDataByModule[module.module_id]?.approved || 0,
+      rejected: leaveDataByModule[module.module_id]?.rejected || 0,
+      pending: leaveDataByModule[module.module_id]?.pending || 0,
     }));
 
-    return { modules, aggregatedLeaveData };
+    return { modules, leaveData };
   } catch (error) {
     console.error("Error aggregating dashboard data:", error);
     throw error;
