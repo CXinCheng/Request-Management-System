@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import crypto from "node:crypto";
 import db from "../../configs/db/db.js";
+import nodemailer from "nodemailer";
 
 const generateOTP = () => {
     return crypto.randomInt(100000, 999999).toString();
@@ -39,7 +40,56 @@ const verifyEmail = async (req, res) => {
             [email, otp, expiryTime]
         );
 
-        // TODO: Send reset email with token
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.EMAIL_PASSWORD,
+            },
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL,
+            // to: email,
+            to: process.env.EMAIL, // For development
+            subject: "Password Reset Request",
+            html: `
+            <h2>Password Reset Request</h2>
+            <p>Hello,</p>
+            <p>We received a request to reset your password.</p>
+            <p>Your one-time password (OTP) is: <strong>${otp}</strong></p>
+            <p>This OTP will expire in 15 minutes.</p>
+            <p>If you did not request a password reset, please ignore this email.</p>
+            <p>Best regards,<br>Request Management System Team</p>
+            `,
+            text: `
+            Password Reset Request
+            
+            Hello,
+            
+            We received a request to reset your password.
+            Your one-time password (OTP) is: ${otp}
+            
+            This OTP will expire in 15 minutes.
+            
+            If you did not request a password reset, please ignore this email.
+            
+            Best regards,
+            Request Management System Team
+            `
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error("Email send error:", error);
+                return res.status(500).json({
+
+                    success: false,
+                    error: "Internal server error",
+                });
+            }
+        });
+
         // For development, return token in response
         res.json({
             success: true,
