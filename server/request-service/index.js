@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import formRoutes from "./src/routes/requestSubmissionForm.js";
 import cors from 'cors';
+import { initialize, close } from './src/configs/db/db.js';
 
 const app = express();
 
@@ -26,7 +27,14 @@ dotenv.config();
 // Routes
 app.use("/api/v1/requests", formRoutes);
 
+// DB connection
+await initialize();
+
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
     console.log(`Request service is running on port ${PORT}.`);
+});
+
+process.on('SIGTERM', () => {
+    close();
 });

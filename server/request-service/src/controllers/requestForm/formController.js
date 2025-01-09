@@ -1,6 +1,6 @@
 import { validationResult } from "express-validator";
 import multer from "multer";
-import db from "../../configs/db/db.js";
+import { db } from "../../configs/db/db.js";
 
 export const upload = multer({
     dest: "../../uploads", // Directory to store uploaded files

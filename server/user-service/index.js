@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import authRoutes from "./src/routes/authRoute.js";
 import { cleanupService } from './src/services/cleanupService.js';
+import { initialize, close } from './src/configs/db/db.js';
 
 const app = express();
 
@@ -17,7 +18,14 @@ app.use("/api/v1/auth", authRoutes);
 
 cleanupService.start();
 
+// DB connection
+await initialize();
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
+    console.log(`Auth service is running on port ${PORT}.`);
+});
+
+process.on('SIGTERM', () => {
+    close();
 });
