@@ -1,11 +1,7 @@
 <template>
     <div class="request-leave-form">
       <h1>Leave Application</h1>
-        
-      <div class="modules">
-        <h4>Modules: {{ selectedModules }}</h4>
-    </div>
-    
+      
     <form @submit.prevent="submitForm">
     <!-- User Particulars -->
     <div class="user-particulars">
@@ -91,17 +87,19 @@
 <script>
 import { requestApiService } from "@/utils/ApiService";
 import axios from "axios";
+import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
 
 export default {
 name: "LeaveRequestForm",
 props: {
-    selectedModules: {
-      type: Array,
-      required: true,
-    },
+  selectedModules: {
+    type: Array,
+    required: true,
+  },
 },
 data() {
   return {
+    // update this to take actual student data
     formData: {
         student: "John Doe",
         school: "National University of Singapore",
@@ -120,24 +118,32 @@ methods: {
   async submitForm() {
     try {
 
-    // const formDataToSubmit = {
-    //   student: this.formData.student,
-    //   reason: this.formData.reason,
-    //   file: this.formData.file,
-    //   modules: this.selectedModules.code, 
-    //   approvers: this.selectedModules.approvers, 
-    // };
+      const moduleIDs = []
+      const approverIDs = []
 
-    const formDataToSubmit = {
-      student: 1,
-      reasonOfLeave: this.formData.reason,
-      startDateOfLeave: "2024-11-21",
-      endDateofLeave: "2024-11-25",
-      modules: ["1", "2"],
-      approvers: ["7", "7"],
-    };
+      const leaveDateStore = useLeaveDateStore();
+      const leaveDates = {...leaveDateStore}
+      const startDate = leaveDates.selectedLeaveDates.startDate
+      const endDate = leaveDates.selectedLeaveDates.endDate
 
-    console.log(formDataToSubmit);
+      this.selectedModules.forEach((selectedMod)=>{
+        const moduleID = {...selectedMod}.id
+        const profID = {...selectedMod}.professorID
+
+        moduleIDs.push(moduleID)
+        approverIDs.push(profID)
+      })
+
+      const formDataToSubmit = {
+        student: 3,
+        reasonOfLeave: this.formData.reason,
+        startDateOfLeave: startDate,
+        endDateOfLeave: endDate,
+        modules: moduleIDs,
+        approvers: approverIDs,
+      };
+
+      console.log(formDataToSubmit);
 
     const response = await requestApiService.submit(formDataToSubmit);
     this.submitStatus = {
@@ -146,17 +152,17 @@ methods: {
     };
     this.resetForm();
 
-    } catch (error) {
-      this.submitStatus = {
-        success: false,
-        message: "Error submitting form. Please try again.",
-      };
-    }
-  },
-  resetForm() {
-    this.formData.reason = "";
-    this.formData.file = null;
-  },
+      } catch (error) {
+        this.submitStatus = {
+          success: false,
+          message: "Error submitting form. Please try again.",
+        };
+      }
+    },
+    resetForm() {
+      this.formData.reason = "";
+      this.formData.file = null;
+    },
 },
 };
 </script>

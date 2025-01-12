@@ -11,13 +11,13 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="module in modules" :key="module.code">
+        <tr v-for="module in modules" :key="module.id">
           <td>
             <input
               type="checkbox"
-              :value="module.code"
-              :checked="selectedModules.includes(module.code)"
-              @change="onCheckboxChange(module.code)"
+              :value="module"
+              :checked="selectedModules.includes(module)"
+              @change="onCheckboxChange(module)"
             />
           </td>
           <td>{{ module.name }}</td>
@@ -37,11 +37,11 @@ export default {
       selectedModules: Array,
   },
   methods: {
-      onCheckboxChange(moduleCode) {
+      onCheckboxChange(module) {
       const updatedModules = [...this.selectedModules];
-      const index = updatedModules.indexOf(moduleCode);
+      const index = updatedModules.indexOf(module);
       if (index === -1) {
-          updatedModules.push(moduleCode); 
+          updatedModules.push(module); 
       } else {
           updatedModules.splice(index, 1);
       }

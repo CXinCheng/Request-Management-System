@@ -43,11 +43,11 @@ export const submitForm = async (req, res) => {
             const request = await t.one(
                 `
                 INSERT INTO request_management.requests (
-                    created_at, date_of_request, reason_of_leave, user_id
-                ) VALUES (CURRENT_TIMESTAMP, $1, $2, $3)
+                    created_at, start_date_of_leave, end_date_of_leave, reason_of_leave, user_id
+                ) VALUES (CURRENT_TIMESTAMP, $1, $2, $3, $4)
                 RETURNING id
                 `,
-                [startDateOfLeave, reasonOfLeave, student]
+                [startDateOfLeave, endDateOfLeave, reasonOfLeave, student]
             );
 
             // Create the sub requests
@@ -55,7 +55,7 @@ export const submitForm = async (req, res) => {
                 return t.one(
                     `
                     INSERT INTO request_management.sub_request (
-                        status, modified_at, module_id, approver_id, consolidated_id
+                        status, modified_at, module_id, approver_id, main_request_id
                     ) VALUES ('Pending', CURRENT_TIMESTAMP, $1, $2, $3)
                     RETURNING id
                     `,
