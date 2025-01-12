@@ -20,22 +20,24 @@
       <input
         type="date"
         id="startDate"
-        v-model="leaveDates.startDate"
+        v-model="leaveDates.startDate" 
         @change="fetchModules"
         required
       />
+
       <label for="endDate">To:</label>
       <input
         type="date"
         id="endDate"
         v-model="leaveDates.endDate"
+        min=""
         @change="fetchModules"
         required
       />
     </div>
   
     <!-- Modules -->
-    <ModulesTable v-model:selectedModules="selectedModules" :modules="modules" />
+    <ModulesTable v-if="showModuleTable" v-model:selectedModules="selectedModules" :modules="modules" />
 
     <!-- Next Button -->
     <div class="form-actions">
@@ -72,14 +74,18 @@ export default {
       },
       modules: [],
       selectedModules: [],
+      showModuleTable: false,
       };
     },
   methods: {
     fetchModules() {
+      if (this.leaveDates.startDate){
+        document.getElementById("endDate").setAttribute("min",this.leaveDates.startDate)
+      }
+
       if (this.leaveDates.startDate && this.leaveDates.endDate) {
         const leaveDateStore = useLeaveDateStore();
         leaveDateStore.setSelectedLeaveDates(this.leaveDates)
-
         // Mocking module data for now
         this.modules = [
           { id: 1, name: "Software Engineering Capstone", code: "TIC4901", professor: "Prof Xavier", professorID: "1" },
@@ -89,6 +95,7 @@ export default {
           { id: 6, name: "Color Theory and Application", code: "ART102", professor: "Prof Jane", professorID: "2" },
           { id: 7, name: "Visual Communication Design", code: "ART202", professor: "Prof Jane", professorID: "2" },
         ];
+        this.showModuleTable = true
         
       } else {
         this.modules = [];
