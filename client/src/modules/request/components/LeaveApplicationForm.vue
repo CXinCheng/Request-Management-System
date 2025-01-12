@@ -3,7 +3,7 @@
       <h1>Leave Application</h1>
       
     <form @submit.prevent="submitForm">
-    <!-- User Particulars -->
+
     <div class="user-particulars">
         <div class="form-group">
         <label for="school">School</label>
@@ -19,7 +19,6 @@
         <input
             type="text"
             id="matriculationId"
-            placeholder="A01234567W" 
             v-model="formData.matriculationId"
             disabled
         />
@@ -43,32 +42,57 @@
         />
         </div>
     </div>
+    
+    <!-- Modules --> 
+    <div class="form-group modules">
+  
+      <v-expansion-panels>
+        <v-expansion-panel color="white">
+        <v-expansion-panel-title>
+          <strong>You Are Applying For The Following Module(s):</strong>
+        </v-expansion-panel-title>
 
-  <!-- Reason -->
-  <div class="form-group reason">
-      <label for="reason">Reason *</label>
-      <textarea
-      id="reason"
-      v-model="formData.reason"
-      placeholder="Please input reason here"
-      required
-      ></textarea>
-  </div>
+        <v-expansion-panel-text>
+          <v-list lines="two">
+            <v-list-item
+              v-for="mod in selectedModules"
+              :key="mod.code"
+              :title="mod.code + ' ' + mod.name"
+              :subtitle="'Taught by ' + mod.professor"
+            ></v-list-item>
+          </v-list>
+        </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
 
-  <!-- File Upload -->
-  <div class="form-group file-upload">
-      <label for="fileUpload">File Upload *</label>
-      <div class="file-upload-box">
-      <input
-          type="file"
-          id="fileUpload"
-          @change="handleFileUpload"
-          accept=".jpg,.png,.pdf,.mp4"
-          required
-      />
-      <p>Choose a file or drag & drop it here</p>
-      <small>JPEG, PNG, PDF, and MP4 formats, up to 50MB</small>
-      </div>
+    </div>
+
+    <!-- Reason -->
+    <div class="form-group reason">
+        <label for="reason">Reason *</label>
+        <textarea
+        id="reason"
+        v-model="formData.reason"
+        placeholder="Please input reason here"
+        required
+        ></textarea>
+    </div>
+
+    <!-- File Upload -->
+    <div class="form-group file-upload">
+        <label for="fileUpload">File Upload *</label>
+        <div class="file-upload-box">
+        <input
+            type="file"
+            id="fileUpload"
+            @change="handleFileUpload"
+            accept=".jpg,.png,.pdf,.mp4"
+            required
+        />
+        <p>Choose a file or drag & drop it here</p>
+        <small>JPEG, PNG, PDF, and MP4 formats, up to 50MB</small>
+    </div>
+
   </div>
 
   <!-- Submit Button -->
@@ -105,6 +129,7 @@ data() {
         school: "National University of Singapore",
         enrollment: "Bachelor of Technology - Software Engineering",
         contactNumber: "9123 4567",
+        matriculationId: "A01234567",
         file: null,
         reason: '',
     },
@@ -170,7 +195,7 @@ methods: {
 <style scoped>
 
 .request-leave-form {
-  max-width: 700px;
+  max-width: 1000px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
 }
