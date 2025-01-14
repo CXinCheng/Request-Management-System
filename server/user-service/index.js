@@ -16,10 +16,10 @@ dotenv.config();
 // Routes
 app.use("/api/v1/auth", authRoutes);
 
-cleanupService.start();
-
 // DB connection
 await initialize();
+
+cleanupService.start();
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
