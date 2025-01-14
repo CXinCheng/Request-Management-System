@@ -51,7 +51,7 @@ const initialize = async () => {
                         socket.pipe(stream);
                         stream.pipe(socket);
                     }).listen(databaseConfig.port, 'localhost', () => {
-                        console.log('SSH tunnel established');
+                        console.log(`SSH tunnel on port ${databaseConfig.port} established`);
                         
                         db = pgp({
                             ...databaseConfig,
