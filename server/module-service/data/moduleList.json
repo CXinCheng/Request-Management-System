@@ -7832,6 +7832,13 @@
     ]
   },
   {
+    "moduleCode": "CM3288SR",
+    "title": "Advanced UROPS in Sustainable Chemistry I (REx)",
+    "semesters": [
+      2
+    ]
+  },
+  {
     "moduleCode": "CM3289",
     "title": "Advanced UROPS in Chemistry II",
     "semesters": [
@@ -28945,7 +28952,8 @@
     "moduleCode": "LSM4263",
     "title": "Field Studies in Biodiversity",
     "semesters": [
-      3
+      3,
+      4
     ]
   },
   {
@@ -34963,8 +34971,7 @@
     "moduleCode": "NHS2086",
     "title": "Women's Health: A Global Perspective",
     "semesters": [
-      1,
-      2
+      1
     ]
   },
   {
@@ -36413,13 +36420,6 @@
   {
     "moduleCode": "NTW2006",
     "title": "Human Trafficking and Labour Migration",
-    "semesters": [
-      2
-    ]
-  },
-  {
-    "moduleCode": "NTW2010",
-    "title": "Sites of Tourism",
     "semesters": [
       2
     ]
@@ -40640,6 +40640,13 @@
   },
   {
     "moduleCode": "PP5527",
+    "title": "Game Theory and Strategic Decision-Making",
+    "semesters": [
+      2
+    ]
+  },
+  {
+    "moduleCode": "PP5527A",
     "title": "Game Theory and Strategic Decision-Making",
     "semesters": [
       2
