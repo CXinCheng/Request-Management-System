@@ -17,7 +17,10 @@ CREATE TABLE request_management.modules (
     code VARCHAR(100) PRIMARY KEY,                             -- Code field of type varchar
     name VARCHAR(255) NOT NULL,                              -- Name field of type varchar
     exam_date TIMESTAMP,
-    class_last_updated_at TIMESTAMP
+    educator_id VARCHAR(255),
+    class_last_updated_at TIMESTAMP,
+
+    FOREIGN KEY (educator_id) REFERENCES request_management.users(matrix_id)
 );
 
 DROP TYPE IF EXISTS request_management.class_type CASCADE;
@@ -58,6 +61,7 @@ CREATE TABLE request_management.requests (
     end_date_of_leave TIMESTAMP NOT NULL,                        -- Timestamp for end of leave request
     reason_of_leave VARCHAR(255) NOT NULL,                   -- Request details
     user_id VARCHAR(255) NOT NULL,
+    blob_url text NOT NULL,
 
     FOREIGN KEY (user_id) REFERENCES request_management.users(matrix_id)
 );
@@ -91,10 +95,6 @@ CREATE TABLE request_management.otp_store (
     FOREIGN KEY (user_email) REFERENCES request_management.users(email)
 );
 
--- Add blob_url field under requests to store user uploads
-ALTER TABLE IF EXISTS request_management.requests
-    ADD COLUMN blob_url text NOT NULL;
-
 -- Insert Users Records
 INSERT INTO request_management.users ("name",matrix_id,email,"role","password") VALUES
 
@@ -102,7 +102,7 @@ INSERT INTO request_management.users ("name",matrix_id,email,"role","password") 
     ('John Doe','A1234567B','test@app.com','Student'::request_management."user_role",'$2b$10$NDhafxuZ7JnqK2B5GnB4KOioZNBs2jY1VYkMNAbA.m1Xj5OBBI.GK'),
 
     -- Password: admin123
-    ('Admin User','A1111111A','admin@app.com','Student'::request_management."user_role",'$2b$10$orwXUtt/zILNBE3BSPWp6OKdDLFZqZZwWK8B5vhqr8ldGmP1usR56');
+    ('Admin User','A1111111A','admin@app.com','Admin'::request_management."user_role",'$2b$10$orwXUtt/zILNBE3BSPWp6OKdDLFZqZZwWK8B5vhqr8ldGmP1usR56');
     
     -- Password: jane1234
     ('Jane Chin','P0123456A','janechin@app.com','Professor'::request_management."user_role",'$2b$10$NDLxhLUpAL9kxp/1Ckq1aumq8zOR5ktdT2ye6IK4/UtqWq2u32Ftu');
