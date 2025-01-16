@@ -1,12 +1,11 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import db from "../../configs/db/db.js";
+import { db } from '../../configs/db/db.js';
 
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Input validation
         if (!email || !password) {
             return res.status(400).json({ 
                 success: false,
@@ -14,13 +13,11 @@ export const login = async (req, res) => {
             });
         }
 
-        // Query user from database
         const user = await db.oneOrNone(
             "SELECT * FROM request_management.users WHERE email = $1",
             [email]
         );
 
-        // Check if user exists
         if (!user) {
             return res.status(401).json({ 
                 success: false,
@@ -28,7 +25,6 @@ export const login = async (req, res) => {
             });
         }
         
-        // Verify password
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
             return res.status(401).json({
@@ -37,7 +33,6 @@ export const login = async (req, res) => {
             });
         }
 
-        // Generate JWT token
         const token = jwt.sign(
             { 
                 userId: user.id,
@@ -48,7 +43,6 @@ export const login = async (req, res) => {
             { expiresIn: "24h" }
         );
 
-        // Return success response
         res.json({
             success: true,
             message: "Login successful",

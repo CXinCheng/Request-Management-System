@@ -1,11 +1,10 @@
 import bcrypt from "bcrypt";
-import db from "../../configs/db/db.js";
+import { db } from "../../configs/db/db.js";
 
 const register = async (req, res) => {
     try {
         const { name, email, password, matrix_id, role } = req.body;
 
-        // Input validation
         if (!name || !email || !password || !matrix_id || !role) {
             return res.status(400).json({
                 success: false,
@@ -13,7 +12,6 @@ const register = async (req, res) => {
             });
         }
 
-        // Check if email already exists
         const existingUser = await db.manyOrNone(
             "SELECT * FROM request_management.users WHERE email = $1 OR matrix_id = $2",
             [email, matrix_id]
@@ -26,11 +24,9 @@ const register = async (req, res) => {
             });
         }
 
-        // Hash password
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // Insert new user
         const newUser = await db.one(
             `INSERT INTO request_management.users (name, email, password, matrix_id, role) 
              VALUES ($1, $2, $3, $4, $5::request_management.user_role) 

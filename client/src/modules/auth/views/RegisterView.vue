@@ -1,6 +1,6 @@
 <template>
   <div class="register-container">
-    <h4 class="text-h4 font-weight-bold title">Register</h4>
+    <h4 class="text-h4 font-weight-bold mb-5">Register</h4>
     <form @submit.prevent="handleRegister">
       <v-text-field
         label="Email Address"
@@ -68,7 +68,7 @@
       <v-select
         label="Role"
         density="comfortable"
-        v-model="role"
+        :value="role"
         :items="['Student', 'Professor']"
         :rules="[() => !!role || 'Role is required']"
       ></v-select>
@@ -108,7 +108,6 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { authApiService } from "@/utils/ApiService";
 
 const router = useRouter();
@@ -166,14 +165,5 @@ const handleRegister = async () => {
   border: 1px solid #ccc;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.v-btn {
-  width: 100%;
-  border-radius: 2px;
-}
-
-.title {
-  padding-bottom: 1rem;
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
     <v-app class="rounded rounded-md">
         <Sidebar v-if="!isAuthRoute"></Sidebar>
-        <Header :title="pageTitle"></Header>
+        <Header v-if="!isAuthRoute" :title="pageTitle"></Header>
         <v-main
             class="d-flex align-center justify-center"
             style="min-height: 300px"
@@ -22,7 +22,7 @@ import Snackbar from './components/Snackbar.vue';
 const route = useRoute();
 
 const isAuthRoute = computed(() => {
-    return ['/login', '/register'].includes(route.path);
+    return ['/login', '/register', '/reset'].includes(route.path);
 });
 
 const pageTitle = computed(() => {
