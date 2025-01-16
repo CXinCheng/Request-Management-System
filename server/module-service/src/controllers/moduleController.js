@@ -1,33 +1,36 @@
-export const getModuleTimetable = async (req, res) => {
-    const academicYear = "2024-2025";
+import updateService from "../services/updateService.js";
+import { db } from "../configs/db/db.js";
+
+export const getModuleTimetableByClassNo = async (req, res) => {
     const moduleCode = req.params.moduleCode;
+    const classNo = req.params.classNo;
     let data = null;
+
     try {
-        const response = await fetch(
-            `https://api.nusmods.com/v2/${academicYear}/modules/${moduleCode}.json`
+        // Check if module classes records are already in database
+        const module = await db.oneOrNone(
+            "SELECT * FROM request_management.modules WHERE code = $1",
+            [moduleCode]
         );
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+
+        if (!module || !module.class_last_updated_at) {
+            await updateService.addClass(moduleCode);
+        } else if (
+            module.class_last_updated_at <
+            new Date(Date.now() - 24 * 60 * 60 * 1000)
+        ) {
+            await updateService.updateClass(moduleCode);
         }
-        let responseJson = await response.json();
-        data = {
-            moduleCode: responseJson.moduleCode,
-            semesterData: responseJson.semesterData.map((semester) => {
-                return {
-                    semester: semester.semester,
-                    timetable: semester.timetable.map((lesson) => {
-                        return {
-                            classNo: lesson.classNo,
-                            lessonType: lesson.lessonType,
-                            day: lesson.day,
-                            startTime: lesson.startTime,
-                            endTime: lesson.endTime,
-                        };
-                    }),
-                    examDate: semester.examDate,
-                };
-            }),
-        };
+
+        data = await db.manyOrNone(
+            "SELECT * FROM request_management.classes WHERE module_code = $1 AND class_no = $2",
+            [moduleCode, classNo]
+        );
+
+        res.json({
+            success: true,
+            data: data,
+        });
     } catch (error) {
         console.error("Error fetching module timetable:", error);
         return res.status(500).json({
@@ -35,35 +38,4 @@ export const getModuleTimetable = async (req, res) => {
             error: "Error fetching module timetable",
         });
     }
-    res.json({
-        success: true,
-        data: data,
-    });
-};
-
-export const getModuleList = async (req, res) => {
-    const moduleList = await moduleService.getModuleList();
-    res.json(moduleList);
-};
-
-export const updateModuleDB = async (req, res) => {
-    await moduleService.updateDB();
-    res.json({ success: true });
-};
-
-export const getModule = async (req, res) => {
-    const moduleCode = req.params.moduleCode;
-    const module = await moduleService.getModule(moduleCode);
-    res.json(module);
-};
-
-export const getModuleByCode = async (req, res) => {
-    const moduleCode = req.params.moduleCode;
-    const module = await moduleService.getModuleByCode(moduleCode);
-    res.json(module);
-};
-export const getModuleById = async (req, res) => {
-    const moduleId = req.params.moduleId;
-    const module = await moduleService.getModuleById(moduleId);
-    res.json(module);
 };
