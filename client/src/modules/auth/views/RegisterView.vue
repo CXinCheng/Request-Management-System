@@ -68,7 +68,7 @@
       <v-select
         label="Role"
         density="comfortable"
-        :value="role"
+        v-model="role"
         :items="['Student', 'Professor']"
         :rules="[() => !!role || 'Role is required']"
       ></v-select>

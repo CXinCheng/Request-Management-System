@@ -30,7 +30,7 @@ const register = async (req, res) => {
         const newUser = await db.one(
             `INSERT INTO request_management.users (name, email, password, matrix_id, role) 
              VALUES ($1, $2, $3, $4, $5::request_management.user_role) 
-             RETURNING id, name, email, role, matrix_id`,
+             RETURNING name, email, role, matrix_id`,
             [name, email, hashedPassword, matrix_id, role]
         );
 
@@ -38,7 +38,6 @@ const register = async (req, res) => {
             success: true,
             message: "User registered successfully",
             data : {
-                id: newUser.id,
                 name: newUser.name,
                 email: newUser.email,
                 role: newUser.role,
