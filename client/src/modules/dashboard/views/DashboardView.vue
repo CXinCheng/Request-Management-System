@@ -25,14 +25,14 @@ export default {
   },
   setup() {
     const route = useRoute();
-    const userId = route.params.userId; // Assume the route includes User_ID
-    const modules = ref([]); // User's enrolled modules
-    const leaveData = ref([]); // Leave application data for user's modules
-    
+    const modules = ref([]);
+    const leaveData = ref([]);
+    const userId = localStorage.getItem("userId"); // Get userId from local storage
+
     const fetchDashboardData = async () => {
       try {
         const { modules: moduleData, leaveData: leaveAppData } =
-          await aggregateDashboardData(userId); // Pass User_ID to aggregator
+          await aggregateDashboardData(userId);
         modules.value = moduleData;
         leaveData.value = leaveAppData;
       } catch (error) {
@@ -40,7 +40,7 @@ export default {
       }
     };
 
-    // Fetch data when the component mounts
+    // Fetch data on component mount
     onMounted(fetchDashboardData);
 
     return { modules, leaveData , route};
