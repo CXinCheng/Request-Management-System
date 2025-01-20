@@ -1,17 +1,17 @@
 <template>
     <div class="container">
-      <h1>Requests for Student {{ studentId }}</h1>
       <v-data-table
         :headers="headers"
         :items="requests"
-        class="elevation-1"
+        class="striped outlined"
         item-value="id"
         dense
-        hide-default-footer
       >
         <template v-slot:top>
-          <v-toolbar flat>
-            <v-toolbar-title>Requests</v-toolbar-title>
+          <v-toolbar 
+            flat 
+            class="bg-white"
+          >
             <v-spacer></v-spacer>
             <v-text-field
               v-model="search"
@@ -22,54 +22,26 @@
           </v-toolbar>
         </template>
       </v-data-table>
-
-      <!-- <DataTable :data="requests" :columns="columns" :options="options" class="display" /> -->
-
-      <!-- <table>
-        <thead>
-          <tr>
-            <th>Request ID</th>
-            <th>Student ID</th>
-            <th>Reason</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="request in requests" :key="request.id">
-            <td>{{ request.id }}</td>
-            <td>{{ request.user_id }}</td>
-            <td>{{ request.reason_of_leave }}</td>
-          </tr>
-        </tbody>
-      </table> -->
     </div>
   </template>
   
   <script>
-  import DataTable from 'datatables.net-vue3';
-  import DataTablesCore from 'datatables.net-dt';
-  import 'datatables.net-select-dt';
-  import 'datatables.net-responsive-dt';
-  
-  DataTable.use(DataTablesCore);
 
   export default {
     components: {
-      DataTable,
     },
     data() {
       return {
-        studentId: '1',  // Replace with the actual student ID
-        requests: [],
-        columns: [
-          { title: "Request ID", data: "id" },
-          { title: "Student ID", data: "user_id" },
-          { title: "Reason", data: "reason_of_leave" },
-          { title: "Date Submitted", data: "date_of_request" },
+        studentId: '2',  // Replace with the actual student ID from local storage
+        headers: [
+          { title: 'Leave Start', key: 'start_date_of_leave' },
+          { title: 'Leave End', key: 'end_date_of_leave' },
+          { title: 'Submitted', key: 'created_at' },
+          { title: 'Status', key: 'status' },
+          { title: 'Approver', key: 'approver_name' }
         ],
-        options: {
-          responsive: true,
-          select: true,
-        }
+        requests: [],
+        search: '', // For search functionality
       };
     },
     mounted() {

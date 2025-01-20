@@ -1,8 +1,14 @@
 <template>
     <div class="requests-view-container">
-
+        <div class="d-flex justify-space-between">
+            <h1>Requests for Student {{ studentId }}</h1>
+            <!-- Create Request button -->
+            <div>
+                <create-request-button></create-request-button>
+            </div>
+        </div>
+        <!-- Requests Table -->
         <div class="main-container">
-            <!-- Requests Table -->
             <RequestsTable />
         </div>
     </div>
@@ -10,12 +16,19 @@
   
   <script>
     import { useRoute } from "vue-router";
+    import CreateRequestButton from '../components/CreateRequestButton.vue';
     import RequestsTable from "../components/RequestsTable.vue";
 
     export default {
-        name: "DashboardView",
+        name: "RequestListView",
         components: {
-        RequestsTable,
+            CreateRequestButton,
+            RequestsTable,
+        },
+        data() {
+            return {
+                studentId: '2',  // Replace with the actual student ID
+            };
         },
         setup() {
         const route = useRoute();
@@ -26,8 +39,7 @@
   
   <style scoped>
     .requests-view-container {
-        display: flex;
-        width: 100%;
+        width: 80%;
     }
 
     .main-container {
