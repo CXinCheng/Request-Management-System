@@ -1,5 +1,5 @@
-const REQUEST_BASE_URL = "http://localhost:3002"; // Request service base URL
-const USER_MODULE_BASE_URL = "http://localhost:3003"; // Base URL for User_Module API
+const USER_MODULE_BASE_URL = "http://ec2-18-143-63-164.ap-southeast-1.compute.amazonaws.com:3003";
+const REQUEST_BASE_URL = "http://ec2-18-143-63-164.ap-southeast-1.compute.amazonaws.com:3002";
 
 /**
  * Fetch enrolled module data for a specific user.
@@ -13,15 +13,21 @@ const fetchUserModules = async (userId) => {
   return await response.json();
 };
 
-/**
- * Fetch leave application data from the Request Service.
- * @returns {Promise<Array>} List of leave applications
- */
-const fetchLeaveApplications = async () => {
-  const response = await fetch(`${REQUEST_BASE_URL}/api/leaveApplications`);
+const fetchLeaveApplications = async (userId) => {
+  const response = await fetch(
+    `${REQUEST_BASE_URL}/api/requests?userId=${userId}`
+  );
   if (!response.ok) throw new Error("Failed to fetch leave applications");
-  return await response.json();
+
+  const data = await response.json();
+
+  // Extract only the necessary fields
+  return data.map(({ module_code, status }) => ({
+    module_code,
+    status,
+  }));
 };
+
 
 /**
  * Aggregate data for the dashboard.
@@ -31,27 +37,24 @@ const fetchLeaveApplications = async () => {
  */
 export const aggregateDashboardData = async (userId) => {
   try {
-    // Fetch user-specific modules and leave applications in parallel
     const [modules, leaveApplications] = await Promise.all([
       fetchUserModules(userId),
-      fetchLeaveApplications(),
+      fetchLeaveApplications(userId),
     ]);
 
-    // Transform leave applications to group by module_id
     const leaveDataByModule = leaveApplications.reduce((acc, leave) => {
-      if (!acc[leave.Module_ID]) {
-        acc[leave.Module_ID] = { approved: 0, rejected: 0, pending: 0 };
+      if (!acc[leave.module_code]) {
+        acc[leave.module_code] = { approved: 0, rejected: 0, pending: 0 };
       }
-      acc[leave.Module_ID][leave.Status.toLowerCase()] += 1;
+      acc[leave.module_code][leave.status.toLowerCase()] += 1;
       return acc;
     }, {});
 
-    // Aggregate data by joining with modules
     const leaveData = modules.map((module) => ({
-      module: module.module_name,
-      approved: leaveDataByModule[module.module_id]?.approved || 0,
-      rejected: leaveDataByModule[module.module_id]?.rejected || 0,
-      pending: leaveDataByModule[module.module_id]?.pending || 0,
+      module: module.code, 
+      approved: leaveDataByModule[module.code]?.approved || 0,
+      rejected: leaveDataByModule[module.code]?.rejected || 0,
+      pending: leaveDataByModule[module.code]?.pending || 0,
     }));
 
     return { modules, leaveData };
