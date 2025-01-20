@@ -1,4 +1,4 @@
-const USER_MODULE_BASE_URL = "http://ec2-18-143-63-164.ap-southeast-1.compute.amazonaws.com:3003";
+const USER_MODULE_MAPPING_BASE_URL = "http://ec2-18-143-63-164.ap-southeast-1.compute.amazonaws.com:3003";
 const REQUEST_BASE_URL = "http://ec2-18-143-63-164.ap-southeast-1.compute.amazonaws.com:3002";
 
 /**
@@ -8,9 +8,18 @@ const REQUEST_BASE_URL = "http://ec2-18-143-63-164.ap-southeast-1.compute.amazon
  */
 
 const fetchUserModules = async (userId) => {
-  const response = await fetch(`${USER_MODULE_BASE_URL}/api/userModules?userId=${userId}`);
+  const response = await fetch(
+    `${USER_MODULE_MAPPING_BASE_URL}/api/userModules?userId=${userId}`
+  );
   if (!response.ok) throw new Error("Failed to fetch user modules");
-  return await response.json();
+
+  const data = await response.json();
+
+  // Return only the required fields: module_code and class_no
+  return data.map(({ module_code, class_no }) => ({
+    module_code,
+    class_no,
+  }));
 };
 
 const fetchLeaveApplications = async (userId) => {
