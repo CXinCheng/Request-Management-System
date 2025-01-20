@@ -4,15 +4,12 @@
 
     <v-container class="cards-container" fluid>
       <v-row>
-        <v-col cols="12" sm="6" md="4" lg="3" v-for="module in modules" :key="module.id">
+        <v-col cols="12" sm="6" md="4" lg="3" v-for="module in modules" :key="module.module_code">
           <v-card>
             <v-card-item>
               <div>
-                <h3 class="module-title">{{ module.name }}</h3>
-                <p class="module-code"><strong>Code:</strong> {{ module.code }}</p>
-                <p class="module-description">
-                  <strong>Description:</strong> {{ module.description }}
-                </p>
+                <h3 class="module-code"><strong>Code:</strong> {{ module.module_code }}</h3>
+                <p class="class-no"><strong>Class:</strong> {{ module.class_no }}</p>
               </div>
             </v-card-item>
           </v-card>
@@ -21,6 +18,7 @@
     </v-container>
   </div>
 </template>
+
 
 <script>
 export default {
@@ -43,15 +41,10 @@ export default {
   margin-top: 16px;
 }
 
-.module-title {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
 .module-code,
-.module-description {
+.class-no {
   font-size: 14px;
   margin-bottom: 8px;
 }
 </style>
+
