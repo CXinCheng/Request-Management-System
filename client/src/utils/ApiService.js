@@ -3,6 +3,7 @@ import axios from 'axios';
 const AUTH_BASE_URL = '/api/v1/auth';
 const REQUEST_BASE_URL = '/api/v1/requests';
 const USER_BASE_URL = '/api/v1/user';
+const MODULE_BASE_URL = '/api/v1/module';
 
 // Auth API
 const authApi = axios.create({
@@ -33,4 +34,13 @@ const userApi = axios.create({
 
 export const userApiService = {
     getAllUsers: () => userApi.get('/all').then(res => res.data),
+};
+
+// Module API
+const moduleApi = axios.create({
+    baseURL: MODULE_BASE_URL,
+});
+
+export const moduleApiService = {
+    getAllModules: () => moduleApi.get('/all').then(res => res.data),
 };

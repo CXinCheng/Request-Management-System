@@ -1,6 +1,26 @@
 import updateService from "../services/updateService.js";
 import { db } from "../configs/db.js";
 
+export const getAllModules = async (req, res) => {
+    let data = null;
+
+    try {
+        data = await db.manyOrNone("SELECT code, name FROM request_management.modules");
+
+        res.json({
+            success: true,
+            data: data,
+        });
+    }
+    catch (error) {
+        console.error("Error fetching all modules:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Error fetching all modules",
+        });
+    }
+}
+
 export const getModuleTimetableByClassNo = async (req, res) => {
     const moduleCode = req.params.moduleCode;
     const classNo = req.params.classNo;

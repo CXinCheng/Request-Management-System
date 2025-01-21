@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 dotenv.config();
 
 // Routes
-app.use("/api/v1/modules", moduleRoute);
+app.use("/api/v1/module", moduleRoute);
 
 // DB connection
 await initialize();
