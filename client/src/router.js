@@ -7,6 +7,7 @@ import DashboardView from "./modules/dashboard/views/DashboardView.vue";
 import RequestView from "./modules/request/views/RequestView.vue";
 import LeaveModuleSelection from "./modules/request/views/LeaveModuleSelection.vue";
 import RequestListView from "./modules/request/views/RequestListView.vue";
+import AdminUsersView from "./modules/admin/views/AdminUsersView.vue";
 
 const isAuthenticated = () => {
     return !!localStorage.getItem("token");
@@ -59,6 +60,12 @@ const routes = [
         name: "RequestListView",
         meta: { requiresAuth: true, title: "Request List" },
     },
+    {
+        path: "/admin/users",
+        component: AdminUsersView,
+        name: "AdminUsersView",
+        meta: { requiresAuth: true, title: "Users" },
+    }
 ];
 
 const router = createRouter({

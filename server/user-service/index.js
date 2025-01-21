@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import authRoutes from "./src/routes/authRoute.js";
+import userRoutes from "./src/routes/userRoute.js";
 import { cleanupService } from './src/services/cleanupService.js';
 import { initialize, close } from './src/configs/db.js';
 
@@ -15,6 +16,7 @@ dotenv.config();
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
 
 // DB connection
 await initialize();

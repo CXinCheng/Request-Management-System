@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const AUTH_BASE_URL = '/api/v1/auth';
-const REQUEST_BASE_URL = 'http://localhost:3002/api/v1/requests';
+const REQUEST_BASE_URL = '/api/v1/requests';
+const USER_BASE_URL = '/api/v1/user';
 
 // Auth API
 const authApi = axios.create({
@@ -23,4 +24,13 @@ const requestApi = axios.create({
 
 export const requestApiService = {
     submit: (request) => requestApi.post('/submit', request).then(res => res.data),
+};
+
+// User API
+const userApi = axios.create({
+    baseURL: USER_BASE_URL,
+});
+
+export const userApiService = {
+    getAllUsers: () => userApi.get('/all').then(res => res.data),
 };

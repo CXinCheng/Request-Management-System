@@ -16,9 +16,7 @@
                 <template v-slot:prepend>
                     <v-icon :icon="item.icon"></v-icon>
                 </template>
-                <v-list-item-content>
-                    <v-list-item-title>{{ item.title }}</v-list-item-title>
-                </v-list-item-content>
+                <v-list-item-title>{{ item.title }}</v-list-item-title>
             </v-list-item>
         </v-list>
         <template v-slot:append>
@@ -55,25 +53,24 @@
     </v-navigation-drawer>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 
-export default {
-    name: "Sidebar",
-    setup() {
-        const router = useRouter();
+const user = ref(JSON.parse(localStorage.getItem("user")));
 
-        const handleLogout = () => {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            router.push("/login");
-        };
+const router = useRouter();
 
-        return { handleLogout };
-    },
-    data() {
-        return {
-            items: [
+const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    router.push("/login");
+};
+
+const items = computed(() => {
+    switch (user.value.role) {
+        case "Student":
+            return [
                 {
                     title: "Dashboard",
                     icon: "mdi-view-dashboard-outline",
@@ -94,8 +91,39 @@ export default {
                     icon: "mdi-list-box-outline",
                     href: "/requests",
                 },
-            ],
-        };
-    },
-};
+            ];
+        case "Professor":
+            return [
+                {
+                    title: "Dashboard",
+                    icon: "mdi-view-dashboard-outline",
+                    href: "/professor/dashboard",
+                },
+                {
+                    title: "My Modules",
+                    icon: "mdi-book-open-variant-outline",
+                    href: "/professor/modules",
+                },
+                {
+                    title: "Leave Applications",
+                    icon: "mdi-text-box-edit-outline",
+                    href: "/professor/leave-requests",
+                },
+            ];
+        case "Admin":
+        default:
+            return [
+                {
+                    title: "Users",
+                    icon: "mdi-account-group",
+                    href: "/admin/users",
+                },
+                {
+                    title: "Modules",
+                    icon: "mdi-book-open-variant-outline",
+                    href: "/admin/modules",
+                },
+            ];
+    }
+});
 </script>

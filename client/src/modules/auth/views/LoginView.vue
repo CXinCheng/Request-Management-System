@@ -120,6 +120,7 @@ const handleLogin = async () => {
 
             setTimeout(() => {
                 router.push(
+                    user.role === "Admin" ? { name: "AdminUsersView" } :
                     router.currentRoute.value.query.redirect || {
                         name: "Dashboard",
                     }
