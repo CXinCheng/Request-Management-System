@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import crypto from "node:crypto";
-import { db } from "../../configs/db/db.js";
+import { db } from "../../configs/db.js";
 import nodemailer from "nodemailer";
 
 const generateOTP = () => {

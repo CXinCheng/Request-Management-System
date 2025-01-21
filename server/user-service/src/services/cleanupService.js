@@ -1,4 +1,4 @@
-import { db } from '../configs/db/db.js';
+import { db } from '../configs/db.js';
 
 class CleanupService {
     constructor() {

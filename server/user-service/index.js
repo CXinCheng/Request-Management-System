@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import authRoutes from "./src/routes/authRoute.js";
 import { cleanupService } from './src/services/cleanupService.js';
-import { initialize, close } from './src/configs/db/db.js';
+import { initialize, close } from './src/configs/db.js';
 
 const app = express();
 

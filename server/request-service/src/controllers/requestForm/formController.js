@@ -1,6 +1,6 @@
 import { validationResult } from "express-validator";
 import multer from "multer";
-import { db } from "../../configs/db/db.js";
+import { db } from "../../configs/db.js";
 import { v1 } from "uuid";
 import { ContainerClient } from '@azure/storage-blob';
 

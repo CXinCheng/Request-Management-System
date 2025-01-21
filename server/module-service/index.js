@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
-import { initialize, close } from './src/configs/db/db.js';
+import { initialize, close } from './src/configs/db.js';
 import updateService from "./src/services/updateService.js";
 import moduleRoute from "./src/routes/moduleRoute.js";
 

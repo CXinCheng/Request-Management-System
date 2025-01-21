@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import formRoutes from "./src/routes/requestSubmissionForm.js";
 import cors from 'cors';
-import { initialize, close } from './src/configs/db/db.js';
+import { initialize, close } from './src/configs/db.js';
 
 const app = express();
 

@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { db } from "../../configs/db/db.js";
+import { db } from "../../configs/db.js";
 
 const register = async (req, res) => {
     try {

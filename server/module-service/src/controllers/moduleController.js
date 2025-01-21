@@ -1,5 +1,5 @@
 import updateService from "../services/updateService.js";
-import { db } from "../configs/db/db.js";
+import { db } from "../configs/db.js";
 
 export const getModuleTimetableByClassNo = async (req, res) => {
     const moduleCode = req.params.moduleCode;

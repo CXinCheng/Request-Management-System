@@ -1,4 +1,4 @@
-import { db } from "../configs/db/db.js";
+import { db } from "../configs/db.js";
 
 
 // API to get all requests for a student
