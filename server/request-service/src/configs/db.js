@@ -21,6 +21,7 @@ const databaseConfig = {
     database: process.env.DATABASE_NAME,
     user: process.env.DATABASE_USERNAME,
     password: process.env.DATABASE_PASSWORD,
+    idleTimeoutMillis: 0,
 };
 
 const rdsConfig = {

@@ -32,6 +32,7 @@
                     :items="filteredUsers"
                     :search="search"
                     :loading="loading"
+                    :sort-by="[{ key: 'role', order: 'asc' }]"
                 >
                 </v-data-table>
             </v-card-text>
@@ -49,10 +50,38 @@ const loading = ref(false);
 const users = ref([]);
 
 const headers = [
-    { title: "Name", key: "name" },
-    { title: "Matrix ID", key: "matrix_id" },
-    { title: "Email", key: "email" },
-    { title: "Role", key: "role" },
+    {
+        title: "Name",
+        key: "name",
+        align: "start",
+        headerProps: {
+            style: "font-weight: 600; font-size:20px;",
+        },
+    },
+    {
+        title: "Matrix ID",
+        key: "matrix_id",
+        align: "start",
+        headerProps: {
+            style: "font-weight: 600; font-size:20px;",
+        },
+    },
+    {
+        title: "Email",
+        key: "email",
+        align: "start",
+        headerProps: {
+            style: "font-weight: 600; font-size:20px;",
+        },
+    },
+    {
+        title: "Role",
+        key: "role",
+        align: "start",
+        headerProps: {
+            style: "font-weight: 600; font-size:20px;",
+        },
+    },
 ];
 
 const filteredUsers = computed(() => {

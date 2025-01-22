@@ -16,7 +16,7 @@
 
                 <v-data-table
                     :headers="headers"
-                    :items="modules"
+                    :items="formattedModules"
                     :search="search"
                     :loading="loading"
                 >
@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { moduleApiService } from "@/utils/ApiService";
 
 const search = ref("");
@@ -35,8 +35,30 @@ const loading = ref(false);
 const modules = ref([]);
 
 const headers = [
-    { title: "Module Code", key: "code" },
-    { title: "Module Name", key: "name" },
+    { 
+        title: "Module Code", 
+        key: "code",
+        align: 'start',
+        headerProps: {
+            style: "font-weight: 600; font-size:20px;",
+        },
+    },
+    { 
+        title: "Module Name", 
+        key: "name",
+        align: 'start',
+        headerProps: {
+            style: "font-weight: 600; font-size:20px;",
+        },
+    },
+    { 
+        title: "Assigned Educator", 
+        key: "educator_id",
+        align: 'start',
+        headerProps: {
+            style: "font-weight: 600; font-size:20px;",
+        },
+    },
 ];
 
 const fetchModules = async () => {
@@ -52,6 +74,13 @@ const fetchModules = async () => {
         loading.value = false;
     }
 };
+
+const formattedModules = computed(() => 
+  modules.value.map(module => ({
+    ...module,
+    educator_id: module.educator_id || 'Not Assigned'
+  }))
+);
 
 onMounted(() => {
     fetchModules();
