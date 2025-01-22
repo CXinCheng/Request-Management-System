@@ -5,7 +5,7 @@ export const getAllModules = async (req, res) => {
     let data = null;
 
     try {
-        data = await db.manyOrNone("SELECT code, name FROM request_management.modules");
+        data = await db.manyOrNone("SELECT code, name, educator_id FROM request_management.modules");
 
         res.json({
             success: true,
