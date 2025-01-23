@@ -23,8 +23,48 @@
                     </v-col>
                     <v-spacer></v-spacer>
                     <v-col cols="2">
-                        <v-btn color="primary" @click=""> Add User </v-btn>
+                        <v-btn color="primary" @click="dialog = true"
+                            >Add User</v-btn
+                        >
                     </v-col>
+                    <v-dialog v-model="dialog" max-width="500px">
+                        <v-card>
+                            <v-card-title>
+                                <span class="text-h5">Add New User</span>
+                            </v-card-title>
+
+                            <v-card-text>
+                                <UserForm
+                                    :initial-data="formData"
+                                    :role-items="[
+                                        'Student',
+                                        'Professor',
+                                        'Admin',
+                                    ]"
+                                    :show-confirm-password="false"
+                                    @submit="handleSave"
+                                >
+                                    <template v-slot:actions>
+                                        <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn
+                                                color="error"
+                                                text
+                                                @click="dialog = false"
+                                                >Cancel</v-btn
+                                            >
+                                            <v-btn
+                                                color="primary"
+                                                text
+                                                type="submit"
+                                                >Save</v-btn
+                                            >
+                                        </v-card-actions>
+                                    </template>
+                                </UserForm>
+                            </v-card-text>
+                        </v-card>
+                    </v-dialog>
                 </v-row>
 
                 <v-data-table
@@ -42,12 +82,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { userApiService } from "@/utils/ApiService";
+import UserForm from "@/components/forms/UserForm.vue";
+import { authApiService, userApiService } from "@/utils/ApiService";
 
 const search = ref("");
 const roleFilter = ref("All");
 const loading = ref(false);
 const users = ref([]);
+const dialog = ref(false);
 
 const headers = [
     {
@@ -83,6 +125,27 @@ const headers = [
         },
     },
 ];
+const handleSave = async (userData) => {
+    try {
+        loading.value = true;
+        const response = await authApiService.register(userData);
+        if (response.success) {
+            await fetchUsers();
+            dialog.value = false;
+        }
+        else {
+            notificationStore.showNotification({
+                message: response.message || 'Error creating user',
+                color: 'error',
+                timeout: 3000
+            });
+        }
+    } catch (error) {
+        console.error("Error creating user:", error);
+    } finally {
+        loading.value = false;
+    }
+};
 
 const filteredUsers = computed(() => {
     if (roleFilter.value === "All") return users.value;
