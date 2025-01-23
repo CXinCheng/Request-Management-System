@@ -34,6 +34,8 @@ const userApi = axios.create({
 
 export const userApiService = {
     getAllUsers: () => userApi.get('/all').then(res => res.data),
+    updateUser: (userData) => userApi.post(`/${userData.matrix_id}`, userData).then(res => res.data),
+    deleteUser: (id) => userApi.delete(`${id}`).then(res => res.data),
 };
 
 // Module API

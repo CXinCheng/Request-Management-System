@@ -20,52 +20,6 @@ export const getAllUsers = async (req, res) => {
     }
 };
 
-// Create new user
-export const createUser = async (req, res) => {
-    try {
-        const { name, email, password, matrix_id, role } = req.body;
-
-        if (!name || !email || !password || !matrix_id || !role) {
-            return res.status(400).json({
-                success: false,
-                error: "All fields are required"
-            });
-        }
-
-        const existingUser = await db.oneOrNone(
-            "SELECT * FROM request_management.users WHERE email = $1 OR matrix_id = $2",
-            [email, matrix_id]
-        );
-
-        if (existingUser) {
-            return res.status(400).json({
-                success: false,
-                error: "User with this email or matrix ID already exists"
-            });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = await db.one(
-            `INSERT INTO request_management.users (name, email, password, matrix_id, role) 
-             VALUES ($1, $2, $3, $4, $5::request_management.user_role) 
-             RETURNING name, email, role, matrix_id`,
-            [name, email, hashedPassword, matrix_id, role]
-        );
-
-        res.status(201).json({
-            success: true,
-            message: "User created successfully",
-            data: newUser
-        });
-    } catch (error) {
-        console.error("Error creating user:", error);
-        res.status(500).json({
-            success: false,
-            error: "Internal server error"
-        });
-    }
-};
-
 // Update user
 export const updateUser = async (req, res) => {
     try {

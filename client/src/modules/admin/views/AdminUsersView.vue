@@ -74,9 +74,75 @@
                     :loading="loading"
                     :sort-by="[{ key: 'role', order: 'asc' }]"
                 >
+                    <template v-slot:item.actions="{ item }">
+                        <v-btn
+                            icon="mdi-pencil"
+                            size="small"
+                            color="primary"
+                            class="mr-2"
+                            @click="editUser(item)"
+                        />
+                        <v-btn
+                            icon="mdi-delete"
+                            size="small"
+                            color="error"
+                            @click="confirmDelete(item)"
+                        />
+                    </template>
                 </v-data-table>
             </v-card-text>
         </v-card>
+
+        <v-dialog v-model="dialog" max-width="500px">
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5"
+                        >{{ isEdit ? "Edit" : "Add" }} User</span
+                    >
+                </v-card-title>
+                <v-card-text>
+                    <UserForm
+                        :initial-data="formData"
+                        :role-items="['Student', 'Professor', 'Admin']"
+                        :show-confirm-password="false"
+                        @submit="handleSave"
+                    >
+                        <template v-slot:actions>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                    color="error"
+                                    text
+                                    @click="dialog = false"
+                                    >Cancel</v-btn
+                                >
+                                <v-btn color="primary" text type="submit"
+                                    >Save</v-btn
+                                >
+                            </v-card-actions>
+                        </template>
+                    </UserForm>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="deleteDialog" max-width="400px">
+            <v-card>
+                <v-card-title class="text-h5">Confirm Delete</v-card-title>
+                <v-card-text>
+                    Are you sure you want to delete this user?
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="error" text @click="deleteDialog = false"
+                        >Cancel</v-btn
+                    >
+                    <v-btn color="primary" text @click="handleDelete"
+                        >Delete</v-btn
+                    >
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </v-container>
 </template>
 
@@ -90,6 +156,16 @@ const roleFilter = ref("All");
 const loading = ref(false);
 const users = ref([]);
 const dialog = ref(false);
+const isEdit = ref(false);
+const deleteDialog = ref(false);
+const selectedUser = ref(null);
+const formData = ref({
+    name: "",
+    matrix_id: "",
+    email: "",
+    role: "",
+    password: "",
+});
 
 const headers = [
     {
@@ -124,24 +200,69 @@ const headers = [
             style: "font-weight: 600; font-size:20px;",
         },
     },
+    {
+        title: "Actions",
+        key: "actions",
+        align: "end",
+        sortable: false,
+        headerProps: {
+            style: "font-weight: 600; font-size:20px;",
+        },
+    },
 ];
+
+const editUser = (user) => {
+    isEdit.value = true;
+    formData.value = { ...user };
+    dialog.value = true;
+};
+
+const confirmDelete = (user) => {
+    selectedUser.value = user;
+    deleteDialog.value = true;
+};
+
 const handleSave = async (userData) => {
     try {
         loading.value = true;
-        const response = await authApiService.register(userData);
+        const response = isEdit.value
+            ? await userApiService.updateUser(userData)
+            : await authApiService.register(userData);
         if (response.success) {
             await fetchUsers();
             dialog.value = false;
-        }
-        else {
+        } else {
             notificationStore.showNotification({
-                message: response.message || 'Error creating user',
-                color: 'error',
-                timeout: 3000
+                message: response.message || "Error creating user",
+                color: "error",
+                timeout: 3000,
             });
         }
     } catch (error) {
         console.error("Error creating user:", error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+const handleDelete = async () => {
+    try {
+        loading.value = true;
+        const response = await userApiService.deleteUser(
+            selectedUser.value.matrix_id
+        );
+        if (response.success) {
+            await fetchUsers();
+            deleteDialog.value = false;
+        } else {
+            notificationStore.showNotification({
+                message: response.message || "Error deleting user",
+                color: "error",
+                timeout: 3000,
+            });
+        }
+    } catch (error) {
+        console.error("Error deleting user:", error);
     } finally {
         loading.value = false;
     }
