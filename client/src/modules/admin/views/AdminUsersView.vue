@@ -27,71 +27,60 @@
                             >Add User</v-btn
                         >
                     </v-col>
-                    <v-dialog v-model="dialog" max-width="500px">
-                        <v-card>
-                            <v-card-title>
-                                <span class="text-h5">Add New User</span>
-                            </v-card-title>
-
-                            <v-card-text>
-                                <UserForm
-                                    :initial-data="formData"
-                                    :role-items="[
-                                        'Student',
-                                        'Professor',
-                                        'Admin',
-                                    ]"
-                                    :show-confirm-password="false"
-                                    @submit="handleSave"
-                                >
-                                    <template v-slot:actions>
-                                        <v-card-actions>
-                                            <v-spacer></v-spacer>
-                                            <v-btn
-                                                color="error"
-                                                text
-                                                @click="dialog = false"
-                                                >Cancel</v-btn
-                                            >
-                                            <v-btn
-                                                color="primary"
-                                                text
-                                                type="submit"
-                                                >Save</v-btn
-                                            >
-                                        </v-card-actions>
-                                    </template>
-                                </UserForm>
-                            </v-card-text>
-                        </v-card>
-                    </v-dialog>
                 </v-row>
 
-                <v-data-table
-                    :headers="headers"
-                    :items="filteredUsers"
-                    :search="search"
+                <UserTable
+                    :users="filteredUsers"
                     :loading="loading"
-                    :sort-by="[{ key: 'role', order: 'asc' }]"
+                    :search="search"
                 >
-                    <template v-slot:item.actions="{ item }">
-                        <v-btn
-                            icon="mdi-pencil"
+                    <template v-slot:actions="{ item }">
+                        <v-icon
+                            class="me-2"
                             size="small"
-                            color="primary"
-                            class="mr-2"
                             @click="editUser(item)"
-                        />
-                        <v-btn
-                            icon="mdi-delete"
-                            size="small"
-                            color="error"
-                            @click="confirmDelete(item)"
-                        />
+                        >
+                            mdi-pencil
+                        </v-icon>
+                        <v-icon size="small" @click="deleteUser(item)">
+                            mdi-delete
+                        </v-icon>
                     </template>
-                </v-data-table>
+                </UserTable>
             </v-card-text>
         </v-card>
+
+        <v-dialog v-model="dialog" max-width="500px">
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5">Add New User</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <UserForm
+                        :initial-data="formData"
+                        :role-items="['Student', 'Professor', 'Admin']"
+                        :show-confirm-password="false"
+                        @submit="handleSave"
+                    >
+                        <template v-slot:actions>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                    color="error"
+                                    text
+                                    @click="dialog = false"
+                                    >Cancel</v-btn
+                                >
+                                <v-btn color="primary" text type="submit"
+                                    >Save</v-btn
+                                >
+                            </v-card-actions>
+                        </template>
+                    </UserForm>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
 
         <v-dialog v-model="dialog" max-width="500px">
             <v-card>
@@ -149,6 +138,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import UserForm from "@/components/forms/UserForm.vue";
+import UserTable from "../components/UsersTable.vue";
 import { authApiService, userApiService } from "@/utils/ApiService";
 
 const search = ref("");
@@ -166,50 +156,6 @@ const formData = ref({
     role: "",
     password: "",
 });
-
-const headers = [
-    {
-        title: "Name",
-        key: "name",
-        align: "start",
-        headerProps: {
-            style: "font-weight: 600; font-size:20px;",
-        },
-    },
-    {
-        title: "Matrix ID",
-        key: "matrix_id",
-        align: "start",
-        headerProps: {
-            style: "font-weight: 600; font-size:20px;",
-        },
-    },
-    {
-        title: "Email",
-        key: "email",
-        align: "start",
-        headerProps: {
-            style: "font-weight: 600; font-size:20px;",
-        },
-    },
-    {
-        title: "Role",
-        key: "role",
-        align: "start",
-        headerProps: {
-            style: "font-weight: 600; font-size:20px;",
-        },
-    },
-    {
-        title: "Actions",
-        key: "actions",
-        align: "end",
-        sortable: false,
-        headerProps: {
-            style: "font-weight: 600; font-size:20px;",
-        },
-    },
-];
 
 const editUser = (user) => {
     isEdit.value = true;
