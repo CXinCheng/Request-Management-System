@@ -13,22 +13,22 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 import Sidebar from "./components/Sidebar.vue";
 import Header from "./components/Header.vue";
-import Snackbar from './components/Snackbar.vue';
+import Snackbar from "./components/Snackbar.vue";
 
 const route = useRoute();
 
 const isAuthRoute = computed(() => {
-    return ['/login', '/register', '/reset'].includes(route.path);
+    return ["/","/login", "/register", "/reset"].includes(route.path);
 });
 
 const pageTitle = computed(() => {
-    if (route.path === '/' || route.path === '/dashboard') {
-        const userData = localStorage.getItem('user');
-        return `Welcome, ${JSON.parse(userData)?.name || 'User'}`;
+    if (route.path === "/dashboard") {
+        const userData = localStorage.getItem("user");
+        return `Welcome, ${JSON.parse(userData)?.name || "User"}`;
     }
     return route.meta?.title;
 });

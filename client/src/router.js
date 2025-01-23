@@ -17,8 +17,7 @@ const isAuthenticated = () => {
 const routes = [
     {
         path: "/",
-        component: DashboardView,
-        name: "Dashboard",
+        redirect: '/dashboard',
         meta: { requiresAuth: true },
     },
     {
@@ -83,7 +82,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
     const isLoggedIn = isAuthenticated();
-
+    
     if (requiresAuth && !isLoggedIn) {
         next({ name: 'Login', query: { redirect: to.fullPath },});
     } else {
