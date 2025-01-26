@@ -1,8 +1,8 @@
 <template>
     <div class="progress-bar">
-        <div class="step completed">1 Apply</div>
-        <div class="step">2 In Review</div>
-        <div class="step">3 Approved/Rejected</div>
+        <div class="step completed">1  Apply</div>
+        <div class="step ">2  In Review</div>
+        <div class="step">3  Approved / Rejected</div>
     </div>
 </template>
 
@@ -21,7 +21,7 @@ export default {
 
 .progress-bar .step {
     flex: 1;
-    text-align: center;
+    text-align: left;
     padding: 0.5rem;
     border-bottom: 2px solid #ccc;
 }

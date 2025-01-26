@@ -1,10 +1,10 @@
 <template>
   <div class="modules">
-    <h2>Applying for the following Module(s):</h2>
+    <h3>Select Your Module(s):</h3>
     <table>
       <thead>
         <tr>
-          <th>Select</th>
+          <th></th>
           <th>Course Name</th>
           <th>Course Code</th>
           <th>Professor</th>
@@ -53,10 +53,11 @@ export default {
 
 <style scoped>
 .modules {
-  margin-top: 1rem;
+  margin-top: 2rem;
 }
 
 .modules table {
+  margin-top: 1rem;
   width: 100%;
   border-collapse: collapse;
 }

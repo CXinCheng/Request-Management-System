@@ -55,9 +55,9 @@ export const submitForm = async (req, res) => {
                 return t.one(
                     `
                     INSERT INTO request_management.sub_request (
-                        status, modified_at, module_id, approver_id, main_request_id
+                        status, modified_at, module_code, approver_id, main_request_id
                     ) VALUES ('Pending', CURRENT_TIMESTAMP, $1, $2, $3)
-                    RETURNING id
+                    RETURNING main_request_id
                     `,
                     [module, approvers[index], request.id]
                 );

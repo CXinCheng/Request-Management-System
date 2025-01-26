@@ -1,6 +1,5 @@
 <template>
     <div class="request-leave-form">
-      <h1>Leave Application</h1>
       
     <form @submit.prevent="submitForm">
 
@@ -152,7 +151,7 @@ methods: {
       const endDate = leaveDates.selectedLeaveDates.endDate
 
       this.selectedModules.forEach((selectedMod)=>{
-        const moduleID = {...selectedMod}.id
+        const moduleID = {...selectedMod}.code
         const profID = {...selectedMod}.professorID
 
         moduleIDs.push(moduleID)
@@ -160,7 +159,7 @@ methods: {
       })
 
       const formDataToSubmit = {
-        student: 3,
+        student: "A1234567B",
         reasonOfLeave: this.formData.reason,
         startDateOfLeave: startDate,
         endDateOfLeave: endDate,
