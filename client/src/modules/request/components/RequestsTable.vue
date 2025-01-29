@@ -32,7 +32,7 @@
     },
     data() {
       return {
-        studentId: '2',  // Replace with the actual student ID from local storage
+        studentId: '',  // Replace with the actual student ID from local storage
         headers: [
           { title: 'Leave Start', key: 'start_date_of_leave' },
           { title: 'Leave End', key: 'end_date_of_leave' },
@@ -45,6 +45,10 @@
       };
     },
     mounted() {
+      if (localStorage.getItem('user')) {
+        let user = JSON.parse(localStorage.getItem('user'));
+        this.studentId = user['matrix_id'];
+      }
       this.fetchRequests();
     },
     methods: {

@@ -1,11 +1,8 @@
 <template>
     <div class="requests-view-container">
         <div class="d-flex justify-space-between">
-            <h1>Requests for Student {{ studentId }}</h1>
-            <!-- Create Request button -->
-            <div>
-                <create-request-button></create-request-button>
-            </div>
+            <h1>Requests</h1>
+            <create-request-button></create-request-button>
         </div>
         <!-- Requests Table -->
         <div class="main-container">
@@ -27,7 +24,7 @@
         },
         data() {
             return {
-                studentId: '2',  // Replace with the actual student ID
+                username: '',  // Replace with the actual student ID
             };
         },
         setup() {

@@ -1,7 +1,10 @@
 <template>
-    <button @click="createRequest" class="rounded">
+    <v-btn 
+      @click="createRequest" 
+      class="rounded text-subtitle-1 bg-blue-darken-4"
+    >
       Add new Request
-    </button>
+    </v-btn>
 </template>
 
 <script>
