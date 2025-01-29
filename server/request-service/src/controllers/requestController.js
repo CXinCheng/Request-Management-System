@@ -10,10 +10,10 @@ export const getAllRequestsByStudent = async (req, res) => {
     try {
         const requests = await db.any(
         `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, u1.name AS user_name, u2.name AS approver_name
-        FROM request r, sub_request sr, users u1, users u2
-        WHERE r.id = sr.request_id
-        AND r.user_id = u1.id
-        AND sr.approver_id = u2.id
+        FROM request_management.requests r, request_management.sub_request sr, request_management.users u1, request_management.users u2
+        WHERE r.id = sr.main_request_id
+        AND r.user_id = u1.matrix_id
+        AND sr.approver_id = u2.matrix_id
         AND r.user_id = $1`, 
         [studentId]
         );
