@@ -7,8 +7,8 @@ const router = express.Router();
 
 router.get('/student/:studentId', getAllRequestsByStudent);
 
-// router.post('/submit', upload.single("file"),
 router.post('/submit',
+    upload.single('uploadFile'), 
     [
         body("student").notEmpty().withMessage("Student is required"),
         body("reasonOfLeave").notEmpty().withMessage("Reason of leave is required"),
