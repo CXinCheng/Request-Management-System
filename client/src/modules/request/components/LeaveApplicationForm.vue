@@ -1,6 +1,5 @@
 <template>
     <div class="request-leave-form">
-      <h1>Leave Application</h1>
       
     <form @submit.prevent="submitForm">
 
@@ -142,7 +141,6 @@ methods: {
   },
   async submitForm() {
     try {
-
       const moduleIDs = []
       const approverIDs = []
 
@@ -152,42 +150,44 @@ methods: {
       const endDate = leaveDates.selectedLeaveDates.endDate
 
       this.selectedModules.forEach((selectedMod)=>{
-        const moduleID = {...selectedMod}.id
+        const moduleID = {...selectedMod}.code
         const profID = {...selectedMod}.professorID
 
         moduleIDs.push(moduleID)
         approverIDs.push(profID)
       })
 
-      const formDataToSubmit = {
-        student: 3,
-        reasonOfLeave: this.formData.reason,
-        startDateOfLeave: startDate,
-        endDateOfLeave: endDate,
-        modules: moduleIDs,
-        approvers: approverIDs,
+      let formData = new FormData()
+      formData.append("student", "A1234567B")
+      formData.append("reasonOfLeave", this.formData.reason)
+      formData.append("startDateOfLeave", startDate)
+      formData.append("endDateOfLeave", endDate)
+      formData.append("modules", moduleIDs)
+      formData.append("approvers", approverIDs)
+      formData.append("uploadFile", this.formData.file)
+
+      for (var key of formData.entries()) {
+        console.log(key[0] + ', ' + key[1]);
+      }
+
+      const response = await requestApiService.submit(formData);
+      this.submitStatus = {
+        success: true,
+        message: "Leave request submitted successfully!",
       };
+      this.resetForm();
 
-      console.log(formDataToSubmit);
-
-    const response = await requestApiService.submit(formDataToSubmit);
-    this.submitStatus = {
-      success: true,
-      message: "Leave request submitted successfully!",
-    };
-    this.resetForm();
-
-      } catch (error) {
+    } catch (error) {
         this.submitStatus = {
           success: false,
           message: "Error submitting form. Please try again.",
         };
       }
     },
-    resetForm() {
-      this.formData.reason = "";
-      this.formData.file = null;
-    },
+      resetForm() {
+        this.formData.reason = "";
+        this.formData.file = null;
+      },
 },
 };
 </script>

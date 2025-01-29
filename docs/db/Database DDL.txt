@@ -91,6 +91,10 @@ CREATE TABLE request_management.otp_store (
     FOREIGN KEY (user_email) REFERENCES request_management.users(email)
 );
 
+-- Add blob_url field under requests to store user uploads
+ALTER TABLE IF EXISTS request_management.requests
+    ADD COLUMN blob_url text NOT NULL;
+
 -- Insert Users Records
 INSERT INTO request_management.users ("name",matrix_id,email,"role","password") VALUES
 

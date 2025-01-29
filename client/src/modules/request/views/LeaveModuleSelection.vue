@@ -1,19 +1,16 @@
 <template>
     <div class="leave-application">
-      <h1>Leave Application</h1>
-  
       <!-- Applicant Info -->
-      <div class="applicant-info">
+      <!-- <div class="applicant-info">
       <p class="info-item">
         <strong>Applicant:</strong> {{ user.name }}
       </p>
       <p class="info-item">
         <strong>Matriculation ID:</strong> {{ user.matriculationId }}
       </p>
-    </div>
+    </div> -->
 
     <ProgresBar/>
-  
     <!-- Date Selection -->
     <div class="date-selection">
       <label for="startDate">From:</label>
@@ -35,7 +32,7 @@
         required
       />
     </div>
-  
+
     <!-- Modules -->
     <ModulesTable v-if="showModuleTable" v-model:selectedModules="selectedModules" :modules="modules" />
 
@@ -88,12 +85,12 @@ export default {
         leaveDateStore.setSelectedLeaveDates(this.leaveDates)
         // Mocking module data for now
         this.modules = [
-          { id: 1, name: "Software Engineering Capstone", code: "TIC4901", professor: "Prof Xavier", professorID: "1" },
-          { id: 3, name: "Graphic Design Fundamentals", code: "ART101", professor: "Prof Xavier", professorID: "1" },
-          { id: 4, name: "Digital Illustration", code: "ART103", professor: "Prof Xavier", professorID: "1" },
-          { id: 5, name: "UX/UI Design Principles", code: "UXD301", professor: "Prof Jane", professorID: "2" },
-          { id: 6, name: "Color Theory and Application", code: "ART102", professor: "Prof Jane", professorID: "2" },
-          { id: 7, name: "Visual Communication Design", code: "ART202", professor: "Prof Jane", professorID: "2" },
+          { id: 1, name: "Software Engineering Capstone", code: "ABM5002", professor: "Prof Xavier", professorID: "P0123456A" },
+          { id: 3, name: "Graphic Design Fundamentals", code: "ABM5003", professor: "Prof Xavier", professorID: "P0123456A" },
+          { id: 4, name: "Digital Illustration", code: "ABM5004", professor: "Prof Xavier", professorID: "P0123456A" },
+          { id: 5, name: "UX/UI Design Principles", code: "ABM5106", professor: "Prof Jane", professorID: "P0123456A" },
+          { id: 6, name: "Color Theory and Application", code: "AC5004", professor: "Prof Jane", professorID: "P0123456A" },
+          { id: 7, name: "Visual Communication Design", code: "AC5012", professor: "Prof Jane", professorID: "P0123456A" },
         ];
         this.showModuleTable = true
         
@@ -139,10 +136,6 @@ h1 {
   display: flex;
   justify-content: space-between;
   margin-bottom: 2rem;
-}
-
-.date-selection label {
-  margin-right: 1rem;
 }
 
 .form-actions {
