@@ -1,6 +1,7 @@
 <template>
   <div class="modules">
-    <h3>Select Your Module(s):</h3>
+    <h5>Select Module(s)</h5>
+
     <table>
       <thead>
         <tr>

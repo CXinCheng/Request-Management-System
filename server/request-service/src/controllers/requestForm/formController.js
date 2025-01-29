@@ -15,19 +15,14 @@ const uploadToAzureBlob = async (file) => {
         // Generate a unique blob name
         const blobName = `${Date.now()}-${file.originalname}-${v1()}`;
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-    
-        console.log("blobname:", blobName)
-        console.log("file: ", file)
         
         // Upload the file to Azure
         await blockBlobClient.uploadData(file.buffer, {
             blobHTTPHeaders: { blobContentType: file.mimetype }
         });
-    
-        console.log("blockBlobClient.url", blockBlobClient.url)
+
         return blockBlobClient.url; // Return the blob URL
     } catch (error) {
-        console.error("Error uploading file to Azure:", error);
         throw new Error("File upload failed");
     }
 

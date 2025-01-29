@@ -1,16 +1,8 @@
 <template>
     <div class="leave-application">
-      <!-- Applicant Info -->
-      <!-- <div class="applicant-info">
-      <p class="info-item">
-        <strong>Applicant:</strong> {{ user.name }}
-      </p>
-      <p class="info-item">
-        <strong>Matriculation ID:</strong> {{ user.matriculationId }}
-      </p>
-    </div> -->
+    <h5>Select Dates</h5>
+    <hr />
 
-    <ProgresBar/>
     <!-- Date Selection -->
     <div class="date-selection">
       <label for="startDate">From:</label>
@@ -20,6 +12,7 @@
         v-model="leaveDates.startDate" 
         @change="fetchModules"
         required
+        style="border: 0.5px solid #000; padding: 5px; border-radius: 3px;"
       />
 
       <label for="endDate">To:</label>
@@ -30,6 +23,7 @@
         min=""
         @change="fetchModules"
         required
+        style="border: 0.5px solid #000; padding: 5px; border-radius: 3px;"
       />
     </div>
 
@@ -47,8 +41,6 @@
 </template>
   
 <script>
-import { useRoute } from "vue-router";
-import ProgresBar from "../components/ProgressBar.vue"
 import ModulesTable from "../components/ModuleTable.vue"
 import { useModuleStore } from '../stores/useModuleStore';
 import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
@@ -56,7 +48,6 @@ import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
 export default {
   name: "LeaveModuleSelection",
   components: {
-    ProgresBar,
     ModulesTable
   },
   data() {
@@ -116,16 +107,6 @@ export default {
   font-family: Arial, sans-serif;
 }
 
-h1 {
-  text-align: left;
-  margin-bottom: 2rem;
-}
-
-.applicant-info {
-  display: flex;
-  gap: 10px; 
-}
-
 .info-item {
   flex: 1;
   display: flex;
@@ -141,6 +122,10 @@ h1 {
 .form-actions {
   text-align: right;
   margin-top: 2rem;
+}
+
+input[type=date]:focus {
+  border: 1px solid #555;
 }
 
 button {

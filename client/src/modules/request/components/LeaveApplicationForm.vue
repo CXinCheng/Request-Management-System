@@ -94,11 +94,14 @@
 
   </div>
 
-  <!-- Submit Button -->
-  <div class="form-group">
-      <button type="submit" class="submit-button">Submit</button>
-  </div>
+  <button type="submit" class="submit-button" :disabled="isLoading">
+      <span v-if="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      <span v-if="isLoading"> Loading...</span>
+      <span v-else>Submit</span>
+  </button>
+
   </form>
+
 
   <div v-if="submitStatus" :class="['status-message', submitStatus.success ? 'success' : 'error']">
     <p>{{ submitStatus.message }}</p>
@@ -109,8 +112,8 @@
   
 <script>
 import { requestApiService } from "@/utils/ApiService";
-import axios from "axios";
 import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
+import { useRouter } from "vue-router";
 
 export default {
 name: "LeaveRequestForm",
@@ -133,6 +136,7 @@ data() {
         reason: '',
     },
     submitStatus: null,
+    isLoading: null,
   };
 },
 methods: {
@@ -140,55 +144,57 @@ methods: {
     this.formData.file = event.target.files[0];
   },
   async submitForm() {
+    const router = useRouter();
+
+    this.isLoading = true
+    this.submitStatus = null;
+
+    const moduleIDs = []
+    const approverIDs = []
+
+    const leaveDateStore = useLeaveDateStore();
+    const leaveDates = {...leaveDateStore}
+    const startDate = leaveDates.selectedLeaveDates.startDate
+    const endDate = leaveDates.selectedLeaveDates.endDate
+
+    this.selectedModules.forEach((selectedMod)=>{
+      const moduleID = {...selectedMod}.code
+      const profID = {...selectedMod}.professorID
+
+      moduleIDs.push(moduleID)
+      approverIDs.push(profID)
+    })
+
+    let formData = new FormData()
+    formData.append("student", "A1234567B")
+    formData.append("reasonOfLeave", this.formData.reason)
+    formData.append("startDateOfLeave", startDate)
+    formData.append("endDateOfLeave", endDate)
+    formData.append("modules", moduleIDs)
+    formData.append("approvers", approverIDs)
+    formData.append("uploadFile", this.formData.file)
+    
+
     try {
-      const moduleIDs = []
-      const approverIDs = []
-
-      const leaveDateStore = useLeaveDateStore();
-      const leaveDates = {...leaveDateStore}
-      const startDate = leaveDates.selectedLeaveDates.startDate
-      const endDate = leaveDates.selectedLeaveDates.endDate
-
-      this.selectedModules.forEach((selectedMod)=>{
-        const moduleID = {...selectedMod}.code
-        const profID = {...selectedMod}.professorID
-
-        moduleIDs.push(moduleID)
-        approverIDs.push(profID)
-      })
-
-      let formData = new FormData()
-      formData.append("student", "A1234567B")
-      formData.append("reasonOfLeave", this.formData.reason)
-      formData.append("startDateOfLeave", startDate)
-      formData.append("endDateOfLeave", endDate)
-      formData.append("modules", moduleIDs)
-      formData.append("approvers", approverIDs)
-      formData.append("uploadFile", this.formData.file)
-
-      for (var key of formData.entries()) {
-        console.log(key[0] + ', ' + key[1]);
-      }
-
-      const response = await requestApiService.submit(formData);
-      this.submitStatus = {
-        success: true,
-        message: "Leave request submitted successfully!",
-      };
-      this.resetForm();
+      let response = await requestApiService.submit(formData);
+      this.submitStatus = { success: true, message: 'Form submitted successfully! \n Redirecting you to Request Page.' };
+      setTimeout(() => {
+        this.$router.push({ path: '/requests' });
+      }, 3000);
 
     } catch (error) {
-        this.submitStatus = {
-          success: false,
-          message: "Error submitting form. Please try again.",
-        };
-      }
+      this.submitStatus = { success: false, message: 'Submission failed. Try again! \n Redirecting you to Submit a New Request.' };
+      setTimeout(() => {
+        this.$router.push({ path: '/leave' });
+      }, 3000);
+    }
+
+    this.formData.reason = ''
+    this.isLoading = null
+
+    }  
+
     },
-      resetForm() {
-        this.formData.reason = "";
-        this.formData.file = null;
-      },
-},
 };
 </script>
   
