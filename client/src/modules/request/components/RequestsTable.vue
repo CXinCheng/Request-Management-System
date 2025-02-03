@@ -1,29 +1,46 @@
 <template>
-    <div class="container">
-      <v-data-table
-        :headers="headers"
-        :items="requests"
-        class="striped outlined"
-        item-value="id"
-        dense
-      >
-        <template v-slot:top>
-          <v-toolbar 
-            flat 
-            class="bg-white"
-          >
-            <v-spacer></v-spacer>
-            <v-text-field
-              v-model="search"
-              label="Search"
-              single-line
-              hide-details
-            ></v-text-field>
-          </v-toolbar>
-        </template>
-      </v-data-table>
-    </div>
-  </template>
+  <v-container>
+    <v-data-table 
+      :headers="headers" 
+      :items="requests" 
+      :search="search" 
+      :loading="loading"
+      :items-per-page="5"
+      :item-class="hover-shadow"
+      @click:row="seeRequestDetails"
+      v-model="selected"
+      class="striped outlined" 
+      item-value="id" 
+      fixed-header
+      dense
+    >
+      <template v-slot:top>
+        <v-toolbar flat class="bg-white">
+          <v-spacer></v-spacer>
+          <v-text-field v-model="search" label="Search" single-line hide-details></v-text-field>
+        </v-toolbar>
+      </template>
+      <template v-slot:item.created_at="{ item }">
+        {{ formatDate(item.created_at) }}
+      </template>
+
+      <template v-slot:item.start_date_of_leave="{ item }">
+        {{ formatDate(item.start_date_of_leave) }}
+      </template>
+
+      <template v-slot:item.end_date_of_leave="{ item }">
+        {{ formatDate(item.end_date_of_leave) }}
+      </template>
+
+      <template v-slot:item.actions="{ item }">
+        <v-icon small>mdi-information-outline</v-icon>
+        <v-icon small>mdi-pencil</v-icon>
+        <v-icon small>mdi-delete</v-icon>
+        <v-icon small>mdi-dots-vertical</v-icon>
+      </template>
+    </v-data-table>
+  </v-container>
+</template>
   
   <script>
 
@@ -38,10 +55,12 @@
           { title: 'Leave End', key: 'end_date_of_leave' },
           { title: 'Submitted', key: 'created_at' },
           { title: 'Status', key: 'status' },
-          { title: 'Approver', key: 'approver_name' }
+          { title: 'Approver', key: 'approver_name' },
+          { title: 'Actions', key: 'actions', sortable: false }
         ],
         requests: [],
         search: '', // For search functionality
+        selectedItem: false
       };
     },
     mounted() {
@@ -63,11 +82,33 @@
             console.error('Error retrieving requests:', error);
           });
       },
+      formatDate(date) {
+        return new Date(date).toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+          timeZone: "UTC",
+        }).replace(",", ""); // Remove comma
+      },
+      seeRequestDetails(event, { item }) {
+        this.$router.push(`/requests/${item.id}`);
+      },
     },
   };
   </script>
   
   <style scoped>
-
+  *::v-deep th span {
+    font-weight: bold !important;
+  }
+  *::v-deep tr:hover {
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Shadow effect */
+    transition: box-shadow 0.01s ease-in-out;
+    cursor: pointer;
+  }
   </style>
   
