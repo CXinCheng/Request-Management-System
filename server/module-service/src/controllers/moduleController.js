@@ -5,21 +5,53 @@ export const getAllModules = async (req, res) => {
     let data = null;
 
     try {
-        data = await db.manyOrNone("SELECT code, name, educator_id FROM request_management.modules");
+        data = await db.manyOrNone(
+            "SELECT code, name, educator_id FROM request_management.modules"
+        );
 
         res.json({
             success: true,
             data: data,
         });
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Error fetching all modules:", error);
         return res.status(500).json({
             success: false,
             error: "Error fetching all modules",
         });
     }
-}
+};
+
+export const updateEducator = async (req, res) => {
+    const { educator_id, module_code } = req.body;
+
+    try {
+        if (educator_id) {
+            const existingProfessor = await db.oneOrNone(
+                "SELECT * FROM request_management.users WHERE matrix_id = $1 AND role = 'Professor'",
+                [educator_id]
+            );
+            if (!existingProfessor) {
+                return res.status(404).json({
+                    success: false,
+                    error: "Matrix ID not found or User is not a Professor"
+                });
+            }
+        }
+        
+        await db.none("UPDATE request_management.modules SET educator_id = $1 WHERE code = $2", [educator_id, module_code]);
+        return res.status(200).json({
+            success: true,
+            data: "Educator updated successfully"
+        });
+    } catch (error) {
+        console.error("Error updating educator:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Error updating educator",
+        });
+    }
+};
 
 export const getModuleTimetableByClassNo = async (req, res) => {
     const moduleCode = req.params.moduleCode;

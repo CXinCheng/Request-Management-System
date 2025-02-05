@@ -36,6 +36,7 @@ export const userApiService = {
     getAllUsers: () => userApi.get('/all').then(res => res.data),
     updateUser: (userData) => userApi.post(`/${userData.matrix_id}`, userData).then(res => res.data),
     deleteUser: (id) => userApi.delete(`${id}`).then(res => res.data),
+    getAllProfessors: () => userApi.get('/all/professors').then(res => res.data),
 };
 
 // Module API
@@ -45,4 +46,5 @@ const moduleApi = axios.create({
 
 export const moduleApiService = {
     getAllModules: () => moduleApi.get('/all').then(res => res.data),
+    updateEducator: (data) => moduleApi.post('updateEducator', data).then(res => res.data),
 };
