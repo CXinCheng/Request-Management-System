@@ -23,9 +23,7 @@
                     </v-col>
                     <v-spacer></v-spacer>
                     <v-col cols="2">
-                        <v-btn color="primary" @click="dialog = true"
-                            >Add User</v-btn
-                        >
+                        <v-btn color="primary" @click="addUser">Add User</v-btn>
                     </v-col>
                 </v-row>
 
@@ -156,6 +154,18 @@ const formData = ref({
     role: "",
     password: "",
 });
+
+const addUser = () => {
+    isEdit.value = false;
+    dialog.value = true;
+    formData.value = {
+        name: "",
+        matrix_id: "",
+        email: "",
+        role: "",
+        password: "",
+    };
+};
 
 const editUser = (user) => {
     isEdit.value = true;
