@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const AUTH_BASE_URL = '/api/v1/auth';
-const REQUEST_BASE_URL = '/api/v1/requests';
-const USER_BASE_URL = '/api/v1/user';
-const MODULE_BASE_URL = '/api/v1/module';
+const AUTH_BASE_URL = '/api/auth';
+const REQUEST_BASE_URL = '/api/requests';
+const USER_BASE_URL = '/api/user';
+const MODULE_BASE_URL = '/api/module';
 
 // Auth API
 const authApi = axios.create({
