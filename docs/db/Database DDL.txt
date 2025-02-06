@@ -5,20 +5,20 @@ DROP TYPE IF EXISTS request_management.user_role CASCADE;
 CREATE TYPE request_management.user_role AS ENUM ('Student', 'Professor', 'Admin');
 DROP TABLE IF EXISTS request_management.users CASCADE;
 CREATE TABLE request_management.users (
-    name VARCHAR(255) NOT NULL,                             -- Name column of type varchar
-    matrix_id VARCHAR(255) PRIMARY KEY,                 -- Matrix_Id column of type varchar
-    email VARCHAR(255) NOT NULL UNIQUE,                     -- Email column of type varchar, with a unique constraint
-    role request_management.user_role NOT NULL,                                -- Enum for role with specific values
-    password VARCHAR(255) NOT NULL                          -- Password field (store hashed and salted password)
+    name VARCHAR(255) NOT NULL,                                 -- Name column of type varchar
+    matrix_id VARCHAR(255) PRIMARY KEY,                         -- Matrix_Id column of type varchar
+    email VARCHAR(255) NOT NULL UNIQUE,                         -- Email column of type varchar, with a unique constraint
+    role request_management.user_role NOT NULL,                 -- Enum for role with specific values
+    password VARCHAR(255) NOT NULL                              -- Password field (store hashed and salted password)
 );
 
 DROP TABLE IF EXISTS request_management.modules CASCADE;
 CREATE TABLE request_management.modules (
-    code VARCHAR(100) PRIMARY KEY,                             -- Code field of type varchar
-    name VARCHAR(255) NOT NULL,                              -- Name field of type varchar
-    exam_date TIMESTAMP,
-    educator_id VARCHAR(255),
-    class_last_updated_at TIMESTAMP,
+    code VARCHAR(100) PRIMARY KEY,                              -- Code field of type varchar
+    name VARCHAR(255) NOT NULL,                                 -- Name field of type varchar
+    exam_date TIMESTAMP,                                        -- The exam date of the module
+    educator_id VARCHAR(255),                                   -- The user id of the teaching educator
+    class_last_updated_at TIMESTAMP,                            -- The timestamp when the classes data of this module is updated
 
     FOREIGN KEY (educator_id) REFERENCES request_management.users(matrix_id)
 );
@@ -29,12 +29,12 @@ DROP TYPE IF EXISTS request_management.day_of_week CASCADE;
 CREATE TYPE request_management.day_of_week AS ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
 DROP TABLE IF EXISTS request_management.classes CASCADE;
 CREATE TABLE request_management.classes (
-    module_code VARCHAR(255),                                             -- Foreign key to Module table
-    class_type request_management.class_type,                                     -- Enum for class type (Lecture/Tutorial)
-    day_of_week request_management.day_of_week,                                           -- Integer representing day of the week
-    starting_time TIME NOT NULL,                                   -- Start time of the class
-    ending_time TIME NOT NULL,                                     -- End time of the class
-    class_no VARCHAR(10),                                              -- Class number
+    module_code VARCHAR(255),                                       -- Foreign key to Module table
+    class_type request_management.class_type,                       -- Enum for class type (Lecture/Tutorial)
+    day_of_week request_management.day_of_week,                     -- Integer representing day of the week
+    starting_time TIME NOT NULL,                                    -- Start time of the class
+    ending_time TIME NOT NULL,                                      -- End time of the class
+    class_no VARCHAR(10),                                           -- Class number
     
     PRIMARY KEY (module_code, class_type, class_no, day_of_week),
     UNIQUE(module_code, class_no),
@@ -43,11 +43,11 @@ CREATE TABLE request_management.classes (
 
 DROP TABLE IF EXISTS request_management.user_module_mapping CASCADE;
 CREATE TABLE request_management.user_module_mapping (
-    user_matrix_id VARCHAR(255),                                               -- Foreign key to Users table
-    module_code VARCHAR(255),                                             -- Module identifier
-    class_no VARCHAR(10),
+    user_matrix_id VARCHAR(255),                                        -- Foreign key to Users table
+    module_code VARCHAR(255),                                           -- Module identifier
+    class_no VARCHAR(10),                                               -- Class number
 
-    PRIMARY KEY (user_matrix_id, module_code, class_no),                                   -- Composite primary key
+    PRIMARY KEY (user_matrix_id, module_code, class_no),                              -- Composite primary key
     FOREIGN KEY (user_matrix_id) REFERENCES request_management.users(matrix_id),      -- Foreign key constraint
     FOREIGN KEY (module_code, class_no) REFERENCES request_management.classes(module_code, class_no)   -- Foreign key constraint
 );
@@ -57,11 +57,11 @@ CREATE TABLE request_management.requests (
     id INT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,    -- Self-increment primary key
     created_at TIMESTAMP NOT NULL,                          -- Timestamp for when the request was created
     start_date_of_leave TIMESTAMP NOT NULL,                 -- Timestamp for start of leave request
-    date_of_request TIMESTAMP NOT NULL,                      -- Date of the request
-    end_date_of_leave TIMESTAMP NOT NULL,                        -- Timestamp for end of leave request
-    reason_of_leave VARCHAR(255) NOT NULL,                   -- Request details
-    user_id VARCHAR(255) NOT NULL,
-    blob_url text NOT NULL,
+    date_of_request TIMESTAMP NOT NULL,                     -- Date of the request
+    end_date_of_leave TIMESTAMP NOT NULL,                   -- Timestamp for end of leave request
+    reason_of_leave VARCHAR(255) NOT NULL,                  -- Request details
+    user_id VARCHAR(255) NOT NULL,                          -- User id of who submit the request
+    blob_url text NOT NULL,                                 -- Url of the uploaded files
 
     FOREIGN KEY (user_id) REFERENCES request_management.users(matrix_id)
 );
@@ -71,10 +71,10 @@ CREATE TYPE request_management.request_status AS ENUM ('Pending', 'Rejected', 'A
 DROP TABLE IF EXISTS request_management.sub_request CASCADE;
 CREATE TABLE request_management.sub_request (
     details VARCHAR(255) NOT NULL,                          -- Request details
-    status request_management.request_status NOT NULL,                         -- Enum status
+    status request_management.request_status NOT NULL,      -- Enum status
     modified_at TIMESTAMP NOT NULL,                         -- Timestamp of modification
-    module_code VARCHAR(255),                                 -- Foreign key to Module table
-    approver_id VARCHAR(255) NOT NULL,                               -- Foreign key to Users table
+    module_code VARCHAR(255),                               -- Foreign key to Module table
+    approver_id VARCHAR(255) NOT NULL,                      -- Foreign key to Users table
     main_request_id INT,                                    -- Foreign key to Request table
     
     PRIMARY KEY (module_code, main_request_id),
@@ -85,11 +85,11 @@ CREATE TABLE request_management.sub_request (
 
 DROP TABLE IF EXISTS request_management.otp_store CASCADE;
 CREATE TABLE request_management.otp_store (
-    user_email VARCHAR(255) NOT NULL,
-    otp_code VARCHAR(6) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP NOT NULL,
-    is_used BOOLEAN DEFAULT FALSE,
+    user_email VARCHAR(255) NOT NULL,                       -- User email address
+    otp_code VARCHAR(6) NOT NULL,                           -- OTP for verification
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,         -- Creation timestamp
+    expires_at TIMESTAMP NOT NULL,                          -- Expiration timestamp
+    is_used BOOLEAN DEFAULT FALSE,                          -- Flag to indicate if the OTP is used
     
     PRIMARY KEY (user_email, otp_code),
     FOREIGN KEY (user_email) REFERENCES request_management.users(email)
