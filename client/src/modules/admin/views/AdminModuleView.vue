@@ -29,7 +29,7 @@
                             @click="openAssignDialog(item)"
                         />
                         <v-btn
-                            v-if="item.educator_id != 'Not Assigned'"
+                            v-if="item.educator_name != 'Not Assigned'"
                             icon="mdi-account-remove"
                             size="small"
                             color="error"
@@ -88,7 +88,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { moduleApiService, userApiService } from "@/utils/ApiService";
+import { moduleApiService, userApiService, adminApiService } from "@/utils/ApiService";
 import UserTable from "../components/UsersTable.vue";
 
 const search = ref("");
@@ -119,7 +119,7 @@ const headers = [
     },
     {
         title: "Assigned Educator",
-        key: "educator_id",
+        key: "educator_name",
         align: "start",
         headerProps: {
             style: "font-weight: 600; font-size:20px;",
@@ -150,23 +150,8 @@ const removeEducator = async (module) => {
     }
 };
 
-const fetchProfessors = async () => {
-    try {
-        loadingProfessors.value = true;
-        const response = await userApiService.getAllProfessors();
-        if (response.success) {
-            professors.value = response.data;
-        }
-    } catch (error) {
-        console.error("Error fetching professors:", error);
-    } finally {
-        loadingProfessors.value = false;
-    }
-};
-
 const openAssignDialog = async (module) => {
     selectedModule.value = module;
-    await fetchProfessors();
     dialog.value = true;
 };
 
@@ -191,10 +176,11 @@ const assignProfessor = async (professor) => {
 const fetchModules = async () => {
     try {
         loading.value = true;
-        const response = await moduleApiService.getAllModules();
+        const response = await adminApiService.getAllModules();
         if (response.success) {
-            modules.value = response.data;
-        }
+            modules.value = response.data.modules;
+            professors.value = response.data.educators;
+        }        
     } catch (error) {
         console.error("Error fetching users:", error);
     } finally {
@@ -205,7 +191,7 @@ const fetchModules = async () => {
 const formattedModules = computed(() =>
     modules.value.map((module) => ({
         ...module,
-        educator_id: module.educator_id || "Not Assigned",
+        educator_name: professors.value.find((p) => p.matrix_id === module.educator_id)?.name ?? "Not Assigned",
     }))
 );
 

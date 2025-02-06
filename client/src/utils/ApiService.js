@@ -4,6 +4,7 @@ const AUTH_BASE_URL = '/api/auth';
 const REQUEST_BASE_URL = '/api/requests';
 const USER_BASE_URL = '/api/user';
 const MODULE_BASE_URL = '/api/module';
+const ADMIN_BASE_URL = '/api/admin';
 
 // Auth API
 const authApi = axios.create({
@@ -45,6 +46,15 @@ const moduleApi = axios.create({
 });
 
 export const moduleApiService = {
-    getAllModules: () => moduleApi.get('/all').then(res => res.data),
+    // getAllModules: () => moduleApi.get('/all').then(res => res.data),
     updateEducator: (data) => moduleApi.post('updateEducator', data).then(res => res.data),
+};
+
+// Admin API
+const adminApi = axios.create({
+    baseURL: ADMIN_BASE_URL,
+});
+
+export const adminApiService = {
+    getAllModules: () => adminApi.get('/modules').then(res => res.data),
 };
