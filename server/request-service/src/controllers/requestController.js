@@ -25,4 +25,28 @@ export const getAllRequestsByStudent = async (req, res) => {
   
 };
 
+// API to get a request's details for a student
+export const getRequestDetailsByStudent = async (req, res) => {
+    console.log('API hit for getRequestDetailsByStudent:');
+
+    const { studentId, requestId } = req.params;
+
+    try {
+        const requests = await db.oneOrNone(
+        `SELECT r.*, sr.*, u1.name AS user_name, u2.name AS approver_name
+        FROM request_management.requests r, request_management.sub_request sr, request_management.users u1, request_management.users u2
+        WHERE r.id = sr.main_request_id
+        AND r.user_id = u1.matrix_id
+        AND sr.approver_id = u2.matrix_id
+        AND r.user_id = $1 
+        AND r.id = $2`, 
+        [studentId, requestId]
+        );
+        res.status(200).json(requests);
+    } catch (error) {
+        console.error('Error fetching request details:', error);
+        res.status(500).json({ error: `Failed to fetch request details - ${error}` });
+    }
+  
+};
 

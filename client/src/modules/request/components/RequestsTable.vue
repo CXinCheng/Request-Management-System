@@ -86,7 +86,12 @@
         return date ? dayjs(date).format("DD-MM-YYYY HH:mm:ss") : "-";
       },
       seeRequestDetails(event, { item }) {
-        this.$router.push(`/requests/${item.id}`);
+        this.$router.push({
+          name: 'RequestDetailsView',
+          params: {
+            requestId: item.id
+          }
+        });
       },
     },
   };
