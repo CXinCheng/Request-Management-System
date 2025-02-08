@@ -15,6 +15,7 @@
     "datatables.net-responsive-dt": "^3.0.3",
     "datatables.net-select-dt": "^2.1.0",
     "datatables.net-vue3": "^3.0.2",
+    "dayjs": "^1.11.13",
     "pinia": "^2.3.0",
     "vite-plugin-vuetify": "^2.0.4",
     "vue": "^3.5.12",

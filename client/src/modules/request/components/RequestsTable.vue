@@ -43,6 +43,8 @@
 </template>
   
   <script>
+  import axios from "axios";
+  import dayjs from "dayjs";
 
   export default {
     components: {
@@ -71,28 +73,16 @@
       this.fetchRequests();
     },
     methods: {
-      fetchRequests() {
-        // Make an API call to get the requests for the student
-        fetch(`http://localhost:3002/api/v1/requests/student/${this.studentId}`)
-          .then(response => response.json())
-          .then(data => {
-            this.requests = data;
-          })
-          .catch(error => {
-            console.error('Error retrieving requests:', error);
-          });
+      async fetchRequests() {
+        try {
+          const response = await axios.get(`http://localhost:3002/api/v1/requests/student/${this.studentId}`);
+          this.requests = response.data;
+        } catch (error) {
+          console.error("Error fetching request:", error);
+        }
       },
       formatDate(date) {
-        return new Date(date).toLocaleString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-          timeZone: "UTC",
-        }).replace(",", ""); // Remove comma
+        return date ? dayjs(date).format("DD-MM-YYYY HH:mm:ss") : "-";
       },
       seeRequestDetails(event, { item }) {
         this.$router.push(`/requests/${item.id}`);
