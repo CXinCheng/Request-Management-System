@@ -57,6 +57,7 @@
           { title: 'Leave End', key: 'end_date_of_leave' },
           { title: 'Submitted', key: 'created_at' },
           { title: 'Status', key: 'status' },
+          { title: 'Module', key: 'module_code' },
           { title: 'Approver', key: 'approver_name' },
           { title: 'Actions', key: 'actions', sortable: false }
         ],
