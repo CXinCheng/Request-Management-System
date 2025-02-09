@@ -6,16 +6,19 @@ import {
     getRequestDetailsByStudent, 
     getAllRequestsByProfessor, 
     updateRequestByStudent, 
-    updateRequestByProfessor
+    updateRequestByProfessor,
+    deleteRequestByStudent
 } from '../controllers/requestController.js';
 
 const router = express.Router();
 
 router.get('/student/:studentId', getAllRequestsByStudent);
-router.get('/student/:profId', getAllRequestsByProfessor);
 router.get('/student/:studentId/:requestId', getRequestDetailsByStudent);
 router.put('/student/:studentId/:requestId', updateRequestByStudent);
-router.put('/student/:studentId/:requestId', updateRequestByProfessor);
+router.delete('/student/:requestId', deleteRequestByStudent);
+
+router.get('/professor/:profId', getAllRequestsByProfessor);
+router.put('/professor/:profId/:requestId', updateRequestByProfessor);
 
 router.post('/submit',
     upload.single('uploadFile'), 
