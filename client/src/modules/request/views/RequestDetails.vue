@@ -3,8 +3,9 @@
       <h1 class="text-xl font-bold">Request Details</h1>
       <p><strong>Status:</strong> {{ request.status }}</p>
       <p><strong>Created At:</strong> {{ formatDate(request.created_at) }}</p>
-      <p><strong>Start Date:</strong> {{ formatDate(request.start_date_of_leave) }}</p>
-      <p><strong>End Date:</strong> {{ formatDate(request.end_date_of_leave	) }}</p>
+      <p><strong>Last modified:</strong> {{ formatDate(request.modified_at) }}</p>
+      <p><strong>Dates of request:</strong> {{ formatDate(request.start_date_of_leave) }} - {{ formatDate(request.end_date_of_leave) }}</p>
+      <p><strong>Module:</strong> {{ request.module_code }}</p>
       <p><strong>Reason:</strong> {{ request.reason_of_leave }}</p>
     </div>
     <div v-else>
@@ -45,7 +46,7 @@
         }
       },
       formatDate(date) {
-        return date ? dayjs(date).format("DD-MM-YYYY HH:mm:ss") : "-";
+        return date ? dayjs(date).format("DD MMM YYYY, HH:mm:ss") : "-";
       },
     },
   };
