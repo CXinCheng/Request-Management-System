@@ -6,7 +6,9 @@ import ResetView from "./modules/auth/views/ResetView.vue";
 import DashboardView from "./modules/dashboard/views/DashboardView.vue";
 import RequestView from "./modules/request/views/RequestView.vue";
 import LeaveModuleSelection from "./modules/request/views/LeaveModuleSelection.vue";
-import RequestListView from "./modules/request/views/RequestListView.vue";
+import RequestListView from "./modules/request/views/RequestList.vue";
+import RequestDetailsView from "./modules/request/views/RequestDetails.vue";
+import EditRequestView from "./modules/request/views/EditRequest.vue";
 
 const isAuthenticated = () => {
     return !!localStorage.getItem("token");
@@ -58,6 +60,18 @@ const routes = [
         component: RequestListView,
         name: "RequestListView",
         meta: { requiresAuth: true, title: "Request List" },
+    },
+    {
+        path: "/requestDetails/:requestId",
+        component: RequestDetailsView,
+        name: "RequestDetailsView",
+        meta: { requiresAuth: true, title: "Request Details" },
+    },
+    {
+        path: "/editRequest/:requestId",
+        component: EditRequestView,
+        name: "EditRequestView",
+        meta: { requiresAuth: true, title: "Edit Request" },
     },
 ];
 
