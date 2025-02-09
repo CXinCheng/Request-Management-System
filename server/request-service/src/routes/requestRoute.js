@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.get('/student/:studentId', getAllRequestsByStudent);
 router.get('/student/:studentId/:requestId', getRequestDetailsByStudent);
-router.put('/student/:studentId/:requestId', updateRequestByStudent);
+router.put('/student/:requestId', updateRequestByStudent);
 router.delete('/student/:requestId', deleteRequestByStudent);
 
 router.get('/professor/:profId', getAllRequestsByProfessor);

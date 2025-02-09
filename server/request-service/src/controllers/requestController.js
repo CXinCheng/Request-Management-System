@@ -40,6 +40,11 @@ export const getRequestDetailsByStudent = async (req, res) => {
         AND sr.approver_id = u2.matrix_id
         AND r.user_id = $1 
         AND r.id = $2`, 
+        // `SELECT r.*, sr.*, STRING_AGG(sr.module_code, ', ') AS modules
+        // FROM request_management.requests r
+        // JOIN request_management.sub_request sr ON sr.main_request_id = r.id
+        // GROUP BY r.id, r.start_date_of_leave, r.end_date_of_leave
+        // HAVING r.id = $2`,
         [studentId, requestId]
         );
         res.status(200).json(request);
@@ -54,24 +59,30 @@ export const getRequestDetailsByStudent = async (req, res) => {
 export const updateRequestByStudent = async (req, res) => {
     console.log('API hit for updateRequest:');
 
-    const { studentId, requestId } = req.params;
-    const { start_date, end_date } = req.body;
+    const { requestId } = req.params;
+    const { start_date, end_date, modules } = req.body;
 
     try {
-        const updatedRequest = await db.oneOrNone(
-        `UPDATE request_management.requests r
-        SET r.start_date_of_leave = $1, r.end_date_of_leave = $2
-        WHERE r.id = $3
-        AND r.user_id = $4
-        RETURNING *`, 
-        [start_date, end_date, requestId, studentId]
-        );
+        await db.tx(async (t) => {
+            // Update requests table
+            await t.oneOrNone(
+            `UPDATE request_management.requests
+            SET start_date_of_leave = $1, end_date_of_leave = $2
+            WHERE id = $3
+            RETURNING *`, 
+            [start_date, end_date, requestId]
+            );
 
-        if (!updatedRequest) {
-            return res.status(404).json({ message: "Request not found" });
-        }
+            // Update sub_request table
+            await t.none(
+            `UPDATE request_management.sub_request
+            SET module_code = $1
+            WHERE main_request_id = $2`,
+            [modules[0].code, requestId]
+            );
+        });
 
-        res.status(200).json(updatedRequest);
+        res.status(200).json({ message: 'Request updated successfully' });
     } catch (error) {
         console.error('Error updating request:', error);
         res.status(500).json({ error: `Failed to update request - ${error}` });
@@ -95,7 +106,7 @@ export const deleteRequestByStudent = async (req, res) => {
         if (!existing) return res.status(404).json({ message: 'Request not found' });
 
         await db.tx(async (t) => {
-            // Update sub_requests table
+            // Update sub_request table
             await t.none(
                 `DELETE FROM request_management.sub_request sr 
                 WHERE sr.main_request_id = $1`,
