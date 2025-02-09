@@ -5,7 +5,7 @@
       :items="requests" 
       :search="search" 
       :loading="loading"
-      :items-per-page="5"
+      :items-per-page="10"
       :item-class="hover-shadow"
       @click:row="seeRequestDetails"
       v-model="selected"
@@ -33,10 +33,22 @@
       </template>
 
       <template v-slot:item.actions="{ item }">
-        <v-icon small>mdi-information-outline</v-icon>
-        <v-icon small>mdi-pencil</v-icon>
-        <v-icon small>mdi-delete</v-icon>
-        <v-icon small>mdi-dots-vertical</v-icon>
+        <v-menu offset-y>
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props" small>mdi-dots-vertical</v-icon>
+          </template>
+          <v-list>
+            <v-list-item clickable @click:item="seeRequestDetails">
+              <v-list-item-title>View Details</v-list-item-title>
+            </v-list-item>
+            <v-list-item clickable @click:item="editRequest" v-if="userRole === 'Student'">
+              <v-list-item-title>Edit</v-list-item-title>
+            </v-list-item>
+            <v-list-item clickable @click:item="deleteRequest" v-if="userRole === 'Student'">
+              <v-list-item-title>Delete</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </template>
     </v-data-table>
   </v-container>
@@ -52,6 +64,7 @@
     data() {
       return {
         studentId: '',  // Replace with the actual student ID from local storage
+        userRole: 'unknown',
         headers: [
           { title: 'Leave Start', key: 'start_date_of_leave' },
           { title: 'Leave End', key: 'end_date_of_leave' },
@@ -70,6 +83,7 @@
       if (localStorage.getItem('user')) {
         let user = JSON.parse(localStorage.getItem('user'));
         this.studentId = user['matrix_id'];
+        this.userRole = user['role']
       }
       this.fetchRequests();
     },
@@ -92,6 +106,23 @@
             requestId: item.id
           }
         });
+      },
+      async editRequest(event, { item }) {
+        this.$router.push({
+          name: 'RequestDetailsView',
+          params: {
+            requestId: item.id
+          }
+        });
+      },
+      async deleteRequest(event, { item }) {
+        console.log("Delete Request button clicked");
+        try {
+          await axios.delete(`http://localhost:3002/api/v1/requests/student/${item.id}`);
+          this.$router.push('/requests'); // redirect to Request List page after deletion
+        } catch (error) {
+          console.error('Error deleting request:', error);
+        }
       },
     },
   };
