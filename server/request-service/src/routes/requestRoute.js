@@ -1,11 +1,24 @@
 import express from 'express';
-import { submitForm, upload } from '../controllers/requestForm/formController.js';
-import { getAllRequestsByStudent } from '../controllers/requestController.js';
 import { body } from "express-validator";
+import { submitForm, upload } from '../controllers/requestForm/formController.js';
+import { 
+    getAllRequestsByStudent, 
+    getRequestDetailsByStudent, 
+    getAllRequestsByProfessor, 
+    updateRequestByStudent, 
+    updateRequestByProfessor,
+    deleteRequestByStudent
+} from '../controllers/requestController.js';
 
 const router = express.Router();
 
 router.get('/student/:studentId', getAllRequestsByStudent);
+router.get('/student/:studentId/:requestId', getRequestDetailsByStudent);
+router.put('/student/:requestId', updateRequestByStudent);
+router.delete('/student/:requestId', deleteRequestByStudent);
+
+router.get('/professor/:profId', getAllRequestsByProfessor);
+router.put('/professor/:profId/:requestId', updateRequestByProfessor);
 
 router.post('/submit',
     upload.single('uploadFile'), 

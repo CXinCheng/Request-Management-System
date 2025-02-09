@@ -5,9 +5,7 @@
             <create-request-button></create-request-button>
         </div>
         <!-- Requests Table -->
-        <div class="main-container">
-            <RequestsTable />
-        </div>
+        <RequestsTable />
     </div>
   </template>
   
@@ -37,11 +35,6 @@
   <style scoped>
     .requests-view-container {
         width: 80%;
-    }
-
-    .main-container {
-        width: 100%;
-        padding: 16px;
     }
   </style>
   

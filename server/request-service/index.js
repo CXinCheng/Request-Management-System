@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
-import formRoutes from "./src/routes/requestSubmissionForm.js";
+import formRoutes from "./src/routes/requestRoute.js";
 import cors from 'cors';
 import { initialize, close } from './src/configs/db.js';
 

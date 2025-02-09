@@ -6,7 +6,9 @@ import ResetView from "./modules/auth/views/ResetView.vue";
 import DashboardView from "./modules/dashboard/views/DashboardView.vue";
 import RequestView from "./modules/request/views/RequestView.vue";
 import LeaveModuleSelection from "./modules/request/views/LeaveModuleSelection.vue";
-import RequestListView from "./modules/request/views/RequestListView.vue";
+import RequestListView from "./modules/request/views/RequestList.vue";
+import RequestDetailsView from "./modules/request/views/RequestDetails.vue";
+import EditRequestView from "./modules/request/views/EditRequest.vue";
 import AdminUsersView from "./modules/admin/views/AdminUsersView.vue";
 import AdminModuleView from "./modules/admin/views/AdminModuleView.vue";
 
@@ -71,7 +73,19 @@ const routes = [
         component: AdminModuleView,
         name: "AdminModuleView",
         meta: { requiresAuth: true, title: "Modules" },
-    }
+    },
+    {
+        path: "/requestDetails/:requestId",
+        component: RequestDetailsView,
+        name: "RequestDetailsView",
+        meta: { requiresAuth: true, title: "Request Details" },
+    },
+    {
+        path: "/editRequest/:requestId",
+        component: EditRequestView,
+        name: "EditRequestView",
+        meta: { requiresAuth: true, title: "Edit Request" },
+    },
 ];
 
 const router = createRouter({
