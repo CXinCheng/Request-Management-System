@@ -14,7 +14,8 @@
         <DeleteRequestButton />
       </div>
       <div v-else-if="userRole === 'Professor'">
-        <StatusButton />
+        <StatusButton :requestId="request.id" actionType="Approve" @status-updated="handleStatusUpdate" />
+        <StatusButton :requestId="request.id" actionType="Reject" @status-updated="handleStatusUpdate" />
       </div>
     </div>
     <div v-else>
