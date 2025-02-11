@@ -21,7 +21,30 @@
                     :loading="loading"
                     :sort-by="[{ key: 'code', order: 'asc' }]"
                 >
-                    <template v-slot:item.actions="{ item }">
+                    <template v-slot:item.educator_name="{ item }">
+                        <div class="d-flex align-center justify-space-between">
+                            <span>
+                                {{ item.educator_name }}
+                            </span>
+                            <div>
+                                <v-btn
+                                    icon="mdi-account-edit"
+                                    size="small"
+                                    color="primary"
+                                    class="ms-2"
+                                    @click="openAssignDialog(item)"
+                                />
+                                <v-btn
+                                    v-if="item.educator_name !== 'Not Assigned'"
+                                    icon="mdi-account-remove"
+                                    size="small"
+                                    color="error"
+                                    class="ms-2"
+                                    @click="removeEducator(item)"
+                                />
+                            </div>
+                        </div>
+                        <!-- <template v-slot:item.actions="{ item }">
                         <v-btn
                             icon="mdi-account-plus"
                             size="small"
@@ -35,7 +58,7 @@
                             color="error"
                             class="ml-2"
                             @click="removeEducator(item)"
-                        />
+                        /> -->
                     </template>
                 </v-data-table>
             </v-card-text>
@@ -88,7 +111,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { moduleApiService, userApiService, adminApiService } from "@/utils/ApiService";
+import {
+    moduleApiService,
+    userApiService,
+    adminApiService,
+} from "@/utils/ApiService";
 import UserTable from "../components/UsersTable.vue";
 
 const search = ref("");
@@ -125,14 +152,14 @@ const headers = [
             style: "font-weight: 600; font-size:20px;",
         },
     },
-    {
-        title: "",
-        key: "actions",
-        align: "end",
-        headerProps: {
-            style: "font-weight: 600; font-size:20px;",
-        },
-    },
+    // {
+    //     title: "",
+    //     key: "actions",
+    //     align: "end",
+    //     headerProps: {
+    //         style: "font-weight: 600; font-size:20px;",
+    //     },
+    // },
 ];
 
 const removeEducator = async (module) => {
@@ -180,7 +207,7 @@ const fetchModules = async () => {
         if (response.success) {
             modules.value = response.data.modules;
             professors.value = response.data.educators;
-        }        
+        }
     } catch (error) {
         console.error("Error fetching users:", error);
     } finally {
@@ -191,7 +218,9 @@ const fetchModules = async () => {
 const formattedModules = computed(() =>
     modules.value.map((module) => ({
         ...module,
-        educator_name: professors.value.find((p) => p.matrix_id === module.educator_id)?.name ?? "Not Assigned",
+        educator_name:
+            professors.value.find((p) => p.matrix_id === module.educator_id)
+                ?.name ?? "Not Assigned",
     }))
 );
 
