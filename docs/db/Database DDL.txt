@@ -106,3 +106,51 @@ INSERT INTO request_management.users ("name",matrix_id,email,"role","password") 
     
     -- Password: jane1234
     ('Jane Chin','P0123456A','janechin@app.com','Professor'::request_management."user_role",'$2b$10$NDLxhLUpAL9kxp/1Ckq1aumq8zOR5ktdT2ye6IK4/UtqWq2u32Ftu');
+
+INSERT INTO request_management."users" (name, id_number, email, role, password) VALUES
+    -- Students
+    ('Alice Tan','S1000001A','alice.tan@app.com','Student'::request_management."user_role",'$2b$10$4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMKJmR3A3j6GpNL/B37qIbC1O'),
+    ('Bob Lim','S1000002B','bob.lim@app.com','Student'::request_management."user_role",'$2b$10$8BKhMkJmR3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROXaN'),
+    ('Charlie Lee','S1000003C','charlie.lee@app.com','Student'::request_management."user_role",'$2b$10$C7pVXV5OZfjwqhsnV2Hkxu9RAbTzQMy1HAmkJ3JmP2K.MNOiBExPK'),
+    ('Diana Koh','S1000004D','diana.koh@app.com','Student'::request_management."user_role",'$2b$10$Xq6T3Z9mOq4cL1NkF5Z7IOGZPahE.Xb2pMvLkoNRj9C6.BJmV1XeO'),
+    ('Ethan Wong','S1000005E','ethan.wong@app.com','Student'::request_management."user_role",'$2b$10$gC5BqLOZfjwqhsnV2Hkxu9RAbTzQMy1HAmkJ3JmP2K.MNOiBExPKa'),
+    ('Fiona Goh','S1000006F','fiona.goh@app.com','Student'::request_management."user_role",'$2b$10$N2Lpk6xZQJmP3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROX'),
+    ('George Tan','S1000007G','george.tan@app.com','Student'::request_management."user_role",'$2b$10$V3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMKJm'),
+    ('Hannah Ng','S1000008H','hannah.ng@app.com','Student'::request_management."user_role",'$2b$10$F5Z7IOGZPahE.Xb2pMvLkoNRj9C6.BJmV1XeOC7pVXV5OZfjwqhsn'),
+    ('Isaac Teo','S1000009I','isaac.teo@app.com','Student'::request_management."user_role",'$2b$10$TzQMy1HAmkJ3JmP2K.MNOiBExPKaN2Lpk6xZQJmP3A3j6GpNL/B37'),
+    ('Jasmine Koh','S1000010J','jasmine.koh@app.com','Student'::request_management."user_role",'$2b$10$Xb1kdgROXaNGnKhMKJmR3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3'),
+    ('Kevin Chan','S1000011K','kevin.chan@app.com','Student'::request_management."user_role",'$2b$10$Rj9C6.BJmV1XeOC7pVXV5OZfjwqhsnV2Hkxu9RAbTzQMy1HAmkJ3J'),
+    ('Lydia Ong','S1000012L','lydia.ong@app.com','Student'::request_management."user_role",'$2b$10$N2Lpk6xZQJmP3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgRO'),
+    ('Michael Chua','S1000013M','michael.chua@app.com','Student'::request_management."user_role",'$2b$10$7IOGZPahE.Xb2pMvLkoNRj9C6.BJmV1XeOC7pVXV5OZfjwqhsnV2H'),
+    ('Nicole Lim','S1000014N','nicole.lim@app.com','Student'::request_management."user_role",'$2b$10$P3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMKJm'),
+    ('Oliver Lee','S1000015O','oliver.lee@app.com','Student'::request_management."user_role",'$2b$10$HAmkJ3JmP2K.MNOiBExPKaN2Lpk6xZQJmP3A3j6GpNL/B37qIbC1O'),
+    ('Patricia Wong','S1000016P','patricia.wong@app.com','Student'::request_management."user_role",'$2b$10$6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMKJmR3A3j'),
+    ('Quentin Tan','S1000017Q','quentin.tan@app.com','Student'::request_management."user_role",'$2b$10$9C6.BJmV1XeOC7pVXV5OZfjwqhsnV2Hkxu9RAbTzQMy1HAmkJ3JmP'),
+    ('Rachel Goh','S1000018R','rachel.goh@app.com','Student'::request_management."user_role",'$2b$10$OZfjwqhsnV2Hkxu9RAbTzQMy1HAmkJ3JmP2K.MNOiBExPKaN2Lpk6'),
+    ('Samuel Chia','S1000019S','samuel.chia@app.com','Student'::request_management."user_role",'$2b$10$C1O4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMKJmR3A3j6GpNL/B37qIb');
+    ('Thomas Yeo','S1000020T','thomas.yeo@app.com','Student'::request_management."user_role",'$2b$10$X9pG1VOBfM7QZ2yJmK3L8GnPK1RoTzB6pN2LaMNOJXaC3BqO4G.Cb'),
+    ('Umar Shah','S1000021U','umar.shah@app.com','Student'::request_management."user_role",'$2b$10$A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMKJmR3'),
+    ('Vanessa Chia','S1000022V','vanessa.chia@app.com','Student'::request_management."user_role",'$2b$10$V5OZfjwqhsnV2Hkxu9RAbTzQMy1HAmkJ3JmP2K.MNOiBExPKaN2Lp'),
+    ('Wilson Goh','S1000023W','wilson.goh@app.com','Student'::request_management."user_role",'$2b$10$XaNGnKhMKJmR3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROX'),
+    ('Xavier Lim','S1000024X','xavier.lim@app.com','Student'::request_management."user_role",'$2b$10$B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMKJmR3A3j6GpNL/'),
+    ('Yvonne Teo','S1000025Y','yvonne.teo@app.com','Student'::request_management."user_role",'$2b$10$HAmkJ3JmP2K.MNOiBExPKaN2Lpk6xZQJmP3A3j6GpNL/B37qIbC1O'),
+    ('Zachary Ng','S1000026Z','zachary.ng@app.com','Student'::request_management."user_role",'$2b$10$N2Lpk6xZQJmP3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgRO'),
+    ('Adam Khoo','S1000027A','adam.khoo@app.com','Student'::request_management."user_role",'$2b$10$7IOGZPahE.Xb2pMvLkoNRj9C6.BJmV1XeOC7pVXV5OZfjwqhsnV2H'),
+    ('Bella Tan','S1000028B','bella.tan@app.com','Student'::request_management."user_role",'$2b$10$C1O4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMKJmR3A3j6GpNL/B37qIb'),
+    ('Chris Wong','S1000029C','chris.wong@app.com','Student'::request_management."user_role",'$2b$10$TzQMy1HAmkJ3JmP2K.MNOiBExPKaN2Lpk6xZQJmP3A3j6GpNL/B37');
+
+-- Professors
+INSERT INTO request_management."users" (name, id_number, email, role, password) VALUES
+    ('Dr. Alvin Tan','P1000001A','alvin.tan@app.com','Professor'::request_management."user_role",'$2b$10$QJmP3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMK'),
+    ('Dr. Brian Lim','P1000002B','brian.lim@app.com','Professor'::request_management."user_role",'$2b$10$B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMKJmR3A3j6GpNL/'),
+    ('Dr. Cynthia Ong','P1000003C','cynthia.ong@app.com','Professor'::request_management."user_role",'$2b$10$XaNGnKhMKJmR3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROX'),
+    ('Dr. David Koh','P1000004D','david.koh@app.com','Professor'::request_management."user_role",'$2b$10$KhMKJmR3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROXaNGn'),
+    ('Dr. Evelyn Lee','P1000005E','evelyn.lee@app.com','Professor'::request_management."user_role",'$2b$10$9C6.BJmV1XeOC7pVXV5OZfjwqhsnV2Hkxu9RAbTzQMy1HAmkJ3JmP'),
+    ('Dr. Francis Goh','P1000006F','francis.goh@app.com','Professor'::request_management."user_role",'$2b$10$7pVXV5OZfjwqhsnV2Hkxu9RAbTzQMy1HAmkJ3JmP2K.MNOiBExPKa'),
+    ('Dr. Grace Tan','P1000007G','grace.tan@app.com','Professor'::request_management."user_role",'$2b$10$MNOiBExPKaN2Lpk6xZQJmP3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9'),
+    ('Dr. Henry Lim','P1000008H','henry.lim@app.com','Professor'::request_management."user_role",'$2b$10$ROXaNGnKhMKJmR3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgR');
+    ('Dr. Daniel Ng','P1000009D','daniel.ng@app.com','Professor'::request_management."user_role",'$2b$10$JmP2K.MNOiBExPKaN2Lpk6xZQJmP3A3j6GpNL/B37qIbC1O4G.CbK'),
+    ('Dr. Emily Koh','P1000010E','emily.koh@app.com','Professor'::request_management."user_role",'$2b$10$P3A3j6GpNL/B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMKJm'),
+    ('Dr. Felix Tan','P1000011F','felix.tan@app.com','Professor'::request_management."user_role",'$2b$10$B37qIbC1O4G.CbKkqBGw9S3Xb1kdgROXaNGnKhMKJmR3A3j6GpNL/'),
+    ('Dr. Grace Chua','P1000012G','grace.chua@app.com','Professor'::request_management."user_role",'$2b$10$9C6.BJmV1XeOC7pVXV5OZfjwqhsnV2Hkxu9RAbTzQMy1HAmkJ3JmP'),
+    ('Dr. Henry Wong','P1000013H','henry.wong@app.com','Professor'::request_management."user_role",'$2b$10$7pVXV5OZfjwqhsnV2Hkxu9RAbTzQMy1HAmkJ3JmP2K.MNOiBExPKa');
