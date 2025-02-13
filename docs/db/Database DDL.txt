@@ -45,9 +45,9 @@ DROP TABLE IF EXISTS request_management.user_module_mapping CASCADE;
 CREATE TABLE request_management.user_module_mapping (
     user_matrix_id VARCHAR(255),                                        -- Foreign key to Users table
     module_code VARCHAR(255),                                           -- Module identifier
-    class_no VARCHAR(10),                                               -- Class number
+    class_no VARCHAR(10) NOT NULL,                                      -- Class number
 
-    PRIMARY KEY (user_matrix_id, module_code, class_no),                              -- Composite primary key
+    PRIMARY KEY (user_matrix_id, module_code),                              -- Composite primary key
     FOREIGN KEY (user_matrix_id) REFERENCES request_management.users(matrix_id),      -- Foreign key constraint
     FOREIGN KEY (module_code, class_no) REFERENCES request_management.classes(module_code, class_no)   -- Foreign key constraint
 );
