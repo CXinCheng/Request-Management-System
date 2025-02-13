@@ -1,8 +1,8 @@
 import express from "express";
-import { createProxyMiddleware, fixRequestBody } from "http-proxy-middleware";
+import { createProxyMiddleware } from "http-proxy-middleware";
 import cors from "cors";
 import dotenv from "dotenv"
-import { getAllModules } from "./admin/adminController.js";
+import { getAllModules, getAllStudentsByModule } from "./admin/adminController.js";
 
 // Access .env file
 dotenv.config();
@@ -45,6 +45,7 @@ services.forEach(({ route, target }) => {
 
 // Aggreate API call
 app.use('/api/admin/modules', getAllModules);
+app.use('/api/admin/students/:moduleCode', getAllStudentsByModule);
 
 app.use((_req, res) => {
     res.status(404).json({

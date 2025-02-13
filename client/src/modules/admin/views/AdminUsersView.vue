@@ -31,6 +31,7 @@
                     :users="filteredUsers"
                     :loading="loading"
                     :search="search"
+                    :additionalHeaders="userTableHeaders"
                 >
                     <template v-slot:actions="{ item }">
                         <v-icon
@@ -40,7 +41,7 @@
                         >
                             mdi-pencil
                         </v-icon>
-                        <v-icon size="small" @click="deleteUser(item)">
+                        <v-icon size="small" @click="confirmDelete(item)">
                             mdi-delete
                         </v-icon>
                     </template>
@@ -115,7 +116,7 @@
 
         <v-dialog v-model="deleteDialog" max-width="400px">
             <v-card>
-                <v-card-title class="text-h5">Confirm Delete</v-card-title>
+                <v-card-title class="text-h5">Confirm Delete {{  selectedUser.name }}</v-card-title>
                 <v-card-text>
                     Are you sure you want to delete this user?
                 </v-card-text>
@@ -138,6 +139,7 @@ import { ref, computed, onMounted } from "vue";
 import UserForm from "@/components/forms/UserForm.vue";
 import UserTable from "../components/UsersTable.vue";
 import { authApiService, userApiService } from "@/utils/ApiService";
+import { useNotificationStore } from "@/utils/NotificationStore";
 
 const search = ref("");
 const roleFilter = ref("All");
@@ -147,6 +149,7 @@ const dialog = ref(false);
 const isEdit = ref(false);
 const deleteDialog = ref(false);
 const selectedUser = ref(null);
+const notificationStore = useNotificationStore();
 const formData = ref({
     name: "",
     matrix_id: "",
@@ -154,6 +157,14 @@ const formData = ref({
     role: "",
     password: "",
 });
+const userTableHeaders = [
+    {
+        title: "Role",
+        key: "role",
+        align: "start",
+        headerProps: { style: "font-weight: 600; font-size:20px;" },
+    },
+];
 
 const addUser = () => {
     isEdit.value = false;
@@ -187,6 +198,13 @@ const handleSave = async (userData) => {
         if (response.success) {
             await fetchUsers();
             dialog.value = false;
+            notificationStore.showNotification({
+                message: isEdit.value
+                    ? "User updated successfully"
+                    : "User created successfully",
+                color: "success",
+                timeout: 3000,
+            });
         } else {
             notificationStore.showNotification({
                 message: response.message || "Error creating user",
@@ -195,6 +213,11 @@ const handleSave = async (userData) => {
             });
         }
     } catch (error) {
+        notificationStore.showNotification({
+            message: response.message || "Error creating user",
+            color: "error",
+            timeout: 3000,
+        });
         console.error("Error creating user:", error);
     } finally {
         loading.value = false;
@@ -218,6 +241,11 @@ const handleDelete = async () => {
             });
         }
     } catch (error) {
+        notificationStore.showNotification({
+            message: response.message || "Error deleting user",
+            color: "error",
+            timeout: 3000,
+        });
         console.error("Error deleting user:", error);
     } finally {
         loading.value = false;
@@ -235,8 +263,19 @@ const fetchUsers = async () => {
         const response = await userApiService.getAllUsers();
         if (response.success) {
             users.value = response.data;
+        } else {
+            notificationStore.showNotification({
+                message: response.message || "Error fetching users",
+                color: "error",
+                timeout: 3000,
+            });
         }
     } catch (error) {
+        notificationStore.showNotification({
+            message: response.message || "Error fetching users",
+            color: "error",
+            timeout: 3000,
+        });
         console.error("Error fetching users:", error);
     } finally {
         loading.value = false;

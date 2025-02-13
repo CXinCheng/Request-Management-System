@@ -3,7 +3,6 @@ import { db } from "../configs/db.js";
 
 export const getAllModules = async (req, res) => {
     let data = null;
-
     try {
         data = await db.manyOrNone(
             "SELECT code, name, educator_id FROM request_management.modules"
@@ -22,6 +21,33 @@ export const getAllModules = async (req, res) => {
     }
 };
 
+export const getAllModulesWithNumbersOfEnrolledStudents = async (req, res) => {
+    let data = null;
+    try {
+        data = await db.manyOrNone(
+            `SELECT code, name, educator_id, COUNT(user_matrix_id) students FROM request_management.modules
+            LEFT JOIN request_management.user_module_mapping
+            ON request_management.modules.code = request_management.user_module_mapping.module_code
+            GROUP BY request_management.modules.code
+            ORDER BY request_management.modules.code`
+        );
+
+        res.json({
+            success: true,
+            data: data,
+        });
+    } catch (error) {
+        console.error(
+            "Error fetching all modules with enrolled students:",
+            error
+        );
+        return res.status(500).json({
+            success: false,
+            error: "Error fetching all modules with enrolled students",
+        });
+    }
+};
+
 export const updateEducator = async (req, res) => {
     const { educator_id, module_code } = req.body;
 
@@ -34,15 +60,18 @@ export const updateEducator = async (req, res) => {
             if (!existingProfessor) {
                 return res.status(404).json({
                     success: false,
-                    error: "Matrix ID not found or User is not a Professor"
+                    error: "Matrix ID not found or User is not a Professor",
                 });
             }
         }
-        
-        await db.none("UPDATE request_management.modules SET educator_id = $1 WHERE code = $2", [educator_id, module_code]);
+
+        await db.none(
+            "UPDATE request_management.modules SET educator_id = $1 WHERE code = $2",
+            [educator_id, module_code]
+        );
         return res.status(200).json({
             success: true,
-            data: "Educator updated successfully"
+            data: "Educator updated successfully",
         });
     } catch (error) {
         console.error("Error updating educator:", error);
@@ -53,9 +82,43 @@ export const updateEducator = async (req, res) => {
     }
 };
 
-export const getModuleTimetableByClassNo = async (req, res) => {
+export const getAllStudentsByModule = async (req, res) => {
     const moduleCode = req.params.moduleCode;
-    const classNo = req.params.classNo;
+    let data = null;
+
+    try {
+        // Check if module exists
+        const module = await db.oneOrNone(
+            "SELECT * FROM request_management.modules WHERE code = $1",
+            [moduleCode]
+        );
+        if (!module) {
+            return res.status(404).json({
+                success: false,
+                error: "Module not found",
+            });
+        }
+
+        data = await db.manyOrNone(
+            "SELECT user_matrix_id, class_no FROM request_management.user_module_mapping WHERE module_code = $1",
+            [moduleCode]
+        );
+
+        res.json({
+            success: true,
+            data: data,
+        });
+    } catch (error) {
+        console.error("Error fetching all students by module:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Error fetching all students by module",
+        });
+    }
+};
+
+export const getClassesByModule = async (req, res) => {
+    const moduleCode = req.params.moduleCode;
     let data = null;
 
     try {
@@ -75,8 +138,8 @@ export const getModuleTimetableByClassNo = async (req, res) => {
         }
 
         data = await db.manyOrNone(
-            "SELECT * FROM request_management.classes WHERE module_code = $1 AND class_no = $2",
-            [moduleCode, classNo]
+            "SELECT * FROM request_management.classes WHERE module_code = $1",
+            [moduleCode]
         );
 
         res.json({
@@ -88,6 +151,65 @@ export const getModuleTimetableByClassNo = async (req, res) => {
         return res.status(500).json({
             success: false,
             error: "Error fetching module timetable",
+        });
+    }
+};
+
+export const updateEnrollmentByModule = async (req, res) => {
+    const moduleCode = req.params.moduleCode;
+    const { addedStudents, deletedStudents, updatedStudents } = req.body;
+    
+    try {
+        // Check if module exists
+        const module = await db.oneOrNone(
+            "SELECT * FROM request_management.modules WHERE code = $1",
+            [moduleCode]
+        );
+        if (!module) {
+            return res.status(404).json({
+                success: false,
+                error: "Module not found",
+            });
+        }
+
+        // Add students
+        if (addedStudents && addedStudents.length > 0) {
+            for (let student of addedStudents) {
+                await db.none(
+                    "INSERT INTO request_management.user_module_mapping (user_matrix_id, module_code, class_no) VALUES ($1, $2, $3)",
+                    [student.matrix_id, moduleCode, student.class_no]
+                );
+            }
+        }
+
+        // Delete students
+        if (deletedStudents && deletedStudents.length > 0) {
+            for (let student of deletedStudents) {
+                await db.none(
+                    "DELETE FROM request_management.user_module_mapping WHERE user_matrix_id = $1 AND module_code = $2",
+                    [student, moduleCode]
+                );
+            }
+        }
+
+        // Update students
+        if (updatedStudents && updatedStudents.length > 0) {
+            for (let student of updatedStudents) {
+                await db.none(
+                    "UPDATE request_management.user_module_mapping SET class_no = $1 WHERE user_matrix_id = $2 AND module_code = $3",
+                    [student.class_no, student.matrix_id, moduleCode]
+                );
+            }
+        }
+        return res.status(200).json({
+            success: true,
+            data: "Enrollment updated successfully",
+        });
+    } catch (error) {
+        console.error("Error updating enrollment:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Error updating enrollment",
         });
     }
 };

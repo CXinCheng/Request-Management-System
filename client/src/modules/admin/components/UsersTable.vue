@@ -1,11 +1,22 @@
 <template>
     <v-data-table
-        :headers="headers"
+        :headers="combinedHeaders"
         :items="users"
         :search="search"
         :loading="loading"
-        :sort-by="[{ key: 'role', order: 'asc' }]"
+        :sort-by="sortBy"
+        @update:sort-by="(value) => (sortBy = value)"
     >
+        <template
+            v-for="header in additionalHeaders"
+            :key="header.key"
+            v-slot:[`item.${header.key}`]="{ item }"
+        >
+            <slot :name="header.key" :item="item">
+                {{ item[header.key] }}
+            </slot>
+        </template>
+
         <template v-slot:[`item.actions`]="{ item }">
             <slot name="actions" :item="item"></slot>
         </template>
@@ -13,6 +24,7 @@
 </template>
 
 <script setup>
+import { ref, computed } from "vue";
 const props = defineProps({
     users: {
         type: Array,
@@ -25,10 +37,6 @@ const props = defineProps({
             },
         ],
     },
-    actionHeader: {
-        type: Array,
-        default: [],
-    },
     loading: {
         type: Boolean,
         default: false,
@@ -37,49 +45,45 @@ const props = defineProps({
         type: String,
         default: "",
     },
+    additionalHeaders: {
+        type: Array,
+        default: () => [],
+    },
+    initialSort: {
+        type: Array,
+        default: () => [{ key: "name", order: "asc" }],
+    },
 });
 
-const headers = [
-    {
-        title: "Name",
-        key: "name",
-        align: "start",
-        headerProps: {
-            style: "font-weight: 600; font-size:20px;",
-        },
-    },
+const defaultHedaers = [
     {
         title: "Matrix ID",
         key: "matrix_id",
         align: "start",
-        headerProps: {
-            style: "font-weight: 600; font-size:20px;",
-        },
+        headerProps: { style: "font-weight: 600; font-size:20px;" },
+    },
+    {
+        title: "Name",
+        key: "name",
+        align: "start",
+        headerProps: { style: "font-weight: 600; font-size:20px;" },
     },
     {
         title: "Email",
         key: "email",
         align: "start",
-        headerProps: {
-            style: "font-weight: 600; font-size:20px;",
-        },
+        headerProps: { style: "font-weight: 600; font-size:20px;" },
     },
-    {
-        title: "Role",
-        key: "role",
-        align: "start",
-        headerProps: {
-            style: "font-weight: 600; font-size:20px;",
-        },
-    },
+];
+const actionHeaders = [
     {
         title: "",
         key: "actions",
         align: "end",
-        sortable: false,
-        headerProps: {
-            style: "font-weight: 600; font-size:20px;",
-        },
     },
 ];
+const sortBy = ref(props.initialSort);
+const combinedHeaders = computed(() => {
+    return [...defaultHedaers, ...props.additionalHeaders, ...actionHeaders];
+});
 </script>

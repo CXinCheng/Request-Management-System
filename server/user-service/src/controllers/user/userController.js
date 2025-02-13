@@ -39,6 +39,24 @@ export const getAllProfessors = async (req, res) => {
     }
 };
 
+export const getAllStudents = async (req, res) => {
+    try {
+        const users = await db.manyOrNone(
+            "SELECT name, email, role, matrix_id FROM request_management.users WHERE role = 'Student'"
+        );
+        res.json({
+            success: true,
+            data: users
+        });
+    } catch (error) {
+        console.error("Error fetching students:", error);
+        res.status(500).json({
+            success: false,
+            error: "Internal server error"
+        });
+    }
+}
+
 // Update user
 export const updateUser = async (req, res) => {
     try {
