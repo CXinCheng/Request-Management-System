@@ -24,7 +24,7 @@ updateService.updateModule();
 
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
-    console.log(`Auth service is running on port ${PORT}.`);
+    console.log(`Module service is running on port ${PORT}.`);
 });
 
 process.on('SIGTERM', () => {
