@@ -46,8 +46,16 @@ const moduleApi = axios.create({
 });
 
 export const moduleApiService = {
-    // getAllModules: () => moduleApi.get('/all').then(res => res.data),
-    updateEducator: (data) => moduleApi.post('updateEducator', data).then(res => res.data),
+    getAllModules: () => moduleApi.get("/all").then(res => res.data),
+    updateEducator: (data) => moduleApi.post("updateEducator", data).then(res => res.data),
+
+    // Fetch user-specific modules from user_module_mapping table
+    getUserMappedModules: (userId) => 
+        moduleApi.get(`/user-module-mapping/${userId}`).then(res => res.data),
+
+    // Add user to a module in user_module_mapping table
+    addUserMappedModule: (userData) => 
+        moduleApi.post("/user-module-mapping", userData).then(res => res.data),
 };
 
 // Admin API
