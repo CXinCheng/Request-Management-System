@@ -1,12 +1,21 @@
 import { moduleApiService, requestApiService } from "@/utils/ApiService";
 
 
-const fetchUserModules = async (userId) => {
+/**
+ * Fetch modules for a specific user from the user_module_mapping table.
+ * @param {string} userId - User ID from local storage
+ * @returns {Promise<Array>} List of modules the user is enrolled in
+ */
+const fetchUserMappedModules = async (userId) => {
   try {
-    const response = await moduleApiService.getUserModules(userId); // Calls the correct API Gateway service
+    console.log(`Fetching mapped modules for user: ${userId}`); // Debugging
+
+    const response = await moduleApiService.getUserMappedModules(userId);
+
+    console.log("API Response:", response); // Debugging
 
     if (!response || response.length === 0) {
-      console.warn(`No modules found for user ${userId}`);
+      console.warn(`No mapped modules found for user ${userId}`);
       return [];
     }
 
@@ -15,10 +24,11 @@ const fetchUserModules = async (userId) => {
       class_no,
     }));
   } catch (error) {
-    console.error("Error fetching user modules:", error);
+    console.error("Error fetching user-mapped modules:", error);
     return [];
   }
 };
+
 
 const fetchLeaveApplications = async (userId) => {
   try {
