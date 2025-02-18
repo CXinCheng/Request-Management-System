@@ -39,7 +39,6 @@ CREATE TABLE request_management.classes (
     class_no VARCHAR(10),                                           -- Class number
     
     PRIMARY KEY (module_code, class_type, class_no, day_of_week),
-    UNIQUE(module_code, class_no),
     FOREIGN KEY (module_code) REFERENCES request_management.modules(code)
 );
 
