@@ -57,6 +57,33 @@ export const getAllStudents = async (req, res) => {
     }
 }
 
+// Get user by matrix_id
+export const getUser = async (req, res) => {
+    try {
+        const { matrix_id } = req.params;
+        const user = await db.oneOrNone(
+            "SELECT name, email, role, matrix_id, faculty, contact_number FROM request_management.users WHERE matrix_id = $1",
+            [matrix_id]
+        );
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: "User not found"
+            });
+        }
+        res.json({
+            success: true,
+            data: user
+        });
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({
+            success: false,
+            error: "Internal server error"
+        });
+    }
+}
+
 // Update user
 export const updateUser = async (req, res) => {
     try {
