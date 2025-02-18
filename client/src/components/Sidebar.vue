@@ -1,7 +1,16 @@
 <template>
     <v-navigation-drawer permanent color="blue-darken-4">
         <v-list nav>
-            <v-list-item title="Request Management System"></v-list-item>
+            <v-list-item>
+            <v-img
+                src="https://www.nus.edu.sg/images/default-source/identity-images/2019/nus-logo-blue-b-horizontal.png"
+                class="mx-auto"
+                ref="{{  }}"
+                max-height="64"></v-img>
+            </v-list-item>
+            
+            <v-list-item class="font-weight-bold"
+            title="Request Management System"></v-list-item>
             <v-divider class="border-opacity-25"></v-divider>
             <v-list-subheader class="text-caption ml-4" style="color: inherit"
                 >ACADEMIC</v-list-subheader
