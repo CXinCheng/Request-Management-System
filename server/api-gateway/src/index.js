@@ -29,10 +29,7 @@ const services = [
         route: "/api/module",
         target: `${process.env.MODULE_SERVICE_URL}/api/v1/module`,
     },
-    {
-        route: "/api/module/user-module-mapping",
-        target: `${process.env.MODULE_SERVICE_URL}/api/v1/user-module-mapping`,
-    }
+
 ];
 
 services.forEach(({ route, target }) => {

@@ -65,21 +65,22 @@ export const aggregateDashboardData = async (userId) => {
     ]);
 
     // Group leave applications by module_code
-    const leaveDataByModule = leaveApplications.reduce((acc, leave) => {
-      if (!acc[leave.module_code]) {
-        acc[leave.module_code] = { approved: 0, rejected: 0, pending: 0 };
-      }
-      acc[leave.module_code][leave.status.toLowerCase()] += 1;
-      return acc;
-    }, {});
+    // const leaveDataByModule = leaveApplications.reduce((acc, leave) => {
+    //   if (!acc[leave.module_code]) {
+    //     acc[leave.module_code] = { approved: 0, rejected: 0, pending: 0 };
+    //   }
+    //   acc[leave.module_code][leave.status.toLowerCase()] += 1;
+    //   return acc;
+    // }, {});
 
     // Join leave application data with enrolled modules
-    const leaveData = modules.map((module) => ({
-      module: module.module_code, 
-      approved: leaveDataByModule[module.module_code]?.approved || 0,
-      rejected: leaveDataByModule[module.module_code]?.rejected || 0,
-      pending: leaveDataByModule[module.module_code]?.pending || 0,
-    }));
+    // const leaveData = modules.map((module) => ({
+    //   module: module.module_code, 
+    //   approved: leaveDataByModule[module.module_code]?.approved || 0,
+    //   rejected: leaveDataByModule[module.module_code]?.rejected || 0,
+    //   pending: leaveDataByModule[module.module_code]?.pending || 0,
+    // }));
+    const leaveData = [];
 
     return { modules, leaveData };
   } catch (error) {

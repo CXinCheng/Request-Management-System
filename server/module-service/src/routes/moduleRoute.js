@@ -4,11 +4,11 @@ import { getModuleTimetableByClassNo, getAllModules, updateEducator, getUserMapp
 const router = express.Router();
 
 // Module routes
-router.get('/:moduleCode/:classNo', getModuleTimetableByClassNo);
 router.get('/all', getAllModules);
 router.post('/updateEducator', updateEducator);
 
 router.get("/user-module-mapping/:userId", getUserMappedModules);  // Fetch user-mapped modules
 router.post("/user-module-mapping", addUserMappedModule);  // Add user to a module
+router.get('/:moduleCode/:classNo', getModuleTimetableByClassNo);
 
 export default router;

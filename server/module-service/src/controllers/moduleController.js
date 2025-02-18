@@ -10,7 +10,7 @@ export const getUserMappedModules = async (req, res) => {
   console.log("DB Query Result:"); // Debugging
   try {
     const result = await db.any(
-      "SELECT module_code, class_no FROM user_module_mapping WHERE user_matrix_id = $1;",
+      "SELECT module_code, class_no FROM request_management.user_module_mapping WHERE user_matrix_id = $1;",
       [userId]
     );
 
@@ -27,7 +27,7 @@ export const addUserMappedModule = async (req, res) => {
   
     try {
       await db.none(
-        "INSERT INTO user_module_mapping (user_matrix_id, module_code, class_no) VALUES ($1, $2, $3);",
+        "INSERT INTO request_management.user_module_mapping (user_matrix_id, module_code, class_no) VALUES ($1, $2, $3);",
         [user_matrix_id, module_code, class_no]
       );
   
