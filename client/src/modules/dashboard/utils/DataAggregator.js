@@ -60,8 +60,8 @@ const fetchLeaveApplications = async (userId) => {
 export const aggregateDashboardData = async (userId) => {
   try {
     const [modules, leaveApplications] = await Promise.all([
-      fetchUserModules(userId),
-      fetchLeaveApplications(userId),
+      fetchUserMappedModules(userId),
+      //fetchLeaveApplications(userId),
     ]);
 
     // Group leave applications by module_code

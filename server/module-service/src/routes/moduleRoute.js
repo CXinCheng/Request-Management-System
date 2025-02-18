@@ -7,7 +7,6 @@ const router = express.Router();
 router.get('/:moduleCode/:classNo', getModuleTimetableByClassNo);
 router.get('/all', getAllModules);
 router.post('/updateEducator', updateEducator);
-router.get("/user-module-mapping/:userId", getUserMappedModules);
 
 router.get("/user-module-mapping/:userId", getUserMappedModules);  // Fetch user-mapped modules
 router.post("/user-module-mapping", addUserMappedModule);  // Add user to a module

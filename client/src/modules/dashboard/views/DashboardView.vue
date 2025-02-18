@@ -27,7 +27,8 @@ export default {
     const route = useRoute();
     const modules = ref([]);
     const leaveData = ref([]);
-    const userId = localStorage.getItem("userId"); // Get userId from local storage
+    let user = JSON.parse(localStorage.getItem('user'));
+    const userId = user['matrix_id'];
 
     const fetchDashboardData = async () => {
       if (!userId) {
