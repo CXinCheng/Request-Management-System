@@ -61,24 +61,60 @@ export const getAllStudents = async (req, res) => {
 export const updateUser = async (req, res) => {
     try {
         const { matrix_id } = req.params;
-        const { name, email, role, password } = req.body;
+        const user = await db.oneOrNone(
+            "SELECT * FROM request_management.users WHERE matrix_id = $1",
+            [matrix_id]
+        );
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: "User not found"
+            });
+        }
 
-        let updateQuery = `
-            UPDATE request_management.users 
-            SET name = $1, 
-                email = $2, 
-                role = $3::request_management.user_role
-        `;
-        let queryParams = [name, email, role];
+        const { name, email, role, password, faculty, contact, currentPassword } = req.body;
 
+        const updates = { name, email, role };
+        const queryParams = [];
+        let paramCount = 1;
+
+        const setStatements = Object.entries(updates)
+            .map(([key, value]) => {
+            queryParams.push(value);
+            return `${key} = $${paramCount++}`;
+            });
+        
+        if (currentPassword) {
+            const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+            if (!isValidPassword) {
+                return res.status(401).json({
+                    success: false,
+                    error: "Invalid current password"
+                });
+            }
+        }
         if (password) {
             const hashedPassword = await bcrypt.hash(password, 10);
-            updateQuery += `, password = $4`;
+            setStatements.push(`password = $${paramCount++}`);
             queryParams.push(hashedPassword);
         }
 
-        updateQuery += ` WHERE matrix_id = $${queryParams.length + 1} RETURNING name, email, role, matrix_id`;
+        if (faculty) {
+            setStatements.push(`faculty = $${paramCount++}`);
+            queryParams.push(faculty);
+        }
+
+        if (contact) {
+            setStatements.push(`contact_number = $${paramCount++}`);
+            queryParams.push(contact);
+        }
+
         queryParams.push(matrix_id);
+        const updateQuery = `
+            UPDATE request_management.users 
+            SET ${setStatements.join(', ')}
+            WHERE matrix_id = $${paramCount}
+            RETURNING matrix_id`;
 
         const updatedUser = await db.oneOrNone(updateQuery, queryParams);
 
@@ -92,7 +128,6 @@ export const updateUser = async (req, res) => {
         res.json({
             success: true,
             message: "User updated successfully",
-            data: updatedUser
         });
     } catch (error) {
         console.error("Error updating user:", error);

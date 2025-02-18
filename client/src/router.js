@@ -11,6 +11,7 @@ import RequestDetailsView from "./modules/request/views/RequestDetails.vue";
 import EditRequestView from "./modules/request/views/EditRequest.vue";
 import AdminUsersView from "./modules/admin/views/AdminUsersView.vue";
 import AdminModuleView from "./modules/admin/views/AdminModuleView.vue";
+import ProfileView from "./modules/user/ProfileView.vue";
 
 const isAuthenticated = () => {
     const token = localStorage.getItem("token");
@@ -99,6 +100,12 @@ const routes = [
         name: "EditRequestView",
         meta: { requiresAuth: true, title: "Edit Request" },
     },
+    {
+        path: "/profile",
+        component: ProfileView,
+        name: "ProfileView",
+        meta: { requiresAuth: true, title: "Profile" },
+    }
 ];
 
 const router = createRouter({

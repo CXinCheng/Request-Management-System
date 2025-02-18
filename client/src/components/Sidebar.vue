@@ -27,15 +27,16 @@
                     >SETTINGS</v-list-subheader
                 >
                 <v-list-item
-                    title="Account Settings"
+                    title="Profile Settings"
                     prepend-icon="mdi-cog-outline"
+                    :to="{ name: 'ProfileView' }"
                     link
                 ></v-list-item>
-                <v-list-item
+                <!-- <v-list-item
                     title="Notification Preferences"
                     prepend-icon="mdi-bell-outline"
                     link
-                ></v-list-item>
+                ></v-list-item> -->
             </v-list>
             <v-divider class="border-opacity-25"></v-divider>
             <div class="pa-2">

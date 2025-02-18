@@ -53,7 +53,9 @@ export const login = async (req, res) => {
                     name: user.name,
                     email: user.email,
                     role: user.role,
-                    matrix_id: user.matrix_id
+                    matrix_id: user.matrix_id,
+                    faculty: user.faculty,
+                    contact: user.contact_number,
                 }
             }
         });
