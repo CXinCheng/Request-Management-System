@@ -76,11 +76,11 @@ const items = computed(() => {
                     icon: "mdi-view-dashboard-outline",
                     href: "/dashboard",
                 },
-                {
-                    title: "Modules",
-                    icon: "mdi-book-open-variant-outline",
-                    href: "/modules",
-                },
+                // {
+                //     title: "Modules",
+                //     icon: "mdi-book-open-variant-outline",
+                //     href: "/modules",
+                // },
                 {
                     title: "Leave Applications",
                     icon: "mdi-text-box-edit-outline",
