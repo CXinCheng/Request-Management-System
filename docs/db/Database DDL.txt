@@ -10,6 +10,8 @@ CREATE TABLE request_management.users (
     email VARCHAR(255) NOT NULL UNIQUE,                         -- Email column of type varchar, with a unique constraint
     role request_management.user_role NOT NULL,                 -- Enum for role with specific values
     password VARCHAR(255) NOT NULL                              -- Password field (store hashed and salted password)
+    faculty VARCHAR(255)                                        -- School/Faculty
+    contact_number VARCHAR(255)                                 -- Contact number
 );
 
 DROP TABLE IF EXISTS request_management.modules CASCADE;
