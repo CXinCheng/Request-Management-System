@@ -213,3 +213,31 @@ export const updateEnrollmentByModule = async (req, res) => {
         });
     }
 };
+
+export const getModulesByProfessor = async (req, res) => {
+    const professorId = req.params.professorId;
+    let data = null;
+    
+    try {
+        data = await db.manyOrNone(
+            `SELECT code, name, COUNT(user_matrix_id) students FROM request_management.modules
+            LEFT JOIN request_management.user_module_mapping
+            ON request_management.modules.code = request_management.user_module_mapping.module_code
+            WHERE educator_id = $1
+            GROUP BY request_management.modules.code
+            ORDER BY request_management.modules.code`,
+            [professorId]
+        );
+
+        res.json({
+            success: true,
+            data: data
+        });
+    } catch (error) {
+        console.error("Error fetching modules by professor:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Error fetching modules by professor"
+        });
+    }
+};

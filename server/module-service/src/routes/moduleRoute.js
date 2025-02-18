@@ -6,6 +6,7 @@ import {
     getAllModulesWithNumbersOfEnrolledStudents,
     getAllStudentsByModule,
     updateEnrollmentByModule,
+    getModulesByProfessor,
 } from "../controllers/moduleController.js";
 
 const router = express.Router();
@@ -13,6 +14,7 @@ const router = express.Router();
 // Module routes
 router.get("/all", getAllModules);
 router.get("/all/enrolled", getAllModulesWithNumbersOfEnrolledStudents);
+router.get("/professor/modules/:professorId", getModulesByProfessor);
 router.get("/students/:moduleCode", getAllStudentsByModule);
 router.post("/updateEducator", updateEducator);
 router.post("/updateEnrollment/:moduleCode", updateEnrollmentByModule);
