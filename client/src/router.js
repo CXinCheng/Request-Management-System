@@ -13,7 +13,20 @@ import AdminUsersView from "./modules/admin/views/AdminUsersView.vue";
 import AdminModuleView from "./modules/admin/views/AdminModuleView.vue";
 
 const isAuthenticated = () => {
-    return !!localStorage.getItem("token");
+    const token = localStorage.getItem("token");
+    if (!token) return false;
+    
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp < Date.now() / 1000) {
+            localStorage.removeItem("token");
+            return false;
+        }
+        return true;
+    } catch {
+        localStorage.removeItem("token");
+        return false;
+    }
 };
 
 const routes = [
