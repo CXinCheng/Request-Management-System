@@ -1,8 +1,12 @@
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import cors from "cors";
-import dotenv from "dotenv"
-import { getAllModules, getAllStudentsByModule } from "./admin/adminController.js";
+import dotenv from "dotenv";
+import {
+    getAllModulesWithEducators,
+    getAllStudentsByModule,
+    getEnrolledStudentsByModule,
+} from "./module/moduleController.js";
 
 // Access .env file
 dotenv.config();
@@ -44,8 +48,12 @@ services.forEach(({ route, target }) => {
 });
 
 // Aggreate API call
-app.use('/api/admin/modules', getAllModules);
-app.use('/api/admin/students/:moduleCode', getAllStudentsByModule);
+app.use("/api/gateway/modules", getAllModulesWithEducators);
+app.use(
+    "/api/gateway/students/enrolled/:moduleCode",
+    getEnrolledStudentsByModule
+);
+app.use("/api/gateway/students/:moduleCode", getAllStudentsByModule);
 
 app.use((_req, res) => {
     res.status(404).json({

@@ -143,7 +143,6 @@ class UpdateService {
 
     async addClass(moduleCode) {
         const moduleDetails = await this.getModuleDetails(moduleCode);
-        // console.log(moduleDetails);
         try {
             if (moduleDetails.timeTable) {
                 for (let lesson of moduleDetails.timeTable) {

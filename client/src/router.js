@@ -12,13 +12,15 @@ import EditRequestView from "./modules/request/views/EditRequest.vue";
 import AdminUsersView from "./modules/admin/views/AdminUsersView.vue";
 import AdminModuleView from "./modules/admin/views/AdminModuleView.vue";
 import ProfileView from "./modules/user/ProfileView.vue";
+import MyModuleView from "./modules/module/MyModuleView.vue";
+import ModuleView from "./modules/module/ModuleView.vue";
 
 const isAuthenticated = () => {
     const token = localStorage.getItem("token");
     if (!token) return false;
-    
+
     try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = JSON.parse(atob(token.split(".")[1]));
         if (payload.exp < Date.now() / 1000) {
             localStorage.removeItem("token");
             return false;
@@ -33,7 +35,7 @@ const isAuthenticated = () => {
 const routes = [
     {
         path: "/",
-        redirect: '/dashboard',
+        redirect: "/dashboard",
         meta: { requiresAuth: true },
     },
     {
@@ -62,7 +64,7 @@ const routes = [
         path: "/leave",
         component: LeaveModuleSelection,
         name: "LeaveModuleSelection",
-        meta: { requiresAuth: true , title: "Leave Application"},
+        meta: { requiresAuth: true, title: "Leave Application" },
     },
     {
         path: "/leaveDetails",
@@ -104,8 +106,20 @@ const routes = [
         path: "/profile",
         component: ProfileView,
         name: "ProfileView",
-        meta: { requiresAuth: true, title: "Profile" },
-    }
+        meta: { requiresAuth: true, title: "Profile Settings" },
+    },
+    {
+        path: "/professor/modules",
+        component: MyModuleView,
+        name: "MyModuleView",
+        meta: { requiresAuth: true, title: "My Modules" },
+    },
+    {
+        path: "/professor/module/:moduleCode",
+        component: ModuleView,
+        name: "ModuleView",
+        meta: { requiresAuth: true, title: "Module" },
+    },
 ];
 
 const router = createRouter({
@@ -116,9 +130,9 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
     const isLoggedIn = isAuthenticated();
-    
+
     if (requiresAuth && !isLoggedIn) {
-        next({ name: 'Login', query: { redirect: to.fullPath },});
+        next({ name: "Login", query: { redirect: to.fullPath } });
     } else {
         next();
     }

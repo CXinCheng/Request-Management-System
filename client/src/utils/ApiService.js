@@ -4,7 +4,7 @@ const AUTH_BASE_URL = "/api/auth";
 const REQUEST_BASE_URL = "/api/requests";
 const USER_BASE_URL = "/api/user";
 const MODULE_BASE_URL = "/api/module";
-const ADMIN_BASE_URL = "/api/admin";
+const GATEWAY_BASE_URL = "/api/gateway";
 
 // Auth API
 const authApi = axios.create({
@@ -64,15 +64,19 @@ export const moduleApiService = {
         moduleApi
             .post(`/updateEnrollment/${data.moduleCode}`, data.modifiedStudents)
             .then((res) => res.data),
+    getModulesByProfessor: (professorId) =>
+        moduleApi.get(`/professor/modules/${professorId}`).then((res) => res.data),
 };
 
-// Admin API
-const adminApi = axios.create({
-    baseURL: ADMIN_BASE_URL,
+// Gateway API
+const gatewayApi = axios.create({
+    baseURL: GATEWAY_BASE_URL,
 });
 
-export const adminApiService = {
-    getAllModules: () => adminApi.get("/modules").then((res) => res.data),
+export const gatewayApiService = {
+    getAllModules: () => gatewayApi.get("/modules").then((res) => res.data),
     getAllStudentsByModule: (moduleCode) =>
-        adminApi.get(`/students/${moduleCode}`).then((res) => res.data),
+        gatewayApi.get(`/students/${moduleCode}`).then((res) => res.data),
+    getEnrolledStudentsByModule: (moduleCode) =>
+        gatewayApi.get(`/students/enrolled/${moduleCode}`).then((res) => res.data),
 };

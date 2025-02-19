@@ -214,7 +214,6 @@ onMounted(() => {
                 faculty: userData.faculty,
             };
         }
-        console.log(userData);
     } catch (error) {
         notificationStore.showNotification({
             message: "Failed to load profile data",

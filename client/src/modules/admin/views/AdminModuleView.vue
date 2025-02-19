@@ -214,7 +214,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
-import { moduleApiService, adminApiService } from "@/utils/ApiService";
+import { moduleApiService, gatewayApiService } from "@/utils/ApiService";
 import UserTable from "../components/UsersTable.vue";
 import { useNotificationStore } from "@/utils/NotificationStore";
 
@@ -363,7 +363,7 @@ async function fetchClasses() {
 async function fetchStudents() {
     try {
         loading.value = true;
-        const response = await adminApiService.getAllStudentsByModule(
+        const response = await gatewayApiService.getAllStudentsByModule(
             selectedModule.value.code
         );
         if (response.success) {
@@ -502,7 +502,7 @@ const assignProfessor = async (professor) => {
 const fetchModules = async () => {
     try {
         loading.value = true;
-        const response = await adminApiService.getAllModules();
+        const response = await gatewayApiService.getAllModules();
         if (response.success) {
             modules.value = response.data.modules;
             professors.value = response.data.educators;
