@@ -33,17 +33,12 @@
   
   <script setup>
   import { ref, onMounted } from 'vue';
-  import { moduleApiService } from '@/utils/ApiService';
   import { useRoute, useRouter } from 'vue-router';
 
-const router = useRouter();
 const route = useRoute();
 const moduleCode = route.params.moduleCode;
 const moduleData = ref({ code: '', name: '', enrolledStudents: [] });
 
-function goBack() {
-  router.push({ name: 'MyModuleView' });
-}
   onMounted(async () => {
     try {
     //   const response = await moduleApiService.getModuleDetails(moduleCode);
