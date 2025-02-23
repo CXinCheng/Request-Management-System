@@ -6,6 +6,7 @@ import {
     getAllModulesWithEducators,
     getAllStudentsByModule,
     getEnrolledStudentsByModule,
+    getModulesTakenByStudent
 } from "./module/moduleController.js";
 
 // Access .env file
@@ -58,7 +59,9 @@ app.use(
     "/api/gateway/students/enrolled/:moduleCode",
     getEnrolledStudentsByModule
 );
-app.use("/api/gateway/students/:moduleCode", getAllStudentsByModule);
+app.use("/api/gateway/students/:studentID/modules", getModulesTakenByStudent);
+// app.use("/api/gateway/students/:moduleCode", getAllStudentsByModule);
+
 
 app.use((_req, res) => {
     res.status(404).json({

@@ -3,8 +3,8 @@ import dotenv from "dotenv"
 
 dotenv.config();
 
-const MODULE_SERVICE_URL = process.env.MODULE_SERVICE_URL;
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL;
+const MODULE_SERVICE_URL = process.env.MODULE_SERVICE_URL || "http://localhost:3003";
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3001" ;
 
 export const getAllModulesWithEducators = async (req, res) => {
     try {
@@ -86,6 +86,50 @@ export const getAllStudentsByModule = async (req, res) => {
         });
     } catch (error) {
         console.error("Error fetching all students by module:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Error fetching all students by module",
+        });
+    }
+}
+
+
+// For student view 
+// Returns module_code, name, educator_id, educator_name, educator_email
+export const getModulesTakenByStudent = async (req, res) => {
+    try {
+        let studentID = req.params.studentID;
+
+        let modulesTakenByStudent = await axios.get(`${MODULE_SERVICE_URL}/api/v1/module/students/${studentID}/modules`);
+        modulesTakenByStudent = modulesTakenByStudent.data
+
+        if (modulesTakenByStudent.success == false) {
+            return res.status(500).json({
+                success: false,
+                error: "Error getting all modules taken by student",
+            });
+        }
+
+        const moduleDetails = await Promise.all(modulesTakenByStudent.data.map(async (module) => {
+            try {
+                let educator_data = await axios.get(`${USER_SERVICE_URL}/api/v1/user/${module.educator_id}`);
+                educator_data = educator_data.data
+                return { ...module, educator_name: educator_data.data.name, educator_email: educator_data.data.email };
+            } catch (error) {
+                console.error(`Error fetching professor data for module ${module}:`, error);
+                return { ...module, educator_name: null, educator_email: null };
+            }
+        }));
+
+        return res.json({
+            success: true,
+            data: moduleDetails,
+        });
+
+    }
+
+    catch (error){
+        // console.error("Error fetching all modules taken by students:", error);
         return res.status(500).json({
             success: false,
             error: "Error fetching all students by module",
