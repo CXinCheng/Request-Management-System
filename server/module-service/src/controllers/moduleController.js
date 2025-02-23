@@ -241,3 +241,33 @@ export const getModulesByProfessor = async (req, res) => {
         });
     }
 };
+
+
+export const getModulesByStudent = async (req, res) => {
+    const studentID = req.params.studentID;
+    console.log("received request to getModules for student:", studentID)
+    let data = null;
+    
+    try {
+        data = await db.manyOrNone(
+            `SELECT um.module_code, m.name, m.educator_id, u.name FROM request_management.user_module_mapping as um
+            left join request_management.modules as m
+            ON um.module_code = m.code
+            left join request_management.users as u
+            ON m.educator_id = u.matrix_id
+            WHERE user_matrix_id = $1`,
+            [studentID]
+        );
+
+        res.json({
+            success: true,
+            data: data
+        });
+    } catch (error) {
+        console.error("Error fetching modules by student:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Error fetching modules by student"
+        });
+    }
+};

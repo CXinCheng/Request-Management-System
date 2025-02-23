@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import { initialize, close } from './src/configs/db.js';
 import updateService from "./src/services/updateService.js";
 import moduleRoute from "./src/routes/moduleRoute.js";
+import cors from 'cors';
 
 const app = express();
 
@@ -15,6 +16,7 @@ dotenv.config();
 
 // Routes
 app.use("/api/v1/module", moduleRoute);
+app.use(cors());
 
 // DB connection
         await initialize();

@@ -1,145 +1,124 @@
 <template>
     <div class="leave-application">
+
+    <v-container>
+
     <h5>Select Dates</h5>
-    <hr />
+    <v-row dense>
+        <v-col cols="12" md="6">
+          <v-date-input    
+            v-model="selectedStartDate"    
+            label="Select a start date"
+            prepend-icon=""
+            prepend-inner-icon="$calendar"
+            variant="solo"
+            required
+          ></v-date-input>
+        </v-col>
 
-    <!-- Date Selection -->
-    <div class="date-selection">
-      <label for="startDate">From:</label>
-      <input
-        type="date"
-        id="startDate"
-        v-model="leaveDates.startDate" 
-        @change="fetchModules"
-        required
-        style="border: 0.5px solid #000; padding: 5px; border-radius: 3px;"
-      />
+        <v-col cols="12" md="6">
+          <v-date-input
+            v-model="selectedEndDate"
+            label="Select a end date"
+            prepend-icon=""
+            variant="solo"
+            required
+          ></v-date-input>
 
-      <label for="endDate">To:</label>
-      <input
-        type="date"
-        id="endDate"
-        v-model="leaveDates.endDate"
-        min=""
-        @change="fetchModules"
-        required
-        style="border: 0.5px solid #000; padding: 5px; border-radius: 3px;"
-      />
-    </div>
+        </v-col>
+    </v-row>
+      <hr />
+      <v-data-table :items="modules"
+      v-model="selectedItems"
+      items-per-page="5"
+      item-value="module_code" 
+      show-select
+      :headers="[
+      { title: 'Module Code', key: 'module_code' },
+      { title: 'Professor Name', key: 'name' }
+      ]"
+      ></v-data-table>
+    </v-container>
 
-    <!-- Modules -->
-    <ModulesTable v-if="showModuleTable" v-model:selectedModules="selectedModules" :modules="modules" />
-
-    <!-- Next Button -->
-    <div class="form-actions">
-      <button @click="goToNextPage" :disabled="!selectedModules.length">
-        Next
-      </button>
-    </div>
-
-    </div>
+    <v-btn @click="goToLeaveDetails" :disabled="!selectedItems.length">
+      Next
+    </v-btn>
+    </div> 
 </template>
-  
-<script>
-import ModulesTable from "../components/ModuleTable.vue"
-import { useModuleStore } from '../stores/useModuleStore';
+
+<script setup>
+import { ref, onMounted, watch } from "vue";
+import { moduleApiService } from "@/utils/ApiService";
 import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
+import { useModuleStore } from "../stores/useModuleStore";
+import { useRouter } from "vue-router";
+import { VDateInput } from 'vuetify/labs/VDateInput'
 
-export default {
-  name: "LeaveModuleSelection",
-  components: {
-    ModulesTable
-  },
-  data() {
-    return {
-      user: {
-          name: "John Doe",
-          matriculationId: "A0123456Z",
-      },
-      leaveDates: {
-          startDate: null,
-          endDate: null,
-      },
-      modules: [],
-      selectedModules: [],
-      showModuleTable: false,
-      };
-    },
-  methods: {
-    fetchModules() {
-      if (this.leaveDates.startDate){
-        document.getElementById("endDate").setAttribute("min",this.leaveDates.startDate)
-      }
+const selectedItems = ref([]);
+const router = useRouter();
+const modules = ref([]);
+const selectedStartDate = ref(null); 
+const selectedEndDate = ref(null); 
 
-      if (this.leaveDates.startDate && this.leaveDates.endDate) {
-        const leaveDateStore = useLeaveDateStore();
-        leaveDateStore.setSelectedLeaveDates(this.leaveDates)
-        // Mocking module data for now
-        this.modules = [
-          { id: 1, name: "Software Engineering Capstone", code: "ABM5002", professor: "Prof Xavier", professorID: "P0123456A" },
-          { id: 3, name: "Graphic Design Fundamentals", code: "ABM5003", professor: "Prof Xavier", professorID: "P0123456A" },
-          { id: 4, name: "Digital Illustration", code: "ABM5004", professor: "Prof Xavier", professorID: "P0123456A" },
-          { id: 5, name: "UX/UI Design Principles", code: "ABM5106", professor: "Prof Jane", professorID: "P0123456A" },
-          { id: 6, name: "Color Theory and Application", code: "AC5004", professor: "Prof Jane", professorID: "P0123456A" },
-          { id: 7, name: "Visual Communication Design", code: "AC5012", professor: "Prof Jane", professorID: "P0123456A" },
-        ];
-        this.showModuleTable = true
-        
-      } else {
-        this.modules = [];
-      }
-    },
-    goToNextPage() {
-      const moduleStore = useModuleStore()
-      moduleStore.setSelectedModules(this.selectedModules)
+const loading = ref(false);
+const leaveDateStore = useLeaveDateStore()
+const moduleStore = useModuleStore()
 
-      this.$router.push('/leaveDetails');
-    },
-  },
+onMounted(async()=>{
+  try { 
+    
+    const studentID = JSON.parse(localStorage.getItem("user")).matrix_id;
+    const response = await moduleApiService.getModulesByStudent(studentID);
+    if (response.success) {
+        modules.value = response.data;
+        console.log("response: ", response.data)
+    } else {
+      console.log("something went wrong: ", response)
+    }
+    } catch (error) {
+        console.error("Error fetching modules:", error);
+    }
+
+})
+
+const fetchModules = () => {
+  if (selectedStartDate){
+    console.log("selectedStartDate:", selectedStartDate.value);
+  }
+  if (selectedEndDate){
+    console.log("selectedEndDate:", selectedEndDate.value);
+  }
+  if (selectedStartDate && selectedEndDate){
+    leaveDateStore.setSelectedLeaveDates({
+      "startDate": selectedStartDate,
+      "endDate": selectedEndDate,
+    })
+  }
 };
+
+const goToLeaveDetails = () => {
+  router.push('/leaveDetails');
+};
+
+watch(selectedEndDate, (newVal) => {
+  if (newVal) {
+    fetchModules();
+  }
+});
+
+watch(selectedStartDate, (newVal) => {
+  if (newVal) {
+    fetchModules();
+  }
+});
+
+watch(selectedItems, (newSelection) => {
+  const moduleSelected = {...newSelection}
+  console.log("Selected Items:", moduleSelected[0]); // Logs the selected objects
+  moduleStore.setSelectedModules(newSelection)
+});
+
 </script>
-  
+
 <style scoped>
-.leave-application {
-  max-width: 900px;
-  width: 90%;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
-}
-
-.info-item {
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-}
-
-.date-selection {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-}
-
-.form-actions {
-  text-align: right;
-  margin-top: 2rem;
-}
-
-input[type=date]:focus {
-  border: 1px solid #555;
-}
-
-button {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  background-color: #007bff;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
 </style>

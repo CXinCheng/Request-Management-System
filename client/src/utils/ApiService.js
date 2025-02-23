@@ -26,7 +26,8 @@ export const authApiService = {
 
 // Request API
 const requestApi = axios.create({
-    baseURL: REQUEST_BASE_URL,
+    // baseURL: REQUEST_BASE_URL,
+    baseURL: "http://localhost:3002/api/v1/requests",
 });
 
 export const requestApiService = {
@@ -52,6 +53,7 @@ export const userApiService = {
 // Module API
 const moduleApi = axios.create({
     baseURL: MODULE_BASE_URL,
+    // baseURL: "http://localhost:3003/api/v1/module",
 });
 
 export const moduleApiService = {
@@ -66,6 +68,8 @@ export const moduleApiService = {
             .then((res) => res.data),
     getModulesByProfessor: (professorId) =>
         moduleApi.get(`/professor/modules/${professorId}`).then((res) => res.data),
+    getModulesByStudent: (studentID) =>
+        moduleApi.get(`/modules/${studentID}`).then((res) => res.data),
 };
 
 // Gateway API
