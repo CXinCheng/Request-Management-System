@@ -22,4 +22,7 @@ router.post("/updateEnrollment/:moduleCode", updateEnrollmentByModule);
 router.get("/classes/:moduleCode", getClassesByModule);
 router.get("/modules/:studentID", getModulesByStudent);
 
+// change function call
+router.get("/user-module-mapping/:userId", getUserMappedModules); 
+
 export default router;

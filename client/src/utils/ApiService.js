@@ -70,6 +70,9 @@ export const moduleApiService = {
         moduleApi.get(`/professor/modules/${professorId}`).then((res) => res.data),
     getModulesByStudent: (studentID) =>
         moduleApi.get(`/modules/${studentID}`).then((res) => res.data),
+    // Fetch user-specific modules from user_module_mapping table
+    // getUserMappedModules: (userId) => 
+    //     moduleApi.get(`/user-module-mapping/${userId}`).then(res => res.data),
 };
 
 // Gateway API

@@ -27,9 +27,15 @@ export default {
     const route = useRoute();
     const modules = ref([]);
     const leaveData = ref([]);
-    const userId = localStorage.getItem("userId"); // Get userId from local storage
+    let user = JSON.parse(localStorage.getItem('user'));
+    const userId = user['matrix_id'];
 
     const fetchDashboardData = async () => {
+      if (!userId) {
+        console.error("User ID is missing from local storage.");
+        return;
+      }
+
       try {
         const { modules: moduleData, leaveData: leaveAppData } =
           await aggregateDashboardData(userId);
@@ -43,10 +49,11 @@ export default {
     // Fetch data on component mount
     onMounted(fetchDashboardData);
 
-    return { modules, leaveData , route};
+    return { modules, leaveData, route };
   },
 };
 </script>
+
 
 <style scoped>
 .dashboard-container {

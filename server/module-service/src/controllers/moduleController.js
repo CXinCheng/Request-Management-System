@@ -1,6 +1,43 @@
 import updateService from "../services/updateService.js";
 import { db } from "../configs/db.js";
 
+
+
+
+// Fetch modules from user_module_mapping based on userId
+export const getUserMappedModules = async (req, res) => {
+  const { userId } = req.params; // Extract userId from URL
+  console.log("DB Query Result:"); // Debugging
+  try {
+    const result = await db.any(
+      "SELECT module_code, class_no FROM request_management.user_module_mapping WHERE user_matrix_id = $1;",
+      [userId]
+    );
+
+    console.log("DB Query Result:", result); // Debugging
+    res.json(result); 
+  } catch (error) {
+    console.error("Database Error:", error);
+    res.status(500).json({ error: "Failed to fetch user module mapping" });
+  }
+};
+// Add a user to "user_module_mapping" table
+export const addUserMappedModule = async (req, res) => {
+    const { user_matrix_id, module_code, class_no } = req.body;
+  
+    try {
+      await db.none(
+        "INSERT INTO request_management.user_module_mapping (user_matrix_id, module_code, class_no) VALUES ($1, $2, $3);",
+        [user_matrix_id, module_code, class_no]
+      );
+  
+      res.status(201).json({ message: "User added to module successfully" });
+    } catch (error) {
+      console.error("Database Error:", error);
+      res.status(500).json({ error: "Failed to add user to module" });
+    }
+  };
+
 export const getAllModules = async (req, res) => {
     let data = null;
     try {

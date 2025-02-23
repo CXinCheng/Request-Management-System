@@ -1,41 +1,54 @@
-const USER_MODULE_MAPPING_BASE_URL = "http://ec2-18-143-63-164.ap-southeast-1.compute.amazonaws.com:3003";
-const REQUEST_BASE_URL = "http://ec2-18-143-63-164.ap-southeast-1.compute.amazonaws.com:3002";
+import { moduleApiService, requestApiService } from "@/utils/ApiService";
+
 
 /**
- * Fetch enrolled module data for a specific user.
- * @param {number} userId - User ID
+ * Fetch modules for a specific user from the user_module_mapping table.
+ * @param {string} userId - User ID from local storage
  * @returns {Promise<Array>} List of modules the user is enrolled in
  */
+const fetchUserMappedModules = async (userId) => {
+  try {
+    console.log(`Fetching mapped modules for user: ${userId}`); // Debugging
 
-const fetchUserModules = async (userId) => {
-  const response = await fetch(
-    `${USER_MODULE_MAPPING_BASE_URL}/api/userModules?userId=${userId}`
-  );
-  if (!response.ok) throw new Error("Failed to fetch user modules");
+    const response = await moduleApiService.getUserMappedModules(userId);
 
-  const data = await response.json();
+    console.log("API Response:", response); // Debugging
 
-  // Return only the required fields: module_code and class_no
-  return data.map(({ module_code, class_no }) => ({
-    module_code,
-    class_no,
-  }));
+    if (!response || response.length === 0) {
+      console.warn(`No mapped modules found for user ${userId}`);
+      return [];
+    }
+
+    return response.map(({ module_code, class_no }) => ({
+      module_code,
+      class_no,
+    }));
+  } catch (error) {
+    console.error("Error fetching user-mapped modules:", error);
+    return [];
+  }
 };
+
 
 const fetchLeaveApplications = async (userId) => {
-  const response = await fetch(
-    `${REQUEST_BASE_URL}/api/requests?userId=${userId}`
-  );
-  if (!response.ok) throw new Error("Failed to fetch leave applications");
+  try {
+    const response = await requestApiService.getUserRequests(userId);
 
-  const data = await response.json();
+    if (!response || response.length === 0) {
+      console.warn(`No leave applications found for user ${userId}`);
+      return [];
+    }
 
-  // Extract only the necessary fields
-  return data.map(({ module_code, status }) => ({
-    module_code,
-    status,
-  }));
+    return response.map(({ status, module_code }) => ({
+      status,
+      module_code,
+    }));
+  } catch (error) {
+    console.error("Error fetching leave applications:", error);
+    return [];
+  }
 };
+
 
 
 /**
@@ -47,24 +60,27 @@ const fetchLeaveApplications = async (userId) => {
 export const aggregateDashboardData = async (userId) => {
   try {
     const [modules, leaveApplications] = await Promise.all([
-      fetchUserModules(userId),
-      fetchLeaveApplications(userId),
+      fetchUserMappedModules(userId),
+      //fetchLeaveApplications(userId),
     ]);
 
-    const leaveDataByModule = leaveApplications.reduce((acc, leave) => {
-      if (!acc[leave.module_code]) {
-        acc[leave.module_code] = { approved: 0, rejected: 0, pending: 0 };
-      }
-      acc[leave.module_code][leave.status.toLowerCase()] += 1;
-      return acc;
-    }, {});
+    // Group leave applications by module_code
+    // const leaveDataByModule = leaveApplications.reduce((acc, leave) => {
+    //   if (!acc[leave.module_code]) {
+    //     acc[leave.module_code] = { approved: 0, rejected: 0, pending: 0 };
+    //   }
+    //   acc[leave.module_code][leave.status.toLowerCase()] += 1;
+    //   return acc;
+    // }, {});
 
-    const leaveData = modules.map((module) => ({
-      module: module.code, 
-      approved: leaveDataByModule[module.code]?.approved || 0,
-      rejected: leaveDataByModule[module.code]?.rejected || 0,
-      pending: leaveDataByModule[module.code]?.pending || 0,
-    }));
+    // Join leave application data with enrolled modules
+    // const leaveData = modules.map((module) => ({
+    //   module: module.module_code, 
+    //   approved: leaveDataByModule[module.module_code]?.approved || 0,
+    //   rejected: leaveDataByModule[module.module_code]?.rejected || 0,
+    //   pending: leaveDataByModule[module.module_code]?.pending || 0,
+    // }));
+    const leaveData = [];
 
     return { modules, leaveData };
   } catch (error) {
@@ -72,3 +88,4 @@ export const aggregateDashboardData = async (userId) => {
     throw error;
   }
 };
+
