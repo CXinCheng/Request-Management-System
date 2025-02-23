@@ -35,7 +35,8 @@
       show-select
       :headers="[
       { title: 'Module Code', key: 'module_code' },
-      { title: 'Professor Name', key: 'name' }
+      { title: 'Module Name', key: 'name' },
+      { title: 'Professor Name', key: 'educator_name' }
       ]"
       ></v-data-table>
     </v-container>
