@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 
-const USER_SERVICE_URL = process.env.MODULE_SERVICE_URL || "http://localhost:3001";
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3001";
 const REQUEST_SERVICE_URL = process.env.REQUEST_SERVICE_URL || "http://localhost:3002";
 const MODULE_SERVICE_URL = process.env.MODULE_SERVICE_URL || "http://localhost:3003"; 
 
