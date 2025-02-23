@@ -16,22 +16,26 @@ const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 
+const USER_SERVICE_URL = process.env.MODULE_SERVICE_URL || "http://localhost:3001";
+const REQUEST_SERVICE_URL = process.env.REQUEST_SERVICE_URL || "http://localhost:3002";
+const MODULE_SERVICE_URL = process.env.MODULE_SERVICE_URL || "http://localhost:3003"; 
+
 const services = [
     {
         route: "/api/auth",
-        target: `${process.env.USER_SERVICE_URL}/api/v1/auth`,
+        target: `${USER_SERVICE_URL}/api/v1/auth`,
     },
     {
         route: "/api/user",
-        target: `${process.env.USER_SERVICE_URL}/api/v1/user`,
+        target: `${USER_SERVICE_URL}/api/v1/user`,
     },
     {
         route: "/api/request",
-        target: `${process.env.REQUEST_SERVICE_URL}/api/v1/request`,
+        target: `${REQUEST_SERVICE_URL}/api/v1/request`,
     },
     {
         route: "/api/module",
-        target: `${process.env.MODULE_SERVICE_URL}/api/v1/module`,
+        target: `${MODULE_SERVICE_URL}/api/v1/module`,
     },
 ];
 

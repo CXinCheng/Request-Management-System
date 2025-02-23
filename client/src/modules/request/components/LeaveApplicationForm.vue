@@ -32,11 +32,11 @@
         />
         </div>
         <div class="form-group">
-        <label for="contactNumber">Contact Number</label>
+        <label for="email">Email</label>
         <input
             type="text"
-            id="contactNumber"
-            v-model="formData.contactNumber"
+            id="email"
+            v-model="formData.email"
             disabled
         />
         </div>
@@ -113,7 +113,6 @@
 <script>
 import { requestApiService } from "@/utils/ApiService";
 import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
-import { useRouter } from "vue-router";
 
 export default {
 name: "LeaveRequestForm",
@@ -124,14 +123,19 @@ props: {
   },
 },
 data() {
+  // redirect user back to select modules if no modules selected 
+  if (this.selectedModules.length == 0) {
+    this.$router.push({ path: '/leave' });
+  }
+  const currentUser = localStorage.getItem("user");
+  console.log(this.selectedModules)
   return {
-    // update this to take actual student data
     formData: {
-        student: "John Doe",
+        student: JSON.parse(currentUser)?.name,
         school: "National University of Singapore",
-        enrollment: "Bachelor of Technology - Software Engineering",
-        contactNumber: "9123 4567",
-        matriculationId: "A01234567",
+        enrollment: JSON.parse(currentUser)?.faculty,
+        email: JSON.parse(currentUser)?.email,
+        matriculationId: JSON.parse(currentUser)?.matrix_id || "-",
         file: null,
         reason: '',
     },
@@ -144,8 +148,6 @@ methods: {
     this.formData.file = event.target.files[0];
   },
   async submitForm() {
-    const router = useRouter();
-
     this.isLoading = true
     this.submitStatus = null;
 
@@ -166,7 +168,8 @@ methods: {
     })
 
     let formData = new FormData()
-    formData.append("student", "A1234567B")
+
+    formData.append("student", this.formData.matriculationId)
     formData.append("reasonOfLeave", this.formData.reason)
     formData.append("startDateOfLeave", startDate)
     formData.append("endDateOfLeave", endDate)
