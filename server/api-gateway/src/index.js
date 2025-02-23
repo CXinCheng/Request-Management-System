@@ -37,6 +37,7 @@ const services = [
         route: "/api/module",
         target: `${MODULE_SERVICE_URL}/api/v1/module`,
     },
+
 ];
 
 services.forEach(({ route, target }) => {

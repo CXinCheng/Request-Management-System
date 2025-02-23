@@ -75,6 +75,21 @@ export const moduleApiService = {
 // Gateway API
 const gatewayApi = axios.create({
     baseURL: GATEWAY_BASE_URL,
+    getAllModules: () => moduleApi.get("/all").then(res => res.data),
+    updateEducator: (data) => moduleApi.post("updateEducator", data).then(res => res.data),
+
+    // Fetch user-specific modules from user_module_mapping table
+    getUserMappedModules: (userId) => 
+        moduleApi.get(`/user-module-mapping/${userId}`).then(res => res.data),
+
+    // Add user to a module in user_module_mapping table
+    addUserMappedModule: (userData) => 
+        moduleApi.post("/user-module-mapping", userData).then(res => res.data),
+};
+
+// Admin API
+const adminApi = axios.create({
+    baseURL: ADMIN_BASE_URL,
 });
 
 export const gatewayApiService = {
