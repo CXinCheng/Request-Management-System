@@ -85,7 +85,7 @@ const gatewayApi = axios.create({
     // Add user to a module in user_module_mapping table
     addUserMappedModule: (userData) => 
         moduleApi.post("/user-module-mapping", userData).then(res => res.data),
-};
+});
 
 // Admin API
 const adminApi = axios.create({
