@@ -35,7 +35,8 @@
       show-select
       :headers="[
       { title: 'Module Code', key: 'module_code' },
-      { title: 'Professor Name', key: 'name' }
+      { title: 'Module Name', key: 'name' },
+      { title: 'Professor Name', key: 'educator_name' }
       ]"
       ></v-data-table>
     </v-container>
@@ -48,7 +49,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { moduleApiService } from "@/utils/ApiService";
+import { gatewayApiService } from "@/utils/ApiService";
 import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
 import { useModuleStore } from "../stores/useModuleStore";
 import { useRouter } from "vue-router";
@@ -68,7 +69,7 @@ onMounted(async()=>{
   try { 
     
     const studentID = JSON.parse(localStorage.getItem("user")).matrix_id;
-    const response = await moduleApiService.getModulesByStudent(studentID);
+    const response = await gatewayApiService.getModulesTakenByStudent(studentID);
     if (response.success) {
         modules.value = response.data;
         console.log("response: ", response.data)

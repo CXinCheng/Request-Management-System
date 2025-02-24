@@ -5,6 +5,7 @@ const REQUEST_BASE_URL = "/api/requests";
 const USER_BASE_URL = "/api/user";
 const MODULE_BASE_URL = "/api/module";
 const GATEWAY_BASE_URL = "/api/gateway";
+const ADMIN_BASE_URL = "/api/admin";
 
 // Auth API
 const authApi = axios.create({
@@ -69,15 +70,27 @@ export const moduleApiService = {
     getModulesByProfessor: (professorId) =>
         moduleApi.get(`/professor/modules/${professorId}`).then((res) => res.data),
     getModulesByStudent: (studentID) =>
-        moduleApi.get(`/modules/${studentID}`).then((res) => res.data),
-    // Fetch user-specific modules from user_module_mapping table
-    // getUserMappedModules: (userId) => 
-    //     moduleApi.get(`/user-module-mapping/${userId}`).then(res => res.data),
+        moduleApi.get(`/students/${studentID}/modules`).then((res) => res.data),
 };
 
 // Gateway API
 const gatewayApi = axios.create({
     baseURL: GATEWAY_BASE_URL,
+    getAllModules: () => moduleApi.get("/all").then(res => res.data),
+    updateEducator: (data) => moduleApi.post("updateEducator", data).then(res => res.data),
+
+    // Fetch user-specific modules from user_module_mapping table
+    getUserMappedModules: (userId) => 
+        moduleApi.get(`/user-module-mapping/${userId}`).then(res => res.data),
+
+    // Add user to a module in user_module_mapping table
+    addUserMappedModule: (userData) => 
+        moduleApi.post("/user-module-mapping", userData).then(res => res.data),
+});
+
+// Admin API
+const adminApi = axios.create({
+    baseURL: ADMIN_BASE_URL,
 });
 
 export const gatewayApiService = {
@@ -86,4 +99,6 @@ export const gatewayApiService = {
         gatewayApi.get(`/students/${moduleCode}`).then((res) => res.data),
     getEnrolledStudentsByModule: (moduleCode) =>
         gatewayApi.get(`/students/enrolled/${moduleCode}`).then((res) => res.data),
+    getModulesTakenByStudent: (studentID) =>
+        gatewayApi.get(`/students/${studentID}/modules`).then((res) => res.data),
 };

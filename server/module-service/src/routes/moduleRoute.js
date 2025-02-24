@@ -20,7 +20,7 @@ router.get("/students/:moduleCode", getAllStudentsByModule);
 router.post("/updateEducator", updateEducator);
 router.post("/updateEnrollment/:moduleCode", updateEnrollmentByModule);
 router.get("/classes/:moduleCode", getClassesByModule);
-router.get("/modules/:studentID", getModulesByStudent);
+router.get("/students/:studentID/modules", getModulesByStudent);
 
 // change function call
 router.get("/user-module-mapping/:userId", getUserMappedModules); 
