@@ -3,7 +3,7 @@ import fs from "fs";
 
 class UpdateService {
     academicYear = "2024-2025";
-    semester = 1;
+    semester = 2;
 
     async getModuleList() {
         try {
@@ -146,17 +146,20 @@ class UpdateService {
         try {
             if (moduleDetails.timeTable) {
                 for (let lesson of moduleDetails.timeTable) {
-                    await db.none(
-                        "INSERT INTO request_management.classes (module_code, class_no, class_type, day_of_week, starting_time, ending_time) VALUES ($1, $2, $3, $4, $5, $6)",
-                        [
-                            moduleCode,
-                            lesson.classNo,
-                            lesson.lessonType,
-                            lesson.day,
-                            lesson.startTime,
-                            lesson.endTime,
-                        ]
-                    );
+                    const validLessonTypes = ['Lecture', 'Tutorial', 'Laboratory'];
+                    if (validLessonTypes.includes(lesson.lessonType)) {
+                        await db.none(
+                            "INSERT INTO request_management.classes (module_code, class_no, class_type, day_of_week, starting_time, ending_time) VALUES ($1, $2, $3, $4, $5, $6)",
+                            [
+                                moduleCode,
+                                lesson.classNo,
+                                lesson.lessonType,
+                                lesson.day,
+                                lesson.startTime,
+                                lesson.endTime,
+                            ]
+                        );
+                    }
                 }
             }
             await db.none(
@@ -170,28 +173,12 @@ class UpdateService {
     }
 
     async updateClass(moduleCode) {
-        const moduleDetails = await this.getModuleDetails(moduleCode);
-
         try {
-            if (moduleDetails.timeTable) {
-                for (let lesson of moduleDetails.timeTable) {
-                    await db.none(
-                        "UPDATE request_management.classes SET class_type = $3, day_of_week = $4, starting_time = $5, ending_time = $6 WHERE module_code = $1 AND class_no = $2",
-                        [
-                            moduleCode,
-                            lesson.classNo,
-                            lesson.lessonType,
-                            lesson.day,
-                            lesson.startTime,
-                            lesson.endTime,
-                        ]
-                    );
-                }
-            }
             await db.none(
-                "UPDATE request_management.modules SET class_last_updated_at = $2 WHERE code = $1",
-                [moduleCode, new Date()]
+                "DELETE FROM request_management.classes WHERE module_code = $1",
+                [moduleCode]
             );
+            await this.addClass(moduleCode);
         } catch (error) {
             console.error("Error updating module classes:", error);
             throw error;
