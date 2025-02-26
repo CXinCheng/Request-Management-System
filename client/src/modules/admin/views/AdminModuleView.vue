@@ -418,6 +418,7 @@ async function fetchStudents() {
                       })),
             }));
         }
+        
     } catch (error) {
         notify.showNotification({
             message: "Error fetching students",
