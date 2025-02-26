@@ -1,3 +1,4 @@
+import { log } from "console";
 import { db } from "../configs/db.js";
 import fs from "fs";
 
@@ -7,6 +8,7 @@ class UpdateService {
 
     async getModuleList() {
         try {
+            // Production
             // const response = await fetch(
             //     `https://api.nusmods.com/v2/${this.academicYear}/moduleList.json`
             // );
@@ -14,17 +16,31 @@ class UpdateService {
             //     throw new Error(`HTTP error! status: ${response.status}`);
             // }
             // const latestModuleList = await response.json();
+
+            // Dev
             const latestModuleList = await JSON.parse(
                 fs.readFileSync("data/moduleList copy.json", "utf-8")
             );
+
+            // Filter modules based on semester
+            const filteredModuleList = latestModuleList.filter(
+                (module) => Array.from(module.semesters).includes(this.semester)
+            );     
+
             const localModuleList = await JSON.parse(
                 fs.readFileSync("data/moduleList.json", "utf-8")
             );
 
             const changes = this.compareChanges(
                 localModuleList,
-                latestModuleList
+                filteredModuleList
             );
+
+            // fs.writeFileSync(
+            //     "data/moduleList1.json",
+            //     JSON.stringify(filteredModuleList, null, 2)
+            // );
+            // console.log("Filtered module list saved to file.");
 
             if (
                 changes.added.length > 0 ||
@@ -99,9 +115,9 @@ class UpdateService {
                 );
             }
         }
-        console.log(`Inserted ${insertCount} new modules.`);
-        console.log(`Updated ${updateCount} existing modules.`);
-        console.log(`Deleted ${deleteCount} modules.`);
+        if (insertCount > 0) console.log(`Inserted ${insertCount} new modules.`);
+        if (updateCount > 0) console.log(`Updated ${updateCount} existing modules.`);
+        if (deleteCount > 0) console.log(`Deleted ${deleteCount} modules.`);
         console.log("Module database updated.");
     }
 

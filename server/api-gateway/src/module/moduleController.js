@@ -74,12 +74,15 @@ export const getAllStudentsByModule = async (req, res) => {
             success: true,
             data: {
                 students: studentData.data.data.map(student => {
-                    let enrolledStudent = enrolledStudentsData.data.data.find(s => s.user_matrix_id === student.matrix_id);
+                    let enrolledStudent = enrolledStudentsData.data.data.filter(s => s.user_matrix_id === student.matrix_id);
                     return {
                         matrix_id: student.matrix_id,
                         name: student.name,
                         email: student.email,
-                        class_no: enrolledStudent ? enrolledStudent.class_no : null,
+                        classes: enrolledStudent.length > 0 ? enrolledStudent.map(s => ({
+                            class_type: s.class_type,
+                            class_no: s.class_no
+                        })) : [],
                     };
                 }),
             }

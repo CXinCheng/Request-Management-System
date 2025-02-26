@@ -26,7 +26,7 @@ CREATE TABLE request_management.modules (
 );
 
 DROP TYPE IF EXISTS request_management.class_type CASCADE;
-CREATE TYPE request_management.class_type AS ENUM ('Lecture', 'Tutorial', 'Laboratory');
+CREATE TYPE request_management.class_type AS ENUM ('Lecture', 'Tutorial', 'Laboratory', 'No Class');
 DROP TYPE IF EXISTS request_management.day_of_week CASCADE;
 CREATE TYPE request_management.day_of_week AS ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
 DROP TABLE IF EXISTS request_management.classes CASCADE;

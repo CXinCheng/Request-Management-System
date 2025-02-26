@@ -58,7 +58,6 @@ watch(
         } else {
             pageTitle.value = route.meta?.title || "";
         }
-        console.log("Page title:", pageTitle.value);
     },
     { immediate: true }
 );
