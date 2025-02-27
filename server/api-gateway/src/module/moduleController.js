@@ -102,7 +102,7 @@ export const getModulesTakenByStudent = async (req, res) => {
 
         let modulesTakenByStudent = await axios.get(`${MODULE_SERVICE_URL}/api/v1/module/students/${studentID}/modules`);
         modulesTakenByStudent = modulesTakenByStudent.data
-
+        
         if (modulesTakenByStudent.success == false) {
             return res.status(500).json({
                 success: false,
@@ -110,26 +110,37 @@ export const getModulesTakenByStudent = async (req, res) => {
             });
         }
 
-        const moduleDetails = await Promise.all(modulesTakenByStudent.data.map(async (module) => {
-            try {
-                let educator_data = await axios.get(`${USER_SERVICE_URL}/api/v1/user/${module.educator_id}`);
-                educator_data = educator_data.data
-                return { ...module, educator_name: educator_data.data.name, educator_email: educator_data.data.email };
-            } catch (error) {
-                console.error(`Error fetching professor data for module ${module}:`, error);
-                return { ...module, educator_name: null, educator_email: null };
-            }
+        const educatorIds = modulesTakenByStudent.data
+        .map(module => module.educator_id)
+        .filter(id => id !== null) 
+        .join(','); 
+        
+        let professorInfo = await axios.get(`${USER_SERVICE_URL}/api/v1/user/professors?ids=${educatorIds}`);
+        if (professorInfo.success == false){
+            return res.json({
+                success: true,
+                data: modulesTakenByStudent.data,
+            });
+        }
+
+        professorInfo = professorInfo.data
+        const professorMap = Object.fromEntries(
+            professorInfo.data.map(prof => [prof.matrix_id, prof])
+        );
+        
+        const modulesWithProfessorInfo = modulesTakenByStudent.data.map(module => ({
+            ...module,
+            professor: professorMap[module.educator_id] || null
         }));
 
         return res.json({
             success: true,
-            data: moduleDetails,
+            data: modulesWithProfessorInfo,
         });
 
     }
 
     catch (error){
-        // console.error("Error fetching all modules taken by students:", error);
         return res.status(500).json({
             success: false,
             error: "Error fetching all students by module",

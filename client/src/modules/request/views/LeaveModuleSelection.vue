@@ -1,7 +1,6 @@
 <template>
-    <div class="leave-application">
 
-    <v-container>
+    <v-container max-width="980">
 
     <h5>Select Dates</h5>
     <v-row dense>
@@ -27,28 +26,32 @@
 
         </v-col>
     </v-row>
-      <hr />
-      <v-data-table :items="modules"
-      v-model="selectedItems"
-      items-per-page="5"
-      item-value="module_code" 
-      show-select
-      :headers="[
-      { title: 'Module Code', key: 'module_code' },
-      { title: 'Module Name', key: 'name' },
-      { title: 'Professor Name', key: 'educator_name' }
-      ]"
-      ></v-data-table>
-    </v-container>
+
+    <hr />
+
+    <v-data-table :items="formattedModules"
+    v-model="selectedItems"
+    items-per-page="5"
+    item-value="module_code" 
+    show-select
+    :headers="[
+    { title: 'Module Code', key: 'module_code' },
+    { title: 'Module Name', key: 'name' },
+    { title: 'Professor Name', key: 'educator_name' }
+    ]"
+    ></v-data-table>
 
     <v-btn @click="goToLeaveDetails" :disabled="!selectedItems.length">
-      Next
+    Next
     </v-btn>
-    </div> 
+    
+    </v-container>
+
+
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { gatewayApiService } from "@/utils/ApiService";
 import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
 import { useModuleStore } from "../stores/useModuleStore";
@@ -61,7 +64,7 @@ const modules = ref([]);
 const selectedStartDate = ref(null); 
 const selectedEndDate = ref(null); 
 
-const loading = ref(false);
+const professsor = ref([]);
 const leaveDateStore = useLeaveDateStore()
 const moduleStore = useModuleStore()
 
@@ -72,15 +75,21 @@ onMounted(async()=>{
     const response = await gatewayApiService.getModulesTakenByStudent(studentID);
     if (response.success) {
         modules.value = response.data;
-        console.log("response: ", response.data)
+        console.log("modules.value: ", modules.value)
     } else {
       console.log("something went wrong: ", response)
     }
     } catch (error) {
         console.error("Error fetching modules:", error);
     }
-
 })
+
+const formattedModules = computed(() => {
+  return modules.value.map((module) => ({
+    ...module,
+    educator_name: module.professor ? module.professor.name : "N/A",
+  }));
+});
 
 const fetchModules = () => {
   if (selectedStartDate){
