@@ -109,16 +109,17 @@ const items = computed(() => {
                     icon: "mdi-view-dashboard-outline",
                     href: "/professor/dashboard",
                 },
+
                 {
-                    title: "My Modules",
-                    icon: "mdi-book-open-variant-outline",
-                    href: "/professor/modules",
+                    title: "All Requests",
+                    icon: "mdi-list-box-outline",
+                    href: "/requests",
                 },
-                {
-                    title: "Leave Applications",
-                    icon: "mdi-text-box-edit-outline",
-                    href: "/professor/leave-requests",
-                },
+                // {
+                //     title: "Leave Applications",
+                //     icon: "mdi-text-box-edit-outline",
+                //     href: "/professor/leave-requests",
+                // },
             ];
         case "Admin":
         default:

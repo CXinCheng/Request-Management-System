@@ -8,7 +8,7 @@
                     <span
                         @click="goBack"
                         class="text-decoration-underline cursor-pointer text-blue"
-                        >My Modules</span
+                        >Dashboard</span
                     >
                     <span> > {{ route.params.moduleCode }}</span>
                 </div>
@@ -63,6 +63,6 @@ watch(
 );
 
 const goBack = () => {
-    router.push({ name: "MyModuleView" });
+    router.push({ name: "ProfDashboardView" });
 };
 </script>

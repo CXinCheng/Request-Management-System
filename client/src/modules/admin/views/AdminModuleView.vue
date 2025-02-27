@@ -144,7 +144,6 @@
                         :users="students"
                         :loading="loading"
                         :search="searchStudents"
-                        :initial-sort="studentsTableSort"
                         :no-data-text="
                             students.length
                                 ? ''
@@ -159,6 +158,7 @@
                                 class="d-flex align-center justify-space-between"
                             >
                                 <v-select
+                                    max-width="150px"
                                     v-if="
                                         selectedStudents.find(
                                             (c) =>
@@ -231,7 +231,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { moduleApiService, gatewayApiService } from "@/utils/ApiService";
 import UserTable from "../components/UsersTable.vue";
 import { useNotificationStore } from "@/utils/NotificationStore";
@@ -286,10 +286,14 @@ const headers = [
         headerProps: {
             style: "font-weight: 600; font-size:20px;",
         },
+        sort: (a, b) => (
+            a === 'Not Assigned' ? 1 : 
+            b === 'Not Assigned' ? -1 : 
+            a.localeCompare(b)
+        )
     },
 ];
 const studentsTableHeaders = ref([]);
-const studentsTableSort = ref([{ key: "class_no", order: "desc" }]);
 
 const removeEducator = async (module) => {
     try {
@@ -398,23 +402,22 @@ async function fetchStudents() {
         if (response.success) {
             students.value = response.data.students.map((student) => ({
                 ...student,
-                classes: classes.value.length ? 
-                    classes.value.map((c) => {
-                        const classNo = student.classes.find(
-                            (s) => s.class_type === c.classType
-                        );
-                        return {
-                            classType: c.classType,
-                            classNo: classNo ? classNo.class_no : null,
-                        };
-                    })
-                    : student.classes.map(c => ({
-                        classType: c.class_type,
-                        classNo: c.class_no
-                    }))
+                classes: classes.value.length
+                    ? classes.value.map((c) => {
+                          const classNo = student.classes.find(
+                              (s) => s.class_type === c.classType
+                          );
+                          return {
+                              classType: c.classType,
+                              classNo: classNo ? classNo.class_no : null,
+                          };
+                      })
+                    : student.classes.map((c) => ({
+                          classType: c.class_type,
+                          classNo: c.class_no,
+                      })),
             }));
         }
-        
     } catch (error) {
         notify.showNotification({
             message: "Error fetching students",
@@ -428,7 +431,7 @@ async function fetchStudents() {
 
 async function saveEnrollments() {
     const invalidStudents = selectedStudents.value.filter((student) =>
-        student.classes.some((cls) => cls.classNo === null)
+        student.classes.every((cls) => cls.classNo === null)
     );
 
     if (invalidStudents.length > 0) {
@@ -443,7 +446,7 @@ async function saveEnrollments() {
         const modifiedStudents = findModifiedStudents(
             selectedStudents.value,
             originalSelectedStudents.value
-        );        
+        );
 
         const response = await moduleApiService.updateEnrollmentByModule({
             moduleCode: selectedModule.value.code,

@@ -82,8 +82,7 @@ export const updateEducator = async (req, res) => {
     }
 };
 
-// Return all students including non-enrolled students
-export const getAllStudentsByModule = async (req, res) => {
+export const getStudentsByModule = async (req, res) => {
     const moduleCode = req.params.moduleCode;
     let data = null;
 

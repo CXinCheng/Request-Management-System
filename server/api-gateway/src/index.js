@@ -4,9 +4,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 import {
     getAllModulesWithEducators,
+    getModulesWithRequestsByProfessor,
+} from "./module/moduleController.js";
+import {
     getAllStudentsByModule,
     getEnrolledStudentsByModule,
-} from "./module/moduleController.js";
+} from "./user/userController.js";
 
 // Access .env file
 dotenv.config();
@@ -26,8 +29,8 @@ const services = [
         target: `${process.env.USER_SERVICE_URL}/api/v1/user`,
     },
     {
-        route: "/api/request",
-        target: `${process.env.REQUEST_SERVICE_URL}/api/v1/request`,
+        route: "/api/requests",
+        target: `${process.env.REQUEST_SERVICE_URL}/api/v1/requests`,
     },
     {
         route: "/api/module",
@@ -48,12 +51,13 @@ services.forEach(({ route, target }) => {
 });
 
 // Aggreate API call
-app.use("/api/gateway/modules", getAllModulesWithEducators);
+app.use("/api/gateway/modules/all", getAllModulesWithEducators);
 app.use(
     "/api/gateway/students/enrolled/:moduleCode",
     getEnrolledStudentsByModule
 );
 app.use("/api/gateway/students/:moduleCode", getAllStudentsByModule);
+app.use("/api/gateway/modules/:profId", getModulesWithRequestsByProfessor);
 
 app.use((_req, res) => {
     res.status(404).json({

@@ -32,6 +32,7 @@ const requestApi = axios.create({
 export const requestApiService = {
     submit: (request) =>
         requestApi.post("/submit", request).then((res) => res.data),
+    getAllRequestsByModule: (moduleCode) => requestApi.get(`/module/${moduleCode}`).then((res) => res.data),
 };
 
 // User API
@@ -74,9 +75,11 @@ const gatewayApi = axios.create({
 });
 
 export const gatewayApiService = {
-    getAllModules: () => gatewayApi.get("/modules").then((res) => res.data),
+    getAllModules: () => gatewayApi.get("/modules/all").then((res) => res.data),
     getAllStudentsByModule: (moduleCode) =>
         gatewayApi.get(`/students/${moduleCode}`).then((res) => res.data),
     getEnrolledStudentsByModule: (moduleCode) =>
         gatewayApi.get(`/students/enrolled/${moduleCode}`).then((res) => res.data),
+    getModulesWithRequestsByProfessor: (profId) =>
+        gatewayApi.get(`/modules/${profId}`).then((res) => res.data),
 };

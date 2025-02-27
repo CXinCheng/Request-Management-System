@@ -181,3 +181,23 @@ export const updateRequestByProfessor = async (req, res) => {
     }
   
 };
+
+export const getAllRequestsByModule = async (req, res) => {
+    const { moduleCode } = req.params;
+    try {
+        const requests = await db.any(
+            `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, sr.module_code, r.user_id 
+            FROM request_management.requests r, request_management.sub_request sr
+            WHERE r.id = sr.main_request_id AND sr.module_code = $1`,
+            [moduleCode]
+        );
+        res.status(200).json({
+            success: true,
+            data: requests,
+        });
+    }
+    catch (error) {
+        console.error('Error fetching requests:', error);
+        res.status(500).json({ error: `Failed to fetch requests - ${error}` });
+    }
+}

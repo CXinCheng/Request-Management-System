@@ -1,6 +1,7 @@
 <template>
     <v-container>
         <v-card>
+            <v-card-title class="text-h5 mb-4"> My Modules </v-card-title>
             <v-card-text>
                 <v-data-table
                     :headers="headers"
@@ -24,7 +25,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { moduleApiService } from "@/utils/ApiService";
+import { gatewayApiService } from "@/utils/ApiService";
 import { useNotificationStore } from "@/utils/NotificationStore";
 import { useRouter } from "vue-router";
 
@@ -76,16 +77,23 @@ const headers = [
 ];
 
 const viewModule = (moduleCode) => {
-    router.push({ name: "ModuleView", params: { moduleCode: moduleCode } });
+    router.push({
+        name: "ModuleView",
+        params: {
+            moduleCode: moduleCode,
+            moduleName: modules.value.find((module) => module.code === moduleCode).name,
+        },
+    });
 };
 
 onMounted(async () => {
     try {
         loading.value = true;
         const profId = JSON.parse(localStorage.getItem("user")).matrix_id;
-        const response = await moduleApiService.getModulesByProfessor(profId);
+        const response =
+            await gatewayApiService.getModulesWithRequestsByProfessor(profId);
         if (response.success) {
-            modules.value = response.data;
+            modules.value = response.data.modules;
         } else {
             notificationStore.showNotification({
                 message: response.error,
