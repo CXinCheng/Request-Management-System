@@ -22,9 +22,10 @@
             prepend-icon=""
             variant="solo"
             required
+            :min="selectedStartDate"
           ></v-date-input>
-
         </v-col>
+
     </v-row>
 
     <hr />
@@ -41,7 +42,7 @@
     ]"
     ></v-data-table>
 
-    <v-btn @click="goToLeaveDetails" :disabled="!selectedItems.length">
+    <v-btn @click="goToLeaveDetails" :disabled="!selectedItems.length || !selectedEndDate || !selectedStartDate">
     Next
     </v-btn>
     
@@ -92,12 +93,6 @@ const formattedModules = computed(() => {
 });
 
 const fetchModules = () => {
-  if (selectedStartDate){
-    console.log("selectedStartDate:", selectedStartDate.value);
-  }
-  if (selectedEndDate){
-    console.log("selectedEndDate:", selectedEndDate.value);
-  }
   if (selectedStartDate && selectedEndDate){
     leaveDateStore.setSelectedLeaveDates({
       "startDate": selectedStartDate,
@@ -110,13 +105,13 @@ const goToLeaveDetails = () => {
   router.push('/leaveDetails');
 };
 
-watch(selectedEndDate, (newVal) => {
+watch(selectedStartDate, (newVal) => {
   if (newVal) {
     fetchModules();
   }
 });
 
-watch(selectedStartDate, (newVal) => {
+watch(selectedEndDate, (newVal) => {
   if (newVal) {
     fetchModules();
   }
