@@ -6,6 +6,7 @@ import {
     updateUser,
     getAllStudents,
     getUser,
+    getProfessors
 } from "../controllers/user/userController.js";
 
 const router = express.Router();
@@ -13,6 +14,7 @@ const router = express.Router();
 router.get("/all", getAllUsers);
 router.get("/all/professors", getAllProfessors);
 router.get("/all/students", getAllStudents);
+router.get("/professors", getProfessors);
 router.get("/:matrix_id", getUser);
 router.post("/:matrix_id", updateUser);
 router.delete("/:matrix_id", deleteUser);
