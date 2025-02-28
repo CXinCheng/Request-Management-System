@@ -1,8 +1,5 @@
 <template>
-
-    <v-container max-width="980">
-
-    <h5>Select Dates</h5>
+    <v-container>
     <v-row dense>
         <v-col cols="12" md="6">
           <v-date-input    
@@ -12,6 +9,7 @@
             prepend-inner-icon="$calendar"
             variant="solo"
             required
+            :max="selectedEndDate"
           ></v-date-input>
         </v-col>
 
@@ -25,29 +23,29 @@
             :min="selectedStartDate"
           ></v-date-input>
         </v-col>
-
     </v-row>
 
-    <hr />
-
-    <v-data-table :items="formattedModules"
-    v-model="selectedItems"
-    items-per-page="5"
-    item-value="module_code" 
-    show-select
+    <v-data-table 
+    :items="formattedModules"
     :headers="[
     { title: 'Module Code', key: 'module_code' },
     { title: 'Module Name', key: 'name' },
     { title: 'Professor Name', key: 'educator_name' }
     ]"
-    ></v-data-table>
+    v-model="selectedItems"
+    items-per-page="5"
+    item-value="module_code" 
+    return-object
+    show-select
+    >
+    </v-data-table>
+
 
     <v-btn @click="goToLeaveDetails" :disabled="!selectedItems.length || !selectedEndDate || !selectedStartDate">
-    Next
+      Next
     </v-btn>
     
-    </v-container>
-
+  </v-container>
 
 </template>
 
@@ -89,6 +87,7 @@ const formattedModules = computed(() => {
   return modules.value.map((module) => ({
     ...module,
     educator_name: module.professor ? module.professor.name : "N/A",
+    educator_id: module.professor ? module.professor.matrix_id : ""
   }));
 });
 
@@ -118,8 +117,6 @@ watch(selectedEndDate, (newVal) => {
 });
 
 watch(selectedItems, (newSelection) => {
-  const moduleSelected = {...newSelection}
-  console.log("Selected Items:", moduleSelected[0]); // Logs the selected objects
   moduleStore.setSelectedModules(newSelection)
 });
 
