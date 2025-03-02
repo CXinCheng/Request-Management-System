@@ -83,10 +83,21 @@
                 ></v-file-input>
             </v-col>
 
-            <v-col cols="12">
+            <v-col cols="6">
             <v-btn 
-            class="mt-2 bg-blue-darken-4 mb-4" 
-            type="submit" 
+            class="mt-2 mb-4" 
+            block 
+            variant="elevated"
+            size="x-large"
+            @click="goBackToModuleSelection"
+            >
+            Back</v-btn>
+            </v-col>
+
+            <v-col cols="6">
+            <v-btn 
+            class="mt-2 mb-4 bg-primary" 
+            type="submit"
             block 
             variant="elevated"
             :disabled="submit"
@@ -174,6 +185,10 @@ const faculty = JSON.parse(currentUser)?.faculty;
 const email = JSON.parse(currentUser)?.email; 
 const phoneNumber = JSON.parse(currentUser)?.contact;
 const reason = ref('');
+
+const goBackToModuleSelection = () => {
+  router.push('/leave');
+};
 
 watch(submit, async(newVal) => {
     if (!newVal) return
