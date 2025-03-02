@@ -30,6 +30,8 @@
     :headers="[
     { title: 'Module Code', key: 'module_code' },
     { title: 'Module Name', key: 'name' },
+    { title: 'Class Type', key: 'class_type' },
+    { title: 'Day', key: 'day_of_week' },
     { title: 'Professor Name', key: 'educator_name' }
     ]"
     v-model="selectedItems"
@@ -50,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, watch, computed, watchEffect } from "vue";
 import { gatewayApiService } from "@/utils/ApiService";
 import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
 import { useModuleStore } from "../stores/useModuleStore";
@@ -63,18 +65,63 @@ const modules = ref([]);
 const selectedStartDate = ref(null); 
 const selectedEndDate = ref(null); 
 
-const professsor = ref([]);
 const leaveDateStore = useLeaveDateStore()
 const moduleStore = useModuleStore()
 
+const getDayNumber = (day) => {
+    const daysMap = { 
+      "Sunday": 0, 
+      "Monday": 1, 
+      "Tuesday": 2, 
+      "Wednesday": 3, 
+      "Thursday": 4, 
+      "Friday": 5, 
+      "Saturday": 6 
+    };
+
+    return daysMap[day];
+  };
+  
+const filterByWeekday = (data, sDate, eDate) => {
+  const startDate = new Date(sDate)
+  const endDate = new Date(eDate)
+
+  const dateAfterAWeek = new Date(startDate);
+  dateAfterAWeek.setDate(startDate.getDate() + 7);
+
+  if (endDate >= dateAfterAWeek){
+    modules.value = allModules.value
+    // assumption made here is that all lectures/tutorials are recurring each week
+    return data
+  }
+
+  const startDay = startDate.getDay();
+  const endDay = endDate.getDay();  
+
+  return data.filter(item => {
+    const itemDay = getDayNumber(item.day_of_week);
+
+    if (startDay <= endDay) { 
+      console.log("normal range -- ", itemDay >= startDay && itemDay <= endDay)
+      return itemDay >= startDay && itemDay <= endDay;
+    } 
+    else { // Wrapped range (e.g., Friday - Monday) 
+      console.log("wrapped range -- ", itemDay >= startDay || itemDay <= endDay)
+      return itemDay >= startDay || itemDay <= endDay;
+    }
+  });
+};
+
+const allModules = ref(null)
+
 onMounted(async()=>{
   try { 
-    
     const studentID = JSON.parse(localStorage.getItem("user")).matrix_id;
     const response = await gatewayApiService.getModulesTakenByStudent(studentID);
+
     if (response.success) {
         modules.value = response.data;
-        console.log("modules.value: ", modules.value)
+        allModules.value = response.data
     } else {
       console.log("something went wrong: ", response)
     }
@@ -84,36 +131,36 @@ onMounted(async()=>{
 })
 
 const formattedModules = computed(() => {
-  return modules.value.map((module) => ({
+  let filtered = modules.value.map((module) => ({
     ...module,
     educator_name: module.professor ? module.professor.name : "N/A",
     educator_id: module.professor ? module.professor.matrix_id : ""
   }));
+
+  if (selectedStartDate.value && selectedEndDate.value) {
+    return filterByWeekday(filtered, selectedStartDate.value, selectedEndDate.value);
+  }
+
+  return filtered
 });
 
-const fetchModules = () => {
-  if (selectedStartDate && selectedEndDate){
-    leaveDateStore.setSelectedLeaveDates({
-      "startDate": selectedStartDate,
-      "endDate": selectedEndDate,
-    })
-  }
-};
+watchEffect(() => {
+  selectedItems.value = selectedItems.value.filter(selected =>
+    formattedModules.value.some(module => module.module_code === selected.module_code)
+  );
+});
 
 const goToLeaveDetails = () => {
   router.push('/leaveDetails');
 };
 
-watch(selectedStartDate, (newVal) => {
-  if (newVal) {
-    fetchModules();
-  }
-});
-
-watch(selectedEndDate, (newVal) => {
-  if (newVal) {
-    fetchModules();
-  }
+watch([selectedStartDate, selectedEndDate], () => {
+  if (selectedStartDate && selectedEndDate){
+    leaveDateStore.setSelectedLeaveDates({
+      "startDate": selectedStartDate,
+      "endDate": selectedEndDate,
+    })
+  } 
 });
 
 watch(selectedItems, (newSelection) => {
