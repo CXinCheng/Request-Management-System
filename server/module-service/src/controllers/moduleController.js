@@ -284,13 +284,25 @@ export const getModulesByStudent = async (req, res) => {
     const studentID = req.params.studentID;
     console.log("received request to getModules for student:", studentID)
     let data = null;
-    
+    if (studentID == null) {
+        return res.status(400).json({
+            success: false,
+            error: "Bad Request. Please provide student ID."
+        });
+    }
+
     try {
         data = await db.manyOrNone(
-            `SELECT um.module_code, m.name, m.educator_id FROM request_management.user_module_mapping as um
-            left join request_management.modules as m
+            `SELECT um.*, c.day_of_week, c.starting_time, c.ending_time
+            FROM ( SELECT um.module_code, um.class_no, um.class_type, m.educator_id, m.name
+            FROM request_management.user_module_mapping AS um
+            LEFT JOIN request_management.modules AS m
             ON um.module_code = m.code
-            WHERE user_matrix_id = $1`,
+            WHERE um.user_matrix_id = $1) AS um
+            JOIN request_management.classes c
+            ON um.module_code = c.module_code
+            AND um.class_no = c.class_no
+            AND um.class_type = c.class_type`,
             [studentID]
         );
 
