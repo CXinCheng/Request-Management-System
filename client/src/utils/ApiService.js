@@ -34,6 +34,12 @@ const requestApi = axios.create({
 export const requestApiService = {
     submit: (request) =>
         requestApi.post("/submit", request).then((res) => res.data),
+    getRequestsByStudent: (studentId) =>
+        requestApi.get(`/student/${studentId}`).then((res) => res.data),
+    getRequestDetailsByStudent: (studentId, requestId) =>
+        requestApi.get(`/student/${studentId}/${requestId}`).then((res) => res.data),
+    getRequestsByProfessor: (professorId) =>
+        requestApi.get(`/professor/${professorId}`).then((res) => res.data),
 };
 
 // User API
@@ -78,14 +84,6 @@ const gatewayApi = axios.create({
     baseURL: GATEWAY_BASE_URL,
     getAllModules: () => moduleApi.get("/all").then(res => res.data),
     updateEducator: (data) => moduleApi.post("updateEducator", data).then(res => res.data),
-
-    // Fetch user-specific modules from user_module_mapping table
-    getUserMappedModules: (userId) => 
-        moduleApi.get(`/user-module-mapping/${userId}`).then(res => res.data),
-
-    // Add user to a module in user_module_mapping table
-    addUserMappedModule: (userData) => 
-        moduleApi.post("/user-module-mapping", userData).then(res => res.data),
 });
 
 // Admin API
