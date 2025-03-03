@@ -8,20 +8,17 @@ import { moduleApiService, requestApiService } from "@/utils/ApiService";
  */
 const fetchUserMappedModules = async (userId) => {
   try {
-    console.log(`Fetching mapped modules for user: ${userId}`); // Debugging
-
-    const response = await moduleApiService.getUserMappedModules(userId);
-
-    console.log("API Response:", response); // Debugging
+    const response = await moduleApiService.getModulesByStudent(userId);
 
     if (!response || response.length === 0) {
       console.warn(`No mapped modules found for user ${userId}`);
       return [];
     }
 
-    return response.map(({ module_code, class_no }) => ({
+    return response.data.map(({ module_code, name, educator_id }) => ({
       module_code,
-      class_no,
+      name,         
+      educator_id,  
     }));
   } catch (error) {
     console.error("Error fetching user-mapped modules:", error);
@@ -32,22 +29,31 @@ const fetchUserMappedModules = async (userId) => {
 
 const fetchLeaveApplications = async (userId) => {
   try {
-    const response = await requestApiService.getUserRequests(userId);
+    const response = await requestApiService.getRequestsByStudent(userId);
+
+    console.log("API Response:", response);
 
     if (!response || response.length === 0) {
       console.warn(`No leave applications found for user ${userId}`);
       return [];
     }
 
-    return response.map(({ status, module_code }) => ({
+    return response.map(({ id, start_date_of_leave, end_date_of_leave, created_at, status, module_code, approver_name }) => ({
+      id,
+      start_date: start_date_of_leave,
+      end_date: end_date_of_leave,
+      submitted: created_at,
       status,
       module_code,
+      approver_name,
     }));
   } catch (error) {
     console.error("Error fetching leave applications:", error);
     return [];
   }
 };
+
+
 
 
 
@@ -60,29 +66,11 @@ const fetchLeaveApplications = async (userId) => {
 export const aggregateDashboardData = async (userId) => {
   try {
     const [modules, leaveApplications] = await Promise.all([
-      fetchUserMappedModules(userId),
-      //fetchLeaveApplications(userId),
+      fetchUserMappedModules(userId), // Calls the correct modules for the user
+      fetchLeaveApplications(userId), // Fetches leave applications
     ]);
 
-    // Group leave applications by module_code
-    // const leaveDataByModule = leaveApplications.reduce((acc, leave) => {
-    //   if (!acc[leave.module_code]) {
-    //     acc[leave.module_code] = { approved: 0, rejected: 0, pending: 0 };
-    //   }
-    //   acc[leave.module_code][leave.status.toLowerCase()] += 1;
-    //   return acc;
-    // }, {});
-
-    // Join leave application data with enrolled modules
-    // const leaveData = modules.map((module) => ({
-    //   module: module.module_code, 
-    //   approved: leaveDataByModule[module.module_code]?.approved || 0,
-    //   rejected: leaveDataByModule[module.module_code]?.rejected || 0,
-    //   pending: leaveDataByModule[module.module_code]?.pending || 0,
-    // }));
-    const leaveData = [];
-
-    return { modules, leaveData };
+    return { modules, leaveApplications }; // Return data in correct format
   } catch (error) {
     console.error("Error aggregating dashboard data:", error);
     throw error;

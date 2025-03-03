@@ -9,7 +9,8 @@
             <v-card-item>
               <div>
                 <h3 class="module-code"><strong>Code:</strong> {{ module.module_code }}</h3>
-                <p class="class-no"><strong>Class:</strong> {{ module.class_no }}</p>
+                <p class="module-name"><strong>Name:</strong> {{ module.name }}</p>
+                <p class="educator-id"><strong>Prof_id:</strong> {{ module.educator_id }}</p>
               </div>
             </v-card-item>
           </v-card>
