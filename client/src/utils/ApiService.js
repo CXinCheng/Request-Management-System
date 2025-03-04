@@ -69,6 +69,7 @@ export const moduleApiService = {
             .then((res) => res.data),
     getModulesByProfessor: (professorId) =>
         moduleApi.get(`/professor/modules/${professorId}`).then((res) => res.data),
+    getAllFaculties: () => moduleApi.get("/all/faculties").then((res) => res.data),
 };
 
 // Gateway API

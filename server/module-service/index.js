@@ -13,14 +13,12 @@ app.use(bodyParser.json());
 // Access .env file
 dotenv.config();
 
-// Routes
 app.use("/api/v1/module", moduleRoute);
 
 // DB connection
 await initialize();
 
-// Update Module DB
-updateService.updateModule(); 
+await updateService.initialize();
 
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {

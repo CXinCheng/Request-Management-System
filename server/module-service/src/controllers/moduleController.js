@@ -278,3 +278,22 @@ export const getModulesByProfessor = async (req, res) => {
         });
     }
 };
+
+export const getAllFaculties = async (req, res) => {
+    let data = null;
+    try {
+        data = await db.manyOrNone(
+            "SELECT * FROM request_management.faculties"
+        );
+        res.json({
+            success: true,
+            data: data,
+        });
+    } catch (error) {
+        console.error("Error fetching all faculties:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Error fetching all faculties",
+        });
+    }
+};

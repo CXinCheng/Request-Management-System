@@ -126,6 +126,7 @@
 import { ref, onMounted } from "vue";
 import { useNotificationStore } from "@/utils/NotificationStore";
 import { userApiService } from "@/utils/ApiService";
+import { facultyList } from "@/constants/facultyList";
 
 const notificationStore = useNotificationStore();
 
@@ -146,26 +147,7 @@ const passwordForm = ref({
     confirm: "",
 });
 
-const faculties = [
-    "Faculty of Arts & Social Sciences",
-    "School of Business",
-    "School of Computing",
-    "School of Continuing & Lifelong Education",
-    "Faculty of Dentistry",
-    "College of Design and Engineering",
-    "Duke-NUS Medical School",
-    "College of Humanities and Sciences",
-    "NUS College",
-    "NUS Graduate School",
-    "Faculty of Law",
-    "Yong Loo Lin School of Medicine (including Nursing)",
-    "Yong Siew Toh Conservatory of Music",
-    "Saw Swee Hock School of Public Health",
-    "Lee Kuan Yew School of Public Policy",
-    "Faculty of Science",
-    "Yale-NUS College",
-    "Institute of Systems Science",
-];
+const faculties = facultyList;
 
 const emailRules = [
     (v) => !!v || "Email is required",

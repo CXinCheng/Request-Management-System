@@ -3,8 +3,41 @@ import { db } from "../configs/db.js";
 import fs from "fs";
 
 class UpdateService {
-    academicYear = "2024-2025";
-    semester = 2;
+    DEFATUL_ACADEMIC_YEAR = "2024-2025";
+    DEFAULT_SEMESTER = 2;
+
+    constructor() {
+        this.academicYear = this.DEFATUL_ACADEMIC_YEAR;
+        this.semester = this.DEFAULT_SEMESTER;
+    }
+
+    async initialize() {
+        await this.loadSettings();
+        await this.updateFaculties();
+        await this.updateModule();
+    }
+
+    async loadSettings() {
+        try {
+            const academicYearSetting = await db.oneOrNone(
+                "SELECT value FROM request_management.system_settings WHERE key = 'academic_year'"
+            );
+
+            const semesterSetting = await db.oneOrNone(
+                "SELECT value FROM request_management.system_settings WHERE key = 'semester_number'"
+            );
+
+            this.academicYear =
+                academicYearSetting?.value || this.DEFATUL_ACADEMIC_YEAR;
+            this.semester = semesterSetting?.value
+                ? parseInt(semesterSetting.value)
+                : this.DEFAULT_SEMESTER;
+
+            // console.log(`Loaded settings: Academic Year: ${this.academicYear}, Semester: ${this.semester}`);
+        } catch (error) {
+            console.error("Error loading system settings:", error);
+        }
+    }
 
     async getModuleList() {
         try {
@@ -19,13 +52,13 @@ class UpdateService {
 
             // Dev
             const latestModuleList = await JSON.parse(
-                fs.readFileSync("data/moduleList copy.json", "utf-8")
+                fs.readFileSync("data/moduleList_latest.json", "utf-8")
             );
 
             // Filter modules based on semester
-            const filteredModuleList = latestModuleList.filter(
-                (module) => Array.from(module.semesters).includes(this.semester)
-            );     
+            const filteredModuleList = latestModuleList.filter((module) =>
+                Array.from(module.semesters).includes(this.semester)
+            );
 
             const localModuleList = await JSON.parse(
                 fs.readFileSync("data/moduleList.json", "utf-8")
@@ -64,61 +97,68 @@ class UpdateService {
 
     async updateModule() {
         const moduleListChanges = await this.getModuleList();
+        if (
+            moduleListChanges.added.length > 0 ||
+            moduleListChanges.updated.length > 0 ||
+            moduleListChanges.deleted.length > 0
+        ) {
+            let insertCount = 0;
+            let updateCount = 0;
+            let deleteCount = 0;
 
-        let insertCount = 0;
-        let updateCount = 0;
-        let deleteCount = 0;
-
-        console.log("Updating module database...");
-        for (let module of moduleListChanges.added) {
-            try {
-                await db.one(
-                    "INSERT INTO request_management.modules (code, name) VALUES ($1, $2) RETURNING code",
-                    [module.moduleCode, module.title]
-                );
-                insertCount++;
-            } catch (error) {
-                console.error(
-                    "Error processing module:",
-                    module.moduleCode,
-                    error
-                );
+            console.log("Updating module database...");
+            for (let module of moduleListChanges.added) {
+                try {
+                    await db.one(
+                        "INSERT INTO request_management.modules (code, name) VALUES ($1, $2) RETURNING code",
+                        [module.moduleCode, module.title]
+                    );
+                    insertCount++;
+                } catch (error) {
+                    console.error(
+                        "Error processing module:",
+                        module.moduleCode,
+                        error
+                    );
+                }
             }
-        }
-        for (let module of moduleListChanges.updated) {
-            try {
-                await db.none(
-                    "UPDATE request_management.modules SET name = $2 WHERE code = $1",
-                    [module.moduleCode, module.title]
-                );
-                updateCount++;
-            } catch (error) {
-                console.error(
-                    "Error processing module:",
-                    module.moduleCode,
-                    error
-                );
+            for (let module of moduleListChanges.updated) {
+                try {
+                    await db.none(
+                        "UPDATE request_management.modules SET name = $2 WHERE code = $1",
+                        [module.moduleCode, module.title]
+                    );
+                    updateCount++;
+                } catch (error) {
+                    console.error(
+                        "Error processing module:",
+                        module.moduleCode,
+                        error
+                    );
+                }
             }
-        }
-        for (let module of moduleListChanges.deleted) {
-            try {
-                await db.none(
-                    "DELETE FROM request_management.modules WHERE code = $1",
-                    [module.moduleCode]
-                );
-                deleteCount++;
-            } catch (error) {
-                console.error(
-                    "Error processing module:",
-                    module.moduleCode,
-                    error
-                );
+            for (let module of moduleListChanges.deleted) {
+                try {
+                    await db.none(
+                        "DELETE FROM request_management.modules WHERE code = $1",
+                        [module.moduleCode]
+                    );
+                    deleteCount++;
+                } catch (error) {
+                    console.error(
+                        "Error processing module:",
+                        module.moduleCode,
+                        error
+                    );
+                }
             }
+            if (insertCount > 0)
+                console.log(`Inserted ${insertCount} new modules.`);
+            if (updateCount > 0)
+                console.log(`Updated ${updateCount} existing modules.`);
+            if (deleteCount > 0) console.log(`Deleted ${deleteCount} modules.`);
+            console.log("Module database updated.");
         }
-        if (insertCount > 0) console.log(`Inserted ${insertCount} new modules.`);
-        if (updateCount > 0) console.log(`Updated ${updateCount} existing modules.`);
-        if (deleteCount > 0) console.log(`Deleted ${deleteCount} modules.`);
-        console.log("Module database updated.");
     }
 
     async getModuleDetails(moduleCode) {
@@ -162,7 +202,11 @@ class UpdateService {
         try {
             if (moduleDetails.timeTable) {
                 for (let lesson of moduleDetails.timeTable) {
-                    const validLessonTypes = ['Lecture', 'Tutorial', 'Laboratory'];
+                    const validLessonTypes = [
+                        "Lecture",
+                        "Tutorial",
+                        "Laboratory",
+                    ];
                     if (validLessonTypes.includes(lesson.lessonType)) {
                         await db.none(
                             "INSERT INTO request_management.classes (module_code, class_no, class_type, day_of_week, starting_time, ending_time) VALUES ($1, $2, $3, $4, $5, $6)",
@@ -198,6 +242,56 @@ class UpdateService {
         } catch (error) {
             console.error("Error updating module classes:", error);
             throw error;
+        }
+    }
+
+    async updateFaculties() {
+        // Production
+        // const response = await fetch(
+        //     `https://api.nusmods.com/v2/${this.academicYear}/facultyDepartments.json`
+        // );
+        // if (!response.ok) {
+        //     throw new Error(`HTTP error! status: ${response.status}`);
+        // }
+        // const faculties = await response.json();
+
+        // Dev
+        const latestFacultyList = await JSON.parse(
+            fs.readFileSync("data/facultyList_latest.json", "utf-8")
+        );
+
+        const localFacultyList = await JSON.parse(
+            fs.readFileSync("data/facultyList.json", "utf-8")
+        );
+
+        const latestJSON = JSON.stringify(latestFacultyList);
+        const localJSON = JSON.stringify(localFacultyList);
+
+        if (latestJSON !== localJSON) {
+            const facultySet = new Set();
+            Object.values(latestFacultyList).forEach((faculty) => {
+                faculty.forEach((f) => facultySet.add(f));
+            });
+            const facultyList = Array.from(facultySet);
+            // console.log(facultyList);
+
+            try {
+                await db.none("DELETE FROM request_management.faculties");
+                for (let faculty of facultyList) {
+                    await db.none(
+                        "INSERT INTO request_management.faculties (name) VALUES ($1)",
+                        [faculty]
+                    );
+                }
+                console.log("Faculties updated.");
+                fs.writeFileSync(
+                    "data/facultyList.json",
+                    JSON.stringify(latestFacultyList, null, 2)
+                );
+            } catch (error) {
+                console.error("Error updating faculties:", error);
+                throw error;
+            }
         }
     }
 

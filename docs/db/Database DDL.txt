@@ -1,6 +1,18 @@
 DROP SCHEMA IF EXISTS request_management CASCADE;
 CREATE SCHEMA request_management;
 
+DROP TABLE IF EXISTS request_management.system_settings;
+CREATE TABLE request_management.system_settings (
+    key VARCHAR(255) PRIMARY KEY,
+    value VARCHAR(255) NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS request_management.faculties;
+CREATE TABLE request_management.faculties (
+    name VARCHAR(255) PRIMARY KEY
+);
+
 DROP TYPE IF EXISTS request_management.user_role CASCADE;
 CREATE TYPE request_management.user_role AS ENUM ('Student', 'Professor', 'Admin');
 DROP TABLE IF EXISTS request_management.users CASCADE;
@@ -95,6 +107,12 @@ CREATE TABLE request_management.otp_store (
     PRIMARY KEY (user_email, otp_code),
     FOREIGN KEY (user_email) REFERENCES request_management.users(email)
 );
+
+-- Insert Stsystem Settings
+INSERT INTO request_management.system_settings ("key",value,updated_at) VALUES
+	 ('academic_year','2024-2025','2025-03-04 14:44:32.879057'),
+	 ('semester_number','2','2025-03-04 14:44:49.251633'),
+	 ('faculty_last_updated','2025-01-04 14:45:51.767','2025-01-04 14:45:51.767');
 
 -- Insert Users Records
 INSERT INTO request_management.users ("name",matrix_id,email,"role","password") VALUES
