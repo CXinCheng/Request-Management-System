@@ -43,7 +43,7 @@ export const getModulesWithRequestsByProfessor = async (req, res) => {
                 modules: moduleData.data.data.map(
                     module => ({
                         ...module,
-                        requests: requestServiceData.data.filter(
+                        requests: requestServiceData.data.data.filter(
                             request => request.module_code === module.code
                         ).length,
                     })

@@ -33,6 +33,8 @@ export const requestApiService = {
     submit: (request) =>
         requestApi.post("/submit", request).then((res) => res.data),
     getAllRequestsByModule: (moduleCode) => requestApi.get(`/module/${moduleCode}`).then((res) => res.data),
+    getAllRequestsByProfessor: (professorId) =>
+        requestApi.get(`/professor/${professorId}`).then((res) => res.data),
 };
 
 // User API
