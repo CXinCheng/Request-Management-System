@@ -1,6 +1,6 @@
 <template>
   <div class="leave-application-container">
-    <h2>My Leave Applications</h2>
+    <h2 class="section-title">Leave Applications</h2>
 
     <v-container class="table-container" fluid>
       <v-data-table
@@ -14,15 +14,18 @@
         dense
       >
 
-        <template v-slot:item.start_date_of_leave="{ item }">
+        <template 
+        v-slot:item.start_date_of_leave="{ item }">
           {{ formatDate(item.start_date) }}
         </template>
 
-        <template v-slot:item.end_date_of_leave="{ item }">
+        <template 
+        v-slot:item.end_date_of_leave="{ item }">
           {{ formatDate(item.end_date) }}
         </template>
 
-        <template v-slot:item.created_at="{ item }">
+        <template 
+        v-slot:item.created_at="{ item }">
           {{ formatDate(item.created_at) }}
         </template>
 
@@ -101,23 +104,61 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* Leave Application Section Styling */
 .leave-application-container {
-  padding: 16px;
-  max-width: 90%;
+  max-width: 95%;
   margin: auto;
+  padding: 24px;
+  background-color: #e3f2fd; /* Light blue background */
+  border-radius: 12px;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
 }
 
-.table-container {
-  width: 100%;
-  margin-top: 16px;
+/* Section Title */
+.section-title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #0d47a1; /* Deep blue */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  border-bottom: 3px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 10px;
 }
 
-.v-data-table {
-  font-size: 14px;
+/* Table Header - Bold & Centered */
+.v-data-table >>> th {
+  font-weight: bold;
+  text-align: center !important;
+  background-color: #1976d2 !important; /* Dark blue header */
+  color: white !important;
 }
 
-.v-toolbar {
-  background-color: #8692ff;
+/* Table Row Alternating Background Colors */
+.row-light {
+  background-color: #b8b8c2;
 }
 
+.row-dark {
+  background-color: #4c5adf;
+}
+
+/* Center Text in All Cells */
+.center-text {
+  text-align: center !important;
+}
+
+/* Status Column - Bold & Color Adjustments */
+.status-cell {
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #0d47a1; /* Deep Blue */
+}
+
+/* Actions Column Styling */
+.actions-column {
+  text-align: center;
+}
 </style>
