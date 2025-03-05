@@ -1,6 +1,5 @@
 import { moduleApiService, requestApiService } from "@/utils/ApiService";
-
-
+import dayjs from "dayjs";
 /**
  * Fetch modules for a specific user from the user_module_mapping table.
  * @param {string} userId - User ID from local storage
@@ -40,9 +39,9 @@ const fetchLeaveApplications = async (userId) => {
 
     return response.map(({ id, start_date_of_leave, end_date_of_leave, created_at, status, module_code, approver_name }) => ({
       id,
-      start_date: start_date_of_leave,
-      end_date: end_date_of_leave,
-      submitted: created_at,
+      start_date: dayjs(start_date_of_leave).format("DD-MM-YYYY HH:mm:ss"),
+      end_date: dayjs(end_date_of_leave).format("DD-MM-YYYY HH:mm:ss"),
+      created_at,
       status,
       module_code,
       approver_name,
@@ -69,8 +68,8 @@ export const aggregateDashboardData = async (userId) => {
       fetchUserMappedModules(userId), // Calls the correct modules for the user
       fetchLeaveApplications(userId), // Fetches leave applications
     ]);
-
-    return { modules, leaveApplications }; // Return data in correct format
+    console.log("Leave Applications Response:", leaveApplications);
+    return { modules, leaveData: leaveApplications || []}; // Return data in correct format
   } catch (error) {
     console.error("Error aggregating dashboard data:", error);
     throw error;
