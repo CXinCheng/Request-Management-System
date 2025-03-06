@@ -130,11 +130,14 @@ const config = ref({
                         average: { show: false },
                         total: {
                             show: true,
-                            text: "",
+                            text: "Total Requests",
+                            offsetY: -10,
+                            fontSize: 20,
+                            color: "#1A1A1A",
                             value: {
                                 color: "#1A1A1A",
-                                offsetY: 4,
-                                fontSize: 64,
+                                offsetY: 10,
+                                fontSize: 30,
                             },
                         },
                     },
