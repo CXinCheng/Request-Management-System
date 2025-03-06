@@ -40,7 +40,7 @@ const route = useRoute();
 const router = useRouter();
 
 const isAuthRoute = computed(() => {
-    return ["/", "/login", "/register", "/reset", "/test"].includes(route.path);
+    return ["/", "/login", "/register", "/reset"].includes(route.path);
 });
 
 const pageTitle = ref("");

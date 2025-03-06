@@ -13,7 +13,6 @@ import AdminUsersView from "./modules/admin/views/AdminUsersView.vue";
 import AdminModuleView from "./modules/admin/views/AdminModuleView.vue";
 import ProfileView from "./modules/user/ProfileView.vue";
 import ModuleView from "./modules/module/ModuleView.vue";
-import TestView from "./TestView.vue";
 import ProfDashboardView from "./modules/dashboard/views/ProfDashboardView.vue";
 
 const isAuthenticated = () => {
@@ -121,12 +120,6 @@ const routes = [
         name: "ModuleView",
         meta: { requiresAuth: true, title: "Module" },
     },
-    {
-        path: "/test",
-        component: TestView,
-        name: "TestView",
-        meta: { requiresAuth: false, title: "Test" },
-    }
 ];
 
 const router = createRouter({
