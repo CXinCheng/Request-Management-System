@@ -48,6 +48,7 @@ CREATE TABLE request_management.classes (
     day_of_week request_management.day_of_week,                     -- Integer representing day of the week
     starting_time TIME NOT NULL,                                    -- Start time of the class
     ending_time TIME NOT NULL,                                      -- End time of the class
+    weeks JSONB NOT NULL,                                         -- Array of weeks
     class_no VARCHAR(10),                                           -- Class number
 
     PRIMARY KEY (module_code, class_type, class_no, day_of_week),

@@ -1,6 +1,7 @@
 import { log } from "console";
 import { db } from "../configs/db.js";
 import fs from "fs";
+import { stringify } from "querystring";
 
 class UpdateService {
     DEFATUL_ACADEMIC_YEAR = "2024-2025";
@@ -187,6 +188,7 @@ class UpdateService {
                             day: timetable.day,
                             startTime: timetable.startTime,
                             endTime: timetable.endTime,
+                            weeks: JSON.stringify(timetable.weeks),
                         };
                     }),
             };
@@ -209,7 +211,7 @@ class UpdateService {
                     ];
                     if (validLessonTypes.includes(lesson.lessonType)) {
                         await db.none(
-                            "INSERT INTO request_management.classes (module_code, class_no, class_type, day_of_week, starting_time, ending_time) VALUES ($1, $2, $3, $4, $5, $6)",
+                            "INSERT INTO request_management.classes (module_code, class_no, class_type, day_of_week, starting_time, ending_time, weeks) VALUES ($1, $2, $3, $4, $5, $6, $7)",
                             [
                                 moduleCode,
                                 lesson.classNo,
@@ -217,6 +219,7 @@ class UpdateService {
                                 lesson.day,
                                 lesson.startTime,
                                 lesson.endTime,
+                                lesson.weeks,
                             ]
                         );
                     }
