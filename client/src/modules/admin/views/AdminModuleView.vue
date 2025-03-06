@@ -333,9 +333,9 @@ const openAssignDialog = async (module) => {
 async function openEnrollDialog(module) {
     selectedModule.value = module;
     enrollDialog.value = true;
-    await fetchClasses(); // fix concurrent requests issue, possibly due to the SSH tunnel
+    fetchClasses();
 
-    await fetchStudents();
+    await fetchStudents(); // await keyword is needed to ensure selectedStudents are loaded
     selectedStudents.value = students.value
         .filter((student) => student.classes.some((c) => c.classNo !== null))
         .map((student) => ({
