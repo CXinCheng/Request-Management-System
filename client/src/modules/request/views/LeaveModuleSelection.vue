@@ -1,5 +1,6 @@
 <template>
     <v-container>
+    <div class="text-h5 pb-4"> AY24/25 SEMESTER 2 </div>
     <v-row dense>
         <v-col cols="12" md="6">
           <v-date-input    
@@ -9,7 +10,9 @@
             prepend-inner-icon="$calendar"
             variant="solo"
             required
+            :min="startDateOfSem"
             :max="selectedEndDate"
+            :allowed-dates="allowedDates"
           ></v-date-input>
         </v-col>
 
@@ -21,6 +24,8 @@
             variant="solo"
             required
             :min="selectedStartDate"
+            :max="endDateOfSem"
+            :allowed-dates="allowedDates"
           ></v-date-input>
         </v-col>
     </v-row>
@@ -32,7 +37,9 @@
     { title: 'Module Name', key: 'name' },
     { title: 'Class Type', key: 'class_type' },
     { title: 'Day', key: 'day_of_week' },
-    { title: 'Professor Name', key: 'educator_name' }
+    { title: 'Professor Name', key: 'educator_name' },
+    { title: 'Weeks', key: 'weeks' }
+    
     ]"
     v-model="selectedItems"
     items-per-page="5"
@@ -69,7 +76,7 @@ const leaveDateStore = useLeaveDateStore()
 const moduleStore = useModuleStore()
 
 const getDayNumber = (day) => {
-    const daysMap = { 
+  const daysMap = { 
       "Sunday": 0, 
       "Monday": 1, 
       "Tuesday": 2, 
@@ -78,10 +85,66 @@ const getDayNumber = (day) => {
       "Friday": 5, 
       "Saturday": 6 
     };
+  return daysMap[day];
+};
 
-    return daysMap[day];
-  };
+const weeksInSemester = {
+  0: { "start": "2025-02-22" }, // 0 -- recess week 
+  1: { "start": "2025-01-13" },
+  2: { "start": "2025-01-20" },
+  3: { "start": "2025-01-27" },
+  4: { "start": "2025-02-03" },
+  5: { "start": "2025-02-10" },
+  6: { "start": "2025-02-17" },
+  7: { "start": "2025-03-03" },
+  8: { "start": "2025-03-10" },
+  9: { "start": "2025-03-17" },
+  10: { "start": "2025-03-24" },
+  11: { "start": "2025-03-31" },
+  12: { "start": "2025-04-07" }, 
+  13: { "start": "2025-04-14" } 
+};
+
+const startDateOfSem = new Date(weeksInSemester[1].start);
+startDateOfSem.setHours(0,0,0,0)
+
+const endDateOfSem = new Date(weeksInSemester[13].start);
+endDateOfSem.setDate(endDateOfSem.getDate() + 6);
+
+const allowedDates = (dateString)=>{
+  const date = new Date(dateString);
+
+  const recessWeekStart = new Date(weeksInSemester[0].start); 
+  recessWeekStart.setHours(0,0,0,0);
+  const recessWeekEnd = new Date(weeksInSemester[0].start);
+  recessWeekEnd.setDate(recessWeekEnd.getDate() + 7);
+
+  // Block Recess Week
+  if (date >= recessWeekStart && date <= recessWeekEnd) {
+    return false;
+  }
   
+  return true;
+}
+
+const getWeekOfSem = (date) => {
+  const normalizedInputDate = new Date(date);
+  normalizedInputDate.setHours(0, 0, 0, 0);
+
+  for (let week in weeksInSemester) {
+    const startDate = new Date(weeksInSemester[week].start);
+    startDate.setHours(0, 0, 0, 0);
+    const nextWeekStart = new Date(startDate);
+    nextWeekStart.setDate(nextWeekStart.getDate() + 7);
+
+    if (date >= startDate && date < nextWeekStart) {
+      return week
+    }
+  }
+
+  console.error("Date is out of semester range: ", date)
+};
+
 const filterByWeekday = (data, sDate, eDate) => {
   const startDate = new Date(sDate)
   const endDate = new Date(eDate)
@@ -91,7 +154,6 @@ const filterByWeekday = (data, sDate, eDate) => {
 
   if (endDate >= dateAfterAWeek){
     modules.value = allModules.value
-    // assumption made here is that all lectures/tutorials are recurring each week
     return data
   }
 
@@ -134,11 +196,33 @@ const formattedModules = computed(() => {
   let filtered = modules.value.map((module) => ({
     ...module,
     educator_name: module.professor ? module.professor.name : "N/A",
-    educator_id: module.professor ? module.professor.matrix_id : ""
+    educator_id: module.professor ? module.professor.matrix_id : "" 
   }));
 
   if (selectedStartDate.value && selectedEndDate.value) {
-    return filterByWeekday(filtered, selectedStartDate.value, selectedEndDate.value);
+    const weekOfStartDate = getWeekOfSem(selectedStartDate.value)
+    const weekOfEndDate = getWeekOfSem(selectedEndDate.value)
+
+    // Apply first filter on weeks 
+    filtered = filtered.filter(item => {
+      const weekOfModulesObj = item.weeks;
+      let isWithinRange = false;
+      
+      for (let index in weekOfModulesObj) {
+        const week = weekOfModulesObj[index]
+
+        if (parseInt(week) >= weekOfStartDate && parseInt(week) <= weekOfEndDate) {
+          isWithinRange = true;
+          break;
+        } 
+      }
+
+      return isWithinRange;
+    });
+
+
+    // Apply first filter on days
+    filtered = filterByWeekday(filtered, selectedStartDate.value, selectedEndDate.value);
   }
 
   return filtered

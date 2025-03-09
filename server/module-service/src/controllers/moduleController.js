@@ -293,7 +293,7 @@ export const getModulesByStudent = async (req, res) => {
 
     try {
         data = await db.manyOrNone(
-            `SELECT um.*, c.day_of_week, c.starting_time, c.ending_time
+            `SELECT um.*, c.day_of_week, c.starting_time, c.ending_time, c.weeks
             FROM ( SELECT um.module_code, um.class_no, um.class_type, m.educator_id, m.name
             FROM request_management.user_module_mapping AS um
             LEFT JOIN request_management.modules AS m
