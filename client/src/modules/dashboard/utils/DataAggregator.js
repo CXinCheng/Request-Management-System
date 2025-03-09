@@ -1,4 +1,4 @@
-import { moduleApiService, requestApiService } from "@/utils/ApiService";
+import { gatewayApiService, requestApiService } from "@/utils/ApiService";
 import dayjs from "dayjs";
 /**
  * Fetch modules for a specific user from the user_module_mapping table.
@@ -7,17 +7,17 @@ import dayjs from "dayjs";
  */
 const fetchUserMappedModules = async (userId) => {
   try {
-    const response = await moduleApiService.getModulesByStudent(userId);
+    const response = await gatewayApiService.getModulesTakenByStudent(userId);
 
     if (!response || response.length === 0) {
       console.warn(`No mapped modules found for user ${userId}`);
       return [];
     }
 
-    return response.data.map(({ module_code, name, educator_id }) => ({
+    return response.data.map(({ module_code, name, professor }) => ({
       module_code,
       name,         
-      educator_id,  
+      educator_name: professor?.name || "N/A", // ✅ Extract only the professor's name  
     }));
   } catch (error) {
     console.error("Error fetching user-mapped modules:", error);
