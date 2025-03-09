@@ -1,6 +1,7 @@
 <template>
     <v-container>
-    <div class="text-h5 pb-4"> AY24/25 SEMESTER 2 </div>
+    <div class="text-h5 pb-1"> AY24/25 SEMESTER 2 </div>
+    <div class="text-subtitle-2 pb-4"> You are currently in Week {{ currentWeek }} </div>
     <v-row dense>
         <v-col cols="12" md="6">
           <v-date-input    
@@ -144,6 +145,8 @@ const getWeekOfSem = (date) => {
 
   console.error("Date is out of semester range: ", date)
 };
+
+const currentWeek = getWeekOfSem(new Date())
 
 const filterByWeekday = (data, sDate, eDate) => {
   const startDate = new Date(sDate)
