@@ -1,5 +1,8 @@
 <template>
     <div v-if="request">
+      <button @click="goBack" class="back-button">
+        <v-icon>mdi-arrow-left</v-icon> Back
+      </button>
       <h1 class="text-xl font-bold">Request Details</h1>
       <hr>
       <p><strong>Status:</strong> {{ request.status }}</p>
@@ -66,7 +69,19 @@
       formatDate(date) {
         return date ? dayjs(date).format("DD MMM YYYY, HH:mm:ss") : "-";
       },
+      goBack() {
+        this.$router.push({ name: 'RequestListView' });
+      },
     },
   };
   </script>
-  
+
+  <style scoped>
+  .back-button {
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+  }
+  </style>
+
