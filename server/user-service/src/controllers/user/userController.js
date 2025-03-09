@@ -194,3 +194,36 @@ export const deleteUser = async (req, res) => {
         });
     }
 };
+
+export const getProfessors = async (req, res) => {
+    try {
+        const ids = req.query.ids?.split(',');
+        console.log("ids received:", ids)
+        if (!ids || ids.length === 0) {
+            return res.status(400).json({ error: "No professor Matrix IDs provided" });
+        }
+
+        const professors = await db.manyOrNone(
+            `SELECT name, matrix_id, email, faculty, contact_number 
+            FROM request_management.users 
+            WHERE role = 'Professor'
+            AND matrix_id = ANY($1)`,
+            [ids]
+        );
+
+        if (professors.length == 0) {
+            return res.status(404).json({
+                success: false,
+                error: "No Professor Information Found"
+            });
+        }
+
+        res.json({
+            success: true,
+            data: professors
+        });
+
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+};

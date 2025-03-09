@@ -1,14 +1,10 @@
 <template>
-  <div class="request-leave-page">
-    <ProgressBar/>
-    <LeaveRequestForm :selectedModules="selectedModules" />
-  </div>
+    <LeaveRequestForm />
 </template>
 
 <script>
 import { defineComponent } from 'vue';
 import LeaveRequestForm from "../components/LeaveApplicationForm.vue"
-import ProgresBar from "../components/ProgressBar.vue"
 import { useModuleStore } from '../stores/useModuleStore';
 import { useLeaveDateStore } from '../stores/useLeaveDatesStore';
 

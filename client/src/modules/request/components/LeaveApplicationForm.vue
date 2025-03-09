@@ -1,308 +1,263 @@
 <template>
-    <div class="request-leave-form">
-      
-    <form @submit.prevent="submitForm">
+<v-container v-if="!isLoading">
 
-    <div class="user-particulars">
-        <div class="form-group">
-        <label for="school">School</label>
-        <input
-            type="text"
-            id="school"
-            v-model="formData.school"
-            disabled
-        />
-        </div>
-        <div class="form-group">
-        <label for="matriculationId">Matriculation ID</label>
-        <input
-            type="text"
-            id="matriculationId"
-            v-model="formData.matriculationId"
-            disabled
-        />
-        </div>
-        <div class="form-group">
-        <label for="enrollment">Enrollment</label>
-        <input
-            type="text"
-            id="enrollment"
-            v-model="formData.enrollment"
-            disabled
-        />
-        </div>
-        <div class="form-group">
-        <label for="email">Email</label>
-        <input
-            type="text"
-            id="email"
-            v-model="formData.email"
-            disabled
-        />
-        </div>
-    </div>
-    
-    <!-- Modules --> 
-    <div class="form-group modules">
-  
-      <v-expansion-panels>
-        <v-expansion-panel color="white">
-        <v-expansion-panel-title>
-          <strong>You Are Applying For The Following Module(s):</strong>
-        </v-expansion-panel-title>
+    <v-row>
 
-        <v-expansion-panel-text>
-          <v-list lines="two">
+    <v-col cols="9"> 
+    <form>
+        <v-row>
+            <v-col cols="12" sm="6">
+                <v-text-field
+                v-model="school"
+                hint="School is a non-editable field"
+                label="School"
+                variant="outlined"
+                disabled         
+                ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+                <v-text-field
+                v-model="faculty"
+                hint="To edit, please go to profile settings."
+                label="Faculty"
+                variant="outlined"
+                persistent-hint
+                disabled
+                ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="4">
+                <v-text-field
+                v-model="matriculationId"
+                hint="Matriculation ID is a non-editable field"
+                label="Matriculation ID"
+                variant="outlined"
+                disabled
+                ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="4">
+                <v-text-field
+                v-model="email"
+                hint="To edit, please go to profile settings."
+                label="Email"
+                variant="outlined"
+                persistent-hint
+                disabled
+                ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="4">
+                <v-text-field
+                v-model="phoneNumber"
+                hint="To edit, please go to profile settings."
+                label="Phone Number"
+                variant="outlined"
+                persistent-hint
+                disabled
+                ></v-text-field>
+            </v-col>
+
+            <v-col cols="12">
+                <v-textarea
+                v-model="reason"
+                label="Please input your reason for leave"
+                row-height="25"
+                rows="3"
+                variant="outlined"
+                :required="true"
+                auto-grow
+                ></v-textarea>
+            </v-col>
+
+            <v-col cols="12">
+                <v-file-input
+                    v-model="file"
+                    label="Upload File"
+                    variant="outlined"
+                    accept=".jpg,.png,.pdf,.mp4"
+                    hint="Accepted File Format .jpg,.png,.pdf"
+                    show-size
+                    required
+                ></v-file-input>
+            </v-col>
+
+            <v-col cols="6">
+            <v-btn 
+            class="mt-2 mb-4" 
+            block 
+            variant="elevated"
+            size="x-large"
+            @click="goBackToModuleSelection"
+            >
+            Back</v-btn>
+            </v-col>
+
+            <v-col cols="6">
+            <v-btn 
+            class="mt-2 mb-4 bg-primary" 
+            type="submit"
+            block 
+            variant="elevated"
+            :disabled="submit"
+            :loading="submit"
+            size="x-large"
+            @click="submit = !submit"
+            >
+            Submit</v-btn>
+            
+            </v-col>
+        </v-row>
+    </form>
+    </v-col>
+
+    <v-col cols="3"> 
+    <v-card class="mx-auto">
+    <v-card-title class="bg-blue-darken-4">Modules Selected</v-card-title>
+
+    <v-card-text>
+        <v-list> Start Date: {{ formattedStartDate }}  </v-list>
+        <v-list> End Date: {{ formattedEndDate }}  </v-list>
+
+        <v-list>
             <v-list-item
-              v-for="mod in selectedModules"
-              :key="mod.code"
-              :title="mod.code + ' ' + mod.name"
-              :subtitle="'Taught by ' + mod.professor"
-            ></v-list-item>
-          </v-list>
-        </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
+              v-for="mod in moduleStore.selectedModules"
+              :key="mod.module_code"
+              :title="mod.module_code"
+              :subtitle="mod.name"
+        ></v-list-item>
+        </v-list>
 
-    </div>
+    </v-card-text>
+    </v-card>
+    </v-col>
 
-    <!-- Reason -->
-    <div class="form-group reason">
-        <label for="reason">Reason *</label>
-        <textarea
-        id="reason"
-        v-model="formData.reason"
-        placeholder="Please input reason here"
-        required
-        ></textarea>
-    </div>
+    </v-row>
 
-    <!-- File Upload -->
-    <div class="form-group file-upload">
-        <label for="fileUpload">File Upload *</label>
-        <div class="file-upload-box">
-        <input
-            type="file"
-            id="fileUpload"
-            @change="handleFileUpload"
-            accept=".jpg,.png,.pdf,.mp4"
-            required
-        />
-        <p>Choose a file or drag & drop it here</p>
-        <small>JPEG, PNG, PDF, and MP4 formats, up to 50MB</small>
-    </div>
-
-  </div>
-
-  <button type="submit" class="submit-button" :disabled="isLoading">
-      <span v-if="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-      <span v-if="isLoading"> Loading...</span>
-      <span v-else>Submit</span>
-  </button>
-
-  </form>
-
-
-  <div v-if="submitStatus" :class="['status-message', submitStatus.success ? 'success' : 'error']">
-    <p>{{ submitStatus.message }}</p>
-  </div>
-
-  </div>
+    </v-container>
 </template>
-  
-<script>
-import { requestApiService } from "@/utils/ApiService";
+
+<script setup>
+import { ref, onMounted, watch, computed, nextTick } from "vue";
 import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
+import { useModuleStore } from "../stores/useModuleStore";
+import { useNotificationStore } from "@/utils/NotificationStore";
+import { useRouter } from "vue-router";
+import { requestApiService } from "@/utils/ApiService";
 
-export default {
-name: "LeaveRequestForm",
-props: {
-  selectedModules: {
-    type: Array,
-    required: true,
-  },
-},
-data() {
-  // redirect user back to select modules if no modules selected 
-  if (this.selectedModules.length == 0) {
-    this.$router.push({ path: '/leave' });
+const leaveDateStore = useLeaveDateStore()
+const moduleStore = useModuleStore()
+const notify = useNotificationStore();
+const router = useRouter();
+const isLoading = ref(true);
+const file = ref(null);
+
+let submit = ref(false);
+
+const isDataReady = computed(() => {
+    return (
+        moduleStore.selectedModules.length > 0 &&
+        leaveDateStore.selectedLeaveDates?.startDate &&
+        leaveDateStore.selectedLeaveDates?.endDate
+    );
+});
+
+onMounted(async() => {
+    await nextTick(); 
+    if (!isDataReady.value) {
+        router.replace({ path: '/leave' })
+    } else {
+        isLoading.value = false;
+    }
+});
+
+watch(isDataReady, (newVal) => {
+  if (!newVal) {
+    router.replace({ path: "/leave" });
   }
-  const currentUser = localStorage.getItem("user");
-  console.log(this.selectedModules)
-  return {
-    formData: {
-        student: JSON.parse(currentUser)?.name,
-        school: "National University of Singapore",
-        enrollment: JSON.parse(currentUser)?.faculty,
-        email: JSON.parse(currentUser)?.email,
-        matriculationId: JSON.parse(currentUser)?.matrix_id || "-",
-        file: null,
-        reason: '',
-    },
-    submitStatus: null,
-    isLoading: null,
-  };
-},
-methods: {
-  handleFileUpload(event) {
-    this.formData.file = event.target.files[0];
-  },
-  async submitForm() {
-    this.isLoading = true
-    this.submitStatus = null;
+});
 
+const currentUser = localStorage.getItem("user");
+const school = ref('National University of Singapore'); 
+const matriculationId = JSON.parse(currentUser)?.matrix_id; 
+const faculty = JSON.parse(currentUser)?.faculty; 
+const email = JSON.parse(currentUser)?.email; 
+const phoneNumber = JSON.parse(currentUser)?.contact;
+const reason = ref('');
+
+const goBackToModuleSelection = () => {
+  router.push('/leave');
+};
+
+watch(submit, async(newVal) => {
+    if (!newVal) return
+
+    if (!file.value || reason.value.length == 0){
+        submit.value = false
+        return
+    }
+    
     const moduleIDs = []
     const approverIDs = []
 
-    const leaveDateStore = useLeaveDateStore();
-    const leaveDates = {...leaveDateStore}
-    const startDate = leaveDates.selectedLeaveDates.startDate
-    const endDate = leaveDates.selectedLeaveDates.endDate
-
-    this.selectedModules.forEach((selectedMod)=>{
-      const moduleID = {...selectedMod}.code
-      const profID = {...selectedMod}.professorID
-
-      moduleIDs.push(moduleID)
-      approverIDs.push(profID)
+    moduleStore.selectedModules.forEach((selectedMod)=>{
+        moduleIDs.push({...selectedMod}.module_code)
+        approverIDs.push({...selectedMod}.educator_id)
     })
 
-    let formData = new FormData()
+    const startDateISO = new Date(leaveDateStore.selectedLeaveDates.startDate).toISOString().split('T')[0];
+    const endDateISO = new Date(leaveDateStore.selectedLeaveDates.endDate).toISOString().split('T')[0];
 
-    formData.append("student", this.formData.matriculationId)
-    formData.append("reasonOfLeave", this.formData.reason)
-    formData.append("startDateOfLeave", startDate)
-    formData.append("endDateOfLeave", endDate)
+    let formData = new FormData()
+    formData.append("student", matriculationId)
+    formData.append("reasonOfLeave", reason.value)
+    formData.append("startDateOfLeave", startDateISO)
+    formData.append("endDateOfLeave", endDateISO)
     formData.append("modules", moduleIDs)
     formData.append("approvers", approverIDs)
-    formData.append("uploadFile", this.formData.file)
-    
+    formData.append("uploadFile", file.value)
 
+    let response = ''
     try {
-      let response = await requestApiService.submit(formData);
-      this.submitStatus = { success: true, message: 'Form submitted successfully! \n Redirecting you to Request Page.' };
-      setTimeout(() => {
-        this.$router.push({ path: '/requests' });
-      }, 3000);
+        response = await requestApiService.submit(formData);
+        notify.showNotification({
+            message: "Request submitted successfully! Redirecting you to view all your requests.",
+            color: "success",
+        });
 
-    } catch (error) {
-      this.submitStatus = { success: false, message: 'Submission failed. Try again! \n Redirecting you to Submit a New Request.' };
-      setTimeout(() => {
-        this.$router.push({ path: '/leave' });
-      }, 3000);
+        setTimeout(() => {
+            router.replace({ path: "/requests" });
+        }, 3000);
+    } catch {
+        notify.showNotification({
+            message: response || "Error submitting requests. Please try again.",
+            color: "error",
+        });
+
+        submit.value = false
     }
 
-    this.formData.reason = ''
-    this.isLoading = null
+});
 
-    }  
+const formattedStartDate = computed(() =>
+  leaveDateStore.selectedLeaveDates?.startDate
+    ? new Date(leaveDateStore.selectedLeaveDates.startDate).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+      })
+    : "N/A"
+);
 
-    },
-};
+const formattedEndDate = computed(() =>
+  leaveDateStore.selectedLeaveDates?.endDate
+    ? new Date(leaveDateStore.selectedLeaveDates.endDate).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+      })
+    : "N/A"
+);
+
 </script>
-  
-<style scoped>
-
-.request-leave-form {
-  max-width: 1000px;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
-}
-
-.modules {
-  margin-bottom: 1.5rem;
-}
-
-h1 {
-  text-align: left;
-  font-size: 1.8rem;
-  margin-bottom: 2rem;
-}
-
-.user-particulars {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.user-particulars .form-group {
-  flex: 1 1 calc(50% - 1rem);
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-textarea {
-  width: 100%;
-  height: 80px;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  resize: none;
-}
-
-input[type="text"],
-input[type="date"],
-input[type="file"] {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.file-upload-box {
-  border: 2px dashed #ccc;
-  padding: 1.5rem;
-  text-align: center;
-  border-radius: 8px;
-}
-
-.file-upload-box p {
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
-}
-
-button.submit-button {
-  background-color: #007bff;
-  color: #fff;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  display: block;
-  width: 100%;
-}
-
-button.submit-button:hover {
-  background-color: #0056b3;
-}
-
-.status-message {
-  padding: 10px;
-  margin-top: 20px;
-  border-radius: 5px;
-  font-weight: bold;
-  text-align: center;
-}
-
-.success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.error {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
-
-
-</style>
-  
