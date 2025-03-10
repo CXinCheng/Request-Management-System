@@ -64,7 +64,7 @@
             </v-card-text>
         </v-card>
 
-        <v-dialog v-model="dialog" max-width="800px">
+        <v-dialog v-model="dialog" max-width="900px">
             <v-card>
                 <v-card-title>
                     <v-row class="mx-2 mt-2"
@@ -119,7 +119,7 @@
             </v-card>
         </v-dialog>
 
-        <v-dialog v-model="enrollDialog" max-width="800px">
+        <v-dialog v-model="enrollDialog" max-width="1100px">
             <v-card>
                 <v-card-title>
                     <v-row class="mx-2 mt-2">
@@ -144,42 +144,60 @@
                         :users="students"
                         :loading="loading"
                         :search="searchStudents"
-                        :initial-sort="studentsTableSort"
                         :no-data-text="
                             students.length
                                 ? ''
                                 : 'This module has no classes in current semester'
                         "
                     >
-                        <template v-slot:class_no="{ item }">
+                        <template
+                            v-for="header in studentsTableHeaders"
+                            v-slot:[header.key]="{ item }"
+                        >
                             <div
                                 class="d-flex align-center justify-space-between"
                             >
                                 <v-select
+                                    max-width="150px"
                                     v-if="
                                         selectedStudents.find(
                                             (c) =>
                                                 c.matrix_id === item.matrix_id
                                         )
                                     "
-                                    :items="classes.map((c) => c.class_no)"
+                                    :items="
+                                        Array.from(
+                                            classes.find(
+                                                (c) =>
+                                                    c.classType === header.type
+                                            )?.classNo
+                                        )
+                                    "
                                     :value="
-                                        item.class_no || classes[0]?.class_no
+                                        item.classes.find(
+                                            (c) => c.classType === header.type
+                                        )?.classNo || null
                                     "
                                     @update:modelValue="
-                                        (val) =>
-                                            (selectedStudents.find(
-                                                (s) =>
-                                                    s.matrix_id ===
+                                        selectedStudents
+                                            .find(
+                                                (c) =>
+                                                    c.matrix_id ===
                                                     item.matrix_id
-                                            ).class_no = val)
+                                            )
+                                            .classes.find(
+                                                (c) =>
+                                                    c.classType === header.type
+                                            ).classNo = $event
                                     "
                                     density="compact"
                                     hide-details
+                                    placeholder="Not Assigned"
                                 />
                                 <template v-else> Not enrolled </template>
                             </div>
                         </template>
+
                         <template v-slot:actions="{ item }">
                             <div class="d-flex align-center justify-center">
                                 <v-checkbox-btn
@@ -191,7 +209,7 @@
                                         )
                                     "
                                     @update:modelValue="
-                                        handleStudentSelection(item.matrix_id)
+                                        handleStudentSelection(item)
                                     "
                                 />
                             </div>
@@ -213,7 +231,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { moduleApiService, gatewayApiService } from "@/utils/ApiService";
 import UserTable from "../components/UsersTable.vue";
 import { useNotificationStore } from "@/utils/NotificationStore";
@@ -268,18 +286,14 @@ const headers = [
         headerProps: {
             style: "font-weight: 600; font-size:20px;",
         },
+        sort: (a, b) => (
+            a === 'Not Assigned' ? 1 : 
+            b === 'Not Assigned' ? -1 : 
+            a.localeCompare(b)
+        )
     },
 ];
-const studentsTableHeaders = [
-    {
-        title: "Class",
-        key: "class_no",
-        align: "start",
-        class: "font-weight-bold",
-        headerProps: { style: "font-weight: 600; font-size:20px;" },
-    },
-];
-const studentsTableSort = ref([{ key: "class_no", order: "desc" }]);
+const studentsTableHeaders = ref([]);
 
 const removeEducator = async (module) => {
     try {
@@ -319,25 +333,22 @@ const openAssignDialog = async (module) => {
 async function openEnrollDialog(module) {
     selectedModule.value = module;
     enrollDialog.value = true;
-    await fetchClasses(); // fix concurrent requests issue, possibly due to the SSH tunnel
+    fetchClasses();
 
-    if (classes.value.length > 0) {
-        await fetchStudents();
-        selectedStudents.value = students.value
-            .filter((student) => student.class_no)
-            .map((student) => ({
-                matrix_id: student.matrix_id,
-                class_no: student.class_no,
-            }));
-        originalSelectedStudents.value = selectedStudents.value.map(
-            (student) => ({
-                matrix_id: student.matrix_id,
-                class_no: student.class_no,
-            })
-        );
-    } else {
-        students.value = [];
-    }
+    await fetchStudents(); // await keyword is needed to ensure selectedStudents are loaded
+    selectedStudents.value = students.value
+        .filter((student) => student.classes.some((c) => c.classNo !== null))
+        .map((student) => ({
+            matrix_id: student.matrix_id,
+            classes: student.classes,
+        }));
+    originalSelectedStudents.value = selectedStudents.value.map((student) => ({
+        matrix_id: student.matrix_id,
+        classes: student.classes.map((c) => ({
+            classType: c.classType,
+            classNo: c.classNo,
+        })),
+    }));
 }
 
 async function fetchClasses() {
@@ -347,12 +358,34 @@ async function fetchClasses() {
             selectedModule.value.code
         );
         if (response.success) {
-            classes.value = response.data
-                .map((classItem) => ({
-                    class_no: classItem.class_no,
-                }))
-                .sort((a, b) => a.class_no.localeCompare(b.class_no));
+            classes.value = response.data.reduce(
+                (acc, { class_type, class_no }) => {
+                    const existing = acc.find(
+                        (c) => c.classType === class_type
+                    );
+                    if (existing) {
+                        existing.classNo.add(class_no);
+                    } else {
+                        acc.push({
+                            classType: class_type,
+                            classNo: new Set([class_no]),
+                        });
+                    }
+                    return acc;
+                },
+                []
+            );
         }
+        studentsTableHeaders.value = [];
+        classes.value.forEach(({ classType }) => {
+            studentsTableHeaders.value.push({
+                type: `${classType}`,
+                title: `${classType} Class`,
+                key: `${classType.toLowerCase()}_class_no`,
+                align: "start",
+                headerProps: { style: "font-weight: 600; font-size:20px;" },
+            });
+        });
     } catch (error) {
         console.error("Error fetching classes:", error);
     } finally {
@@ -369,12 +402,26 @@ async function fetchStudents() {
         if (response.success) {
             students.value = response.data.students.map((student) => ({
                 ...student,
-                class_no: student.class_no ?? null,
+                classes: classes.value.length
+                    ? classes.value.map((c) => {
+                          const classNo = student.classes.find(
+                              (s) => s.class_type === c.classType
+                          );
+                          return {
+                              classType: c.classType,
+                              classNo: classNo ? classNo.class_no : null,
+                          };
+                      })
+                    : student.classes.map((c) => ({
+                          classType: c.class_type,
+                          classNo: c.class_no,
+                      })),
             }));
         }
+        
     } catch (error) {
         notify.showNotification({
-            message: response.message || "Error fetching students",
+            message: "Error fetching students",
             color: "error",
         });
         console.error("Error fetching students:", error);
@@ -384,44 +431,23 @@ async function fetchStudents() {
 }
 
 async function saveEnrollments() {
+    const invalidStudents = selectedStudents.value.filter((student) =>
+        student.classes.every((cls) => cls.classNo === null)
+    );
+
+    if (invalidStudents.length > 0) {
+        notify.showNotification({
+            message: "Each student must be assigned to at least one class",
+            color: "warning",
+        });
+        return;
+    }
     try {
         loading.value = true;
-        const modifiedStudents = {
-            addedStudents: selectedStudents.value
-                .filter(
-                    (student) =>
-                        !originalSelectedStudents.value.some(
-                            (original) =>
-                                original.matrix_id === student.matrix_id
-                        )
-                )
-                .map((student) => ({
-                    matrix_id: student.matrix_id,
-                    class_no: student.class_no,
-                })),
-
-            updatedStudents: selectedStudents.value
-                .filter((student) => {
-                    const original = originalSelectedStudents.value.find(
-                        (o) => o.matrix_id === student.matrix_id
-                    );
-                    return original && original.class_no !== student.class_no;
-                })
-                .map((student) => ({
-                    matrix_id: student.matrix_id,
-                    class_no: student.class_no,
-                })),
-
-            deletedStudents: originalSelectedStudents.value
-                .filter(
-                    (original) =>
-                        !selectedStudents.value.some(
-                            (student) =>
-                                student.matrix_id === original.matrix_id
-                        )
-                )
-                .map((student) => student.matrix_id),
-        };
+        const modifiedStudents = findModifiedStudents(
+            selectedStudents.value,
+            originalSelectedStudents.value
+        );
 
         const response = await moduleApiService.updateEnrollmentByModule({
             moduleCode: selectedModule.value.code,
@@ -444,7 +470,7 @@ async function saveEnrollments() {
         }
     } catch (error) {
         notify.showNotification({
-            message: response.message || "Error updating enrollment",
+            message: "Error updating enrollment",
             color: "error",
         });
         console.error("Error enrolling students:", error);
@@ -453,18 +479,84 @@ async function saveEnrollments() {
     }
 }
 
-const handleStudentSelection = (matrix_id) => {
+const handleStudentSelection = (item) => {
     const index = selectedStudents.value.findIndex(
-        (s) => s.matrix_id === matrix_id
+        (s) => s.matrix_id === item.matrix_id
     );
     if (index !== -1) {
         selectedStudents.value.splice(index, 1);
     } else {
         selectedStudents.value.push({
-            matrix_id: matrix_id,
-            class_no: classes.value[0]?.class_no,
+            matrix_id: item.matrix_id,
+            classes: classes.value.length
+                ? classes.value.map((c) => ({
+                      classType: c.classType,
+                      classNo: null,
+                  }))
+                : [{ classType: "No Class", classNo: "0" }],
         });
     }
+};
+
+// const handleClassSelection = (student, classType, classNo) => {
+//     const seletedStudent = selectedStudents.value.find(
+//         (s) => s.matrix_id === student.matrix_id
+//     );
+//     const index = seletedStudent.classes.findIndex(
+//         (c) => c.classType === classType
+//     );
+//     if (index === -1) {
+//         seletedStudent.classes.push({ classType, classNo });
+//     } else {
+//         seletedStudent.classes[index].classNo = classNo;
+//     }
+// };
+
+const findModifiedStudents = (selectedStudents, originalSelectedStudents) => {
+    const result = {
+        addedStudents: [],
+        updatedStudents: [],
+        deletedStudents: [],
+    };
+
+    const originalMap = new Map(
+        originalSelectedStudents.map((student) => [student.matrix_id, student])
+    );
+    const selectedMap = new Map(
+        selectedStudents.map((student) => [student.matrix_id, student])
+    );
+
+    for (const student of selectedStudents) {
+        const original = originalMap.get(student.matrix_id);
+        if (!original) {
+            result.addedStudents.push({
+                matrix_id: student.matrix_id,
+                classes: student.classes,
+            });
+        } else {
+            const hasChanges = student.classes.some((studentClass) => {
+                const originalClass = original.classes.find(
+                    (c) => c.classType === studentClass.classType
+                );
+                return (
+                    !originalClass ||
+                    originalClass.classNo !== studentClass.classNo
+                );
+            });
+            if (hasChanges) {
+                result.updatedStudents.push({
+                    matrix_id: student.matrix_id,
+                    classes: student.classes,
+                });
+            }
+        }
+    }
+
+    result.deletedStudents = originalSelectedStudents
+        .filter((original) => !selectedMap.has(original.matrix_id))
+        .map((student) => student.matrix_id);
+
+    return result;
 };
 
 const assignProfessor = async (professor) => {

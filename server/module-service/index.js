@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
-import { initialize, close } from './src/configs/db.js';
+import { initialize, close } from "./src/configs/db.js";
 import updateService from "./src/services/updateService.js";
 import moduleRoute from "./src/routes/moduleRoute.js";
 import cors from 'cors';
@@ -14,21 +14,19 @@ app.use(bodyParser.json());
 // Access .env file
 dotenv.config();
 
-// Routes
 app.use("/api/v1/module", moduleRoute);
 app.use(cors());
 
 // DB connection
-        await initialize();
+await initialize();
 
-// Update Module DB
-updateService.updateModule();
+await updateService.initialize();
 
-        const PORT = process.env.PORT || 3003;
-        app.listen(PORT, () => {
+const PORT = process.env.PORT || 3003;
+app.listen(PORT, () => {
     console.log(`Module service is running on port ${PORT}.`);
-        });
+});
 
-process.on('SIGTERM', () => {
+process.on("SIGTERM", () => {
     close();
 });

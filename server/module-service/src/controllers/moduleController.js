@@ -62,7 +62,7 @@ export const getAllModulesWithNumbersOfEnrolledStudents = async (req, res) => {
     let data = null;
     try {
         data = await db.manyOrNone(
-            `SELECT code, name, educator_id, COUNT(user_matrix_id) students FROM request_management.modules
+            `SELECT code, name, educator_id, COUNT(DISTINCT user_matrix_id) students FROM request_management.modules
             LEFT JOIN request_management.user_module_mapping
             ON request_management.modules.code = request_management.user_module_mapping.module_code
             GROUP BY request_management.modules.code
@@ -119,7 +119,7 @@ export const updateEducator = async (req, res) => {
     }
 };
 
-export const getAllStudentsByModule = async (req, res) => {
+export const getStudentsByModule = async (req, res) => {
     const moduleCode = req.params.moduleCode;
     let data = null;
 
@@ -137,7 +137,7 @@ export const getAllStudentsByModule = async (req, res) => {
         }
 
         data = await db.manyOrNone(
-            "SELECT user_matrix_id, class_no FROM request_management.user_module_mapping WHERE module_code = $1",
+            "SELECT user_matrix_id, class_type, class_no FROM request_management.user_module_mapping WHERE module_code = $1",
             [moduleCode]
         );
 
@@ -195,7 +195,7 @@ export const getClassesByModule = async (req, res) => {
 export const updateEnrollmentByModule = async (req, res) => {
     const moduleCode = req.params.moduleCode;
     const { addedStudents, deletedStudents, updatedStudents } = req.body;
-    
+
     try {
         // Check if module exists
         const module = await db.oneOrNone(
@@ -212,10 +212,19 @@ export const updateEnrollmentByModule = async (req, res) => {
         // Add students
         if (addedStudents && addedStudents.length > 0) {
             for (let student of addedStudents) {
-                await db.none(
-                    "INSERT INTO request_management.user_module_mapping (user_matrix_id, module_code, class_no) VALUES ($1, $2, $3)",
-                    [student.matrix_id, moduleCode, student.class_no]
-                );
+                for (let classItem of student.classes) {
+                    if (classItem.classNo !== null) {
+                        await db.none(
+                            "INSERT INTO request_management.user_module_mapping (user_matrix_id, module_code, class_no, class_type) VALUES ($1, $2, $3, $4)",
+                            [
+                                student.matrix_id,
+                                moduleCode,
+                                classItem.classNo,
+                                classItem.classType,
+                            ]
+                        );
+                    }
+                }
             }
         }
 
@@ -232,10 +241,38 @@ export const updateEnrollmentByModule = async (req, res) => {
         // Update students
         if (updatedStudents && updatedStudents.length > 0) {
             for (let student of updatedStudents) {
-                await db.none(
-                    "UPDATE request_management.user_module_mapping SET class_no = $1 WHERE user_matrix_id = $2 AND module_code = $3",
-                    [student.class_no, student.matrix_id, moduleCode]
-                );
+                for (let classItem of student.classes) {
+                    const existingClass = await db.oneOrNone(
+                        "SELECT * FROM request_management.user_module_mapping WHERE user_matrix_id = $1 AND module_code = $2 AND class_type = $3",
+                        [student.matrix_id, moduleCode, classItem.classType]
+                    );
+                    if (existingClass) {
+                        await db.none(
+                            "UPDATE request_management.user_module_mapping SET class_no = $1 WHERE user_matrix_id = $2 AND module_code = $3 AND class_type = $4",
+                            [
+                                classItem.classNo,
+                                student.matrix_id,
+                                moduleCode,
+                                classItem.classType,
+                            ]
+                        );
+                    } else if (classItem.classNo !== null) {
+                        await db.none(
+                            "INSERT INTO request_management.user_module_mapping (user_matrix_id, module_code, class_no, class_type) VALUES ($1, $2, $3, $4)",
+                            [
+                                student.matrix_id,
+                                moduleCode,
+                                classItem.classNo,
+                                classItem.classType,
+                            ]
+                        );
+                    } else {
+                        await db.none(
+                            "DELETE FROM request_management.user_module_mapping WHERE user_matrix_id = $1 AND module_code = $2 AND class_type = $3",
+                            [student.matrix_id, moduleCode, classItem.classType]
+                        );
+                    }
+                }
             }
         }
         return res.status(200).json({
@@ -254,7 +291,7 @@ export const updateEnrollmentByModule = async (req, res) => {
 export const getModulesByProfessor = async (req, res) => {
     const professorId = req.params.professorId;
     let data = null;
-    
+
     try {
         data = await db.manyOrNone(
             `SELECT code, name, COUNT(user_matrix_id) students FROM request_management.modules
@@ -268,13 +305,32 @@ export const getModulesByProfessor = async (req, res) => {
 
         res.json({
             success: true,
-            data: data
+            data: data,
         });
     } catch (error) {
         console.error("Error fetching modules by professor:", error);
         return res.status(500).json({
             success: false,
-            error: "Error fetching modules by professor"
+            error: "Error fetching modules by professor",
+        });
+    }
+};
+
+export const getAllFaculties = async (req, res) => {
+    let data = null;
+    try {
+        data = await db.manyOrNone(
+            "SELECT * FROM request_management.faculties"
+        );
+        res.json({
+            success: true,
+            data: data,
+        });
+    } catch (error) {
+        console.error("Error fetching all faculties:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Error fetching all faculties",
         });
     }
 };

@@ -34,6 +34,9 @@ const requestApi = axios.create({
 export const requestApiService = {
     submit: (request) =>
         requestApi.post("/submit", request).then((res) => res.data),
+    getAllRequestsByModule: (moduleCode) => requestApi.get(`/module/${moduleCode}`).then((res) => res.data),
+    getAllRequestsByProfessor: (professorId) =>
+        requestApi.get(`/professor/${professorId}`).then((res) => res.data),
     getRequestsByStudent: (studentId) =>
         requestApi.get(`/student/${studentId}`).then((res) => res.data),
     getRequestDetailsByStudent: (studentId, requestId) =>
@@ -77,6 +80,7 @@ export const moduleApiService = {
         moduleApi.get(`/professor/modules/${professorId}`).then((res) => res.data),
     getModulesByStudent: (studentID) =>
         moduleApi.get(`/students/${studentID}/modules`).then((res) => res.data),
+    getAllFaculties: () => moduleApi.get("/all/faculties").then((res) => res.data),
 };
 
 // Gateway API
@@ -92,11 +96,13 @@ const adminApi = axios.create({
 });
 
 export const gatewayApiService = {
-    getAllModules: () => gatewayApi.get("/modules").then((res) => res.data),
+    getAllModules: () => gatewayApi.get("/modules/all").then((res) => res.data),
     getAllStudentsByModule: (moduleCode) =>
         gatewayApi.get(`/students/${moduleCode}`).then((res) => res.data),
     getEnrolledStudentsByModule: (moduleCode) =>
         gatewayApi.get(`/students/enrolled/${moduleCode}`).then((res) => res.data),
     getModulesTakenByStudent: (studentID) =>
         gatewayApi.get(`/students/${studentID}/modules`).then((res) => res.data),
+    getModulesWithRequestsByProfessor: (profId) =>
+        gatewayApi.get(`/modules/${profId}`).then((res) => res.data),
 };

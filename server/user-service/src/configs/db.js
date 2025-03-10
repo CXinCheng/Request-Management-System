@@ -1,86 +1,137 @@
 import pgPromise from "pg-promise";
 import dotenv from "dotenv";
-import { Client } from 'ssh2';
-import fs from 'fs';
-import net from "net";
+import { createTunnel } from "tunnel-ssh";
+import fs from "fs";
 
 dotenv.config();
 
 const pgp = pgPromise();
 
-const sshConfig = {
+const tunnelOptions = {
+    autoClose: true,
+};
+
+const serverOptions = {
+    host: "127.0.0.1",
+    port: 0,
+};
+
+const sshOptions = {
     host: process.env.EC2_HOST,
     port: 22,
     username: process.env.EC2_USERNAME,
     privateKey: fs.readFileSync(process.env.EC2_PRIVATE_KEY_PATH),
+    keepaliveInterval: 10000,
+};
+
+const forwardOptions = {
+    srcAddr: "127.0.0.1",
+    dstAddr: process.env.DATABASE_URL,
+    dstPort: process.env.DATABASE_PORT,
 };
 
 const databaseConfig = {
-    host: 'localhost',
-    port: process.env.EC2_FORWARD_PORT, // local port to forward to
+    host: "127.0.0.1",
     database: process.env.DATABASE_NAME,
     user: process.env.DATABASE_USERNAME,
     password: process.env.DATABASE_PASSWORD,
-    idleTimeoutMillis: 0,
-};
-
-const rdsConfig = {
-    host: process.env.DATABASE_URL,
-    port: process.env.DATABASE_PORT,
+    max: 10,
+    idleTimeoutMillis: 10000,
+    connectionTimeoutMillis: 2000,
 };
 
 let db = null;
-let sshClient = null;
+let sshTunnel = null;
+let isReconnecting = false;
+let reconnectionPromise = null;
 
 const initialize = async () => {
     return new Promise((resolve, reject) => {
-        sshClient = new Client();
+        if (db) {
+            return resolve(db);
+        }
 
-        sshClient.on('ready', () => {
-            sshClient.forwardOut(
-                'localhost',
-                databaseConfig.port,
-                rdsConfig.host,
-                rdsConfig.port,
-                (err, stream) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-
-                    const server = net.createServer(socket => {
-                        socket.pipe(stream);
-                        stream.pipe(socket);
-                    }).listen(databaseConfig.port, 'localhost', () => {
-                        console.log(`SSH tunnel on port ${databaseConfig.port} established`);
-                        
-                        db = pgp({
-                            ...databaseConfig,
-                            host: 'localhost'
-                        });
-                        
-                        resolve(db);
-                    });
-                }
-            );
-        });
-
-        sshClient.on('error', (err) => {
-            console.error('SSH connection error:', err);
-            reject(err);
-        });
-
-        sshClient.connect(sshConfig);
+        createTunnel(tunnelOptions, serverOptions, sshOptions, forwardOptions)
+            .then(([server]) => {
+                sshTunnel = server;
+                // console.log("SSH tunnel established on port:", server.address().port);
+                
+                db = pgp({ ...databaseConfig, port: server.address().port });
+                resolve(db);
+            })
+            .catch((err) => {
+                console.error("SSH tunnel error:", err);
+                reject(err);
+            });
     });
 };
 
-const close = () => {
-    if (sshClient) {
-        sshClient.end();
+const reconnect = async () => {
+    // console.log("Starting reconnection process...");
+    
+    if (sshTunnel) {
+        try {
+            sshTunnel.close();
+        } catch (e) {
+            console.error("Error closing SSH tunnel:", e);
+        }
+        sshTunnel = null;
     }
+
     if (db) {
         pgp.end();
+        db = null;
+    }
+
+    try {
+        await initialize();
+        return true;
+    } catch (error) {
+        console.error("Reconnection failed:", error);
+        return false;
+    } finally {
+        isReconnecting = false;
+        reconnectionPromise = null;
     }
 };
 
-export { initialize, close, db };
+const ensureConnection = async () => {
+    if (db && sshTunnel) {
+        try {
+            await db.one("SELECT 1 AS connected");
+            return true;
+        } catch (error) {
+            // console.log("Connection test failed");
+        }
+    }
+    
+    if (isReconnecting) {
+        return reconnectionPromise;
+    }
+    
+    isReconnecting = true;
+    reconnectionPromise = reconnect();
+    
+    return reconnectionPromise;
+};
+
+const close = () => {
+    if (db) {
+        pgp.end();
+        db = null;
+    }
+
+    if (sshTunnel) {
+        try {
+            sshTunnel.close();
+        } catch (e) {
+            console.error("Error closing SSH tunnel:", e);
+        }
+        sshTunnel = null;
+    }
+    
+    isReconnecting = false;
+    reconnectionPromise = null;
+};
+
+export { initialize, close, db, ensureConnection };

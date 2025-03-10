@@ -8,7 +8,7 @@
                     <span
                         @click="goBack"
                         class="text-decoration-underline cursor-pointer text-blue"
-                        >My Modules</span
+                        >Dashboard</span
                     >
                     <span> > {{ route.params.moduleCode }}</span>
                 </div>
@@ -58,12 +58,11 @@ watch(
         } else {
             pageTitle.value = route.meta?.title || "";
         }
-        console.log("Page title:", pageTitle.value);
     },
     { immediate: true }
 );
 
 const goBack = () => {
-    router.push({ name: "MyModuleView" });
+    router.push({ name: "ProfDashboardView" });
 };
 </script>

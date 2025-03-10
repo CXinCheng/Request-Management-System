@@ -12,8 +12,8 @@ import EditRequestView from "./modules/request/views/EditRequest.vue";
 import AdminUsersView from "./modules/admin/views/AdminUsersView.vue";
 import AdminModuleView from "./modules/admin/views/AdminModuleView.vue";
 import ProfileView from "./modules/user/ProfileView.vue";
-import MyModuleView from "./modules/module/MyModuleView.vue";
 import ModuleView from "./modules/module/ModuleView.vue";
+import ProfDashboardView from "./modules/dashboard/views/ProfDashboardView.vue";
 
 const isAuthenticated = () => {
     const token = localStorage.getItem("token");
@@ -109,13 +109,13 @@ const routes = [
         meta: { requiresAuth: true, title: "Profile Settings" },
     },
     {
-        path: "/professor/modules",
-        component: MyModuleView,
-        name: "MyModuleView",
-        meta: { requiresAuth: true, title: "My Modules" },
+        path: "/professor/dashboard",
+        component: ProfDashboardView,
+        name: "ProfDashboardView",
+        meta: { requiresAuth: true, title: "Dashboard" },
     },
     {
-        path: "/professor/module/:moduleCode",
+        path: "/professor/module/:moduleCode/:moduleName",
         component: ModuleView,
         name: "ModuleView",
         meta: { requiresAuth: true, title: "Module" },

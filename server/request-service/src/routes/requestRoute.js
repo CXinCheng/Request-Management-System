@@ -7,15 +7,39 @@ import {
     getAllRequestsByProfessor, 
     updateRequestByStudent, 
     updateRequestByProfessor,
-    deleteRequestByStudent
+    deleteRequestByStudent,
+    getAllRequestsByModule,
 } from '../controllers/requestController.js';
+import { ensureConnection } from "../configs/db.js";
+
+const dbConnectionMiddleware = async (req, res, next) => {
+    try {
+      const connectionActive = await ensureConnection();
+      if (!connectionActive) {
+        return res.status(503).json({
+          success: false,
+          error: "Database connection unavailable"
+        });
+      }
+      next();
+    } catch (error) {
+      console.error("DB middleware error:", error);
+      res.status(503).json({
+        success: false,
+        error: "Database service unavailable"
+      });
+    }
+  };
 
 const router = express.Router();
+router.use(dbConnectionMiddleware);
 
 router.get('/student/:studentId', getAllRequestsByStudent);
 router.get('/student/:studentId/:requestId', getRequestDetailsByStudent);
 router.put('/student/:requestId', updateRequestByStudent);
 router.delete('/student/:requestId', deleteRequestByStudent);
+
+router.get('/module/:moduleCode', getAllRequestsByModule);
 
 router.get('/professor/:profId', getAllRequestsByProfessor);
 router.put('/professor/:profId/:requestId', updateRequestByProfessor);

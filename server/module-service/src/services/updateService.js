@@ -1,12 +1,48 @@
+import { log } from "console";
 import { db } from "../configs/db.js";
 import fs from "fs";
+import { stringify } from "querystring";
 
 class UpdateService {
-    academicYear = "2024-2025";
-    semester = 1;
+    DEFATUL_ACADEMIC_YEAR = "2024-2025";
+    DEFAULT_SEMESTER = 2;
+
+    constructor() {
+        this.academicYear = this.DEFATUL_ACADEMIC_YEAR;
+        this.semester = this.DEFAULT_SEMESTER;
+    }
+
+    async initialize() {
+        await this.loadSettings();
+        await this.updateFaculties();
+        await this.updateModule();
+    }
+
+    async loadSettings() {
+        try {
+            const academicYearSetting = await db.oneOrNone(
+                "SELECT value FROM request_management.system_settings WHERE key = 'academic_year'"
+            );
+
+            const semesterSetting = await db.oneOrNone(
+                "SELECT value FROM request_management.system_settings WHERE key = 'semester_number'"
+            );
+
+            this.academicYear =
+                academicYearSetting?.value || this.DEFATUL_ACADEMIC_YEAR;
+            this.semester = semesterSetting?.value
+                ? parseInt(semesterSetting.value)
+                : this.DEFAULT_SEMESTER;
+
+            // console.log(`Loaded settings: Academic Year: ${this.academicYear}, Semester: ${this.semester}`);
+        } catch (error) {
+            console.error("Error loading system settings:", error);
+        }
+    }
 
     async getModuleList() {
         try {
+            // Production
             // const response = await fetch(
             //     `https://api.nusmods.com/v2/${this.academicYear}/moduleList.json`
             // );
@@ -14,17 +50,31 @@ class UpdateService {
             //     throw new Error(`HTTP error! status: ${response.status}`);
             // }
             // const latestModuleList = await response.json();
+
+            // Dev
             const latestModuleList = await JSON.parse(
-                fs.readFileSync("data/moduleList copy.json", "utf-8")
+                fs.readFileSync("data/moduleList_latest.json", "utf-8")
             );
+
+            // Filter modules based on semester
+            const filteredModuleList = latestModuleList.filter((module) =>
+                Array.from(module.semesters).includes(this.semester)
+            );
+
             const localModuleList = await JSON.parse(
                 fs.readFileSync("data/moduleList.json", "utf-8")
             );
 
             const changes = this.compareChanges(
                 localModuleList,
-                latestModuleList
+                filteredModuleList
             );
+
+            // fs.writeFileSync(
+            //     "data/moduleList1.json",
+            //     JSON.stringify(filteredModuleList, null, 2)
+            // );
+            // console.log("Filtered module list saved to file.");
 
             if (
                 changes.added.length > 0 ||
@@ -48,61 +98,68 @@ class UpdateService {
 
     async updateModule() {
         const moduleListChanges = await this.getModuleList();
+        if (
+            moduleListChanges.added.length > 0 ||
+            moduleListChanges.updated.length > 0 ||
+            moduleListChanges.deleted.length > 0
+        ) {
+            let insertCount = 0;
+            let updateCount = 0;
+            let deleteCount = 0;
 
-        let insertCount = 0;
-        let updateCount = 0;
-        let deleteCount = 0;
-
-        console.log("Updating module database...");
-        for (let module of moduleListChanges.added) {
-            try {
-                await db.one(
-                    "INSERT INTO request_management.modules (code, name) VALUES ($1, $2) RETURNING code",
-                    [module.moduleCode, module.title]
-                );
-                insertCount++;
-            } catch (error) {
-                console.error(
-                    "Error processing module:",
-                    module.moduleCode,
-                    error
-                );
+            console.log("Updating module database...");
+            for (let module of moduleListChanges.added) {
+                try {
+                    await db.one(
+                        "INSERT INTO request_management.modules (code, name) VALUES ($1, $2) RETURNING code",
+                        [module.moduleCode, module.title]
+                    );
+                    insertCount++;
+                } catch (error) {
+                    console.error(
+                        "Error processing module:",
+                        module.moduleCode,
+                        error
+                    );
+                }
             }
-        }
-        for (let module of moduleListChanges.updated) {
-            try {
-                await db.none(
-                    "UPDATE request_management.modules SET name = $2 WHERE code = $1",
-                    [module.moduleCode, module.title]
-                );
-                updateCount++;
-            } catch (error) {
-                console.error(
-                    "Error processing module:",
-                    module.moduleCode,
-                    error
-                );
+            for (let module of moduleListChanges.updated) {
+                try {
+                    await db.none(
+                        "UPDATE request_management.modules SET name = $2 WHERE code = $1",
+                        [module.moduleCode, module.title]
+                    );
+                    updateCount++;
+                } catch (error) {
+                    console.error(
+                        "Error processing module:",
+                        module.moduleCode,
+                        error
+                    );
+                }
             }
-        }
-        for (let module of moduleListChanges.deleted) {
-            try {
-                await db.none(
-                    "DELETE FROM request_management.modules WHERE code = $1",
-                    [module.moduleCode]
-                );
-                deleteCount++;
-            } catch (error) {
-                console.error(
-                    "Error processing module:",
-                    module.moduleCode,
-                    error
-                );
+            for (let module of moduleListChanges.deleted) {
+                try {
+                    await db.none(
+                        "DELETE FROM request_management.modules WHERE code = $1",
+                        [module.moduleCode]
+                    );
+                    deleteCount++;
+                } catch (error) {
+                    console.error(
+                        "Error processing module:",
+                        module.moduleCode,
+                        error
+                    );
+                }
             }
+            if (insertCount > 0)
+                console.log(`Inserted ${insertCount} new modules.`);
+            if (updateCount > 0)
+                console.log(`Updated ${updateCount} existing modules.`);
+            if (deleteCount > 0) console.log(`Deleted ${deleteCount} modules.`);
+            console.log("Module database updated.");
         }
-        console.log(`Inserted ${insertCount} new modules.`);
-        console.log(`Updated ${updateCount} existing modules.`);
-        console.log(`Deleted ${deleteCount} modules.`);
-        console.log("Module database updated.");
     }
 
     async getModuleDetails(moduleCode) {
@@ -131,6 +188,7 @@ class UpdateService {
                             day: timetable.day,
                             startTime: timetable.startTime,
                             endTime: timetable.endTime,
+                            weeks: JSON.stringify(timetable.weeks),
                         };
                     }),
             };
@@ -146,17 +204,25 @@ class UpdateService {
         try {
             if (moduleDetails.timeTable) {
                 for (let lesson of moduleDetails.timeTable) {
-                    await db.none(
-                        "INSERT INTO request_management.classes (module_code, class_no, class_type, day_of_week, starting_time, ending_time) VALUES ($1, $2, $3, $4, $5, $6)",
-                        [
-                            moduleCode,
-                            lesson.classNo,
-                            lesson.lessonType,
-                            lesson.day,
-                            lesson.startTime,
-                            lesson.endTime,
-                        ]
-                    );
+                    const validLessonTypes = [
+                        "Lecture",
+                        "Tutorial",
+                        "Laboratory",
+                    ];
+                    if (validLessonTypes.includes(lesson.lessonType)) {
+                        await db.none(
+                            "INSERT INTO request_management.classes (module_code, class_no, class_type, day_of_week, starting_time, ending_time, weeks) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                            [
+                                moduleCode,
+                                lesson.classNo,
+                                lesson.lessonType,
+                                lesson.day,
+                                lesson.startTime,
+                                lesson.endTime,
+                                lesson.weeks,
+                            ]
+                        );
+                    }
                 }
             }
             await db.none(
@@ -170,31 +236,65 @@ class UpdateService {
     }
 
     async updateClass(moduleCode) {
-        const moduleDetails = await this.getModuleDetails(moduleCode);
-
         try {
-            if (moduleDetails.timeTable) {
-                for (let lesson of moduleDetails.timeTable) {
-                    await db.none(
-                        "UPDATE request_management.classes SET class_type = $3, day_of_week = $4, starting_time = $5, ending_time = $6 WHERE module_code = $1 AND class_no = $2",
-                        [
-                            moduleCode,
-                            lesson.classNo,
-                            lesson.lessonType,
-                            lesson.day,
-                            lesson.startTime,
-                            lesson.endTime,
-                        ]
-                    );
-                }
-            }
             await db.none(
-                "UPDATE request_management.modules SET class_last_updated_at = $2 WHERE code = $1",
-                [moduleCode, new Date()]
+                "DELETE FROM request_management.classes WHERE module_code = $1",
+                [moduleCode]
             );
+            await this.addClass(moduleCode);
         } catch (error) {
             console.error("Error updating module classes:", error);
             throw error;
+        }
+    }
+
+    async updateFaculties() {
+        // Production
+        // const response = await fetch(
+        //     `https://api.nusmods.com/v2/${this.academicYear}/facultyDepartments.json`
+        // );
+        // if (!response.ok) {
+        //     throw new Error(`HTTP error! status: ${response.status}`);
+        // }
+        // const faculties = await response.json();
+
+        // Dev
+        const latestFacultyList = await JSON.parse(
+            fs.readFileSync("data/facultyList_latest.json", "utf-8")
+        );
+
+        const localFacultyList = await JSON.parse(
+            fs.readFileSync("data/facultyList.json", "utf-8")
+        );
+
+        const latestJSON = JSON.stringify(latestFacultyList);
+        const localJSON = JSON.stringify(localFacultyList);
+
+        if (latestJSON !== localJSON) {
+            const facultySet = new Set();
+            Object.values(latestFacultyList).forEach((faculty) => {
+                faculty.forEach((f) => facultySet.add(f));
+            });
+            const facultyList = Array.from(facultySet);
+            // console.log(facultyList);
+
+            try {
+                await db.none("DELETE FROM request_management.faculties");
+                for (let faculty of facultyList) {
+                    await db.none(
+                        "INSERT INTO request_management.faculties (name) VALUES ($1)",
+                        [faculty]
+                    );
+                }
+                console.log("Faculties updated.");
+                fs.writeFileSync(
+                    "data/facultyList.json",
+                    JSON.stringify(latestFacultyList, null, 2)
+                );
+            } catch (error) {
+                console.error("Error updating faculties:", error);
+                throw error;
+            }
         }
     }
 
