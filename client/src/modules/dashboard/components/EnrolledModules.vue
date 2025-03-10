@@ -14,7 +14,7 @@
           <v-card-title class="card-title">{{ module.module_code }}</v-card-title>
           <v-card-text class="card-text">{{ module.name }}</v-card-text>
           <v-card-text class="card-text">
-            <p><strong>Professor:</strong> {{ module.educator_name || 'N/A' }}</p>
+            <p><strong>Professor:</strong> {{ module.educator_name }}</p>
           </v-card-text>
         </v-card>
       </v-col>
