@@ -35,7 +35,7 @@ const services = [
     },
     {
         route: "/api/requests",
-        target: `${process.env.REQUEST_SERVICE_URL}/api/v1/requests`,
+        target: `${REQUEST_SERVICE_URL}/api/v1/requests`,
     },
     {
         route: "/api/module",
@@ -63,7 +63,7 @@ app.use(
     getEnrolledStudentsByModule
 );
 app.use("/api/gateway/students/:studentID/modules", getModulesTakenByStudent);
-// app.use("/api/gateway/students/:moduleCode", getAllStudentsByModule);
+app.use("/api/gateway/students/:moduleCode", getAllStudentsByModule);
 
 app.use("/api/gateway/modules/:profId", getModulesWithRequestsByProfessor);
 

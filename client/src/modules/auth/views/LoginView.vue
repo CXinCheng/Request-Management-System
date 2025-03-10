@@ -119,12 +119,16 @@ const handleLogin = async () => {
             successMessage.value = "Login successful! Redirecting...";
 
             setTimeout(() => {
-                router.push(
-                    user.role === "Admin" ? { name: "AdminUsersView" } :
-                    router.currentRoute.value.query.redirect || {
-                        name: "Dashboard",
-                    }
-                );
+                if (user.role === "Admin") {
+                    router.push({ name: "AdminUsersView" });
+                } 
+                else if (user.role === "Professor") {
+                    router.push({ name: "ProfDashboardView" });
+                }
+                else {
+                    const redirect = router.currentRoute.value.query.redirect;
+                    router.push(redirect ? { path: redirect } : { name: "Dashboard" });
+                }
             }, 1000);
         }
     } catch (error) {
