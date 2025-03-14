@@ -11,6 +11,7 @@ import {
     getAllStudentsByModule,
     getEnrolledStudentsByModule,
 } from "./user/userController.js";
+import { verifyToken, authorizeRoles } from "./middlewares/authMiddleware.js";
 
 // Access .env file
 dotenv.config();
@@ -60,6 +61,8 @@ services.forEach(({ route, target }) => {
 app.use("/api/gateway/modules/all", getAllModulesWithEducators);
 app.use(
     "/api/gateway/students/enrolled/:moduleCode",
+    verifyToken,
+    authorizeRoles(["Professor"]),
     getEnrolledStudentsByModule
 );
 app.use("/api/gateway/students/:studentID/modules", getModulesTakenByStudent);

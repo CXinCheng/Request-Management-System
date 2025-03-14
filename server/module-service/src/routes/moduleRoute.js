@@ -11,6 +11,7 @@ import {
     getAllFaculties
 } from "../controllers/moduleController.js";
 import { ensureConnection } from "../configs/db.js";
+import { verifyToken, authorizeRoles } from "../middlewares/authMiddleware.js";
 
 const dbConnectionMiddleware = async (req, res, next) => {
     try {
@@ -32,17 +33,17 @@ const dbConnectionMiddleware = async (req, res, next) => {
   };
 
 const router = express.Router();
-router.use(dbConnectionMiddleware);
+router.use(dbConnectionMiddleware, verifyToken);
 
 // Module routes
-router.get("/all", getAllModules);
-router.get("/all/faculties", getAllFaculties);
-router.get("/all/enrolled", getAllModulesWithNumbersOfEnrolledStudents);
-router.get("/professor/modules/:professorId", getModulesByProfessor);
-router.get("/students/:moduleCode", getStudentsByModule);
-router.post("/updateEducator", updateEducator);
-router.post("/updateEnrollment/:moduleCode", updateEnrollmentByModule);
-router.get("/classes/:moduleCode", getClassesByModule);
-router.get("/students/:studentID/modules", getModulesByStudent);
+router.get("/all", authorizeRoles(['Admin']), getAllModules);
+router.get("/all/faculties", authorizeRoles(['Admin', 'Professor', 'Student']), getAllFaculties);
+router.get("/all/enrolled", authorizeRoles(['Admin', 'Professor']), getAllModulesWithNumbersOfEnrolledStudents);
+router.get("/professor/modules/:professorId", authorizeRoles(['Admin', 'Professor']), getModulesByProfessor);
+router.get("/students/:moduleCode", authorizeRoles(['Admin', 'Professor', 'Student']), getStudentsByModule);
+router.post("/updateEducator", authorizeRoles(['Admin']), updateEducator);
+router.post("/updateEnrollment/:moduleCode", authorizeRoles(['Admin']), updateEnrollmentByModule);
+router.get("/classes/:moduleCode", authorizeRoles(['Admin']), getClassesByModule);
+router.get("/students/:studentID/modules", authorizeRoles(['Admin', 'Student']), getModulesByStudent);
 
 export default router;

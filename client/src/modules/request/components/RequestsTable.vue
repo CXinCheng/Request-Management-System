@@ -70,6 +70,7 @@
 <script>
 import axios from "axios";
 import dayjs from "dayjs";
+import { requestApiService } from "@/utils/ApiService";
 
 export default {
     components: {},
@@ -102,10 +103,13 @@ export default {
     methods: {
         async fetchRequests() {
             try {
-                const response = await axios.get(
-                    `http://localhost:3002/api/v1/requests/student/${this.studentId}`
+                // const response = await axios.get(
+                //     `http://localhost:3002/api/v1/requests/student/${this.studentId}`
+                // );
+                const response = await requestApiService.getRequestsByStudent(
+                    this.studentId
                 );
-                this.requests = response.data;
+                this.requests = response;
             } catch (error) {
                 console.error("Error fetching request:", error);
             }
@@ -132,9 +136,10 @@ export default {
         async deleteRequest(event, { item }) {
             console.log("Delete Request button clicked");
             try {
-                await axios.delete(
-                    `http://localhost:3002/api/v1/requests/student/${item.id}`
-                );
+                // await axios.delete(
+                //     `http://localhost:3002/api/v1/requests/student/${item.id}`
+                // );
+                await requestApiService.deleteRequest(item.id);
                 this.$router.push("/requests"); // redirect to Request List page after deletion
             } catch (error) {
                 console.error("Error deleting request:", error);

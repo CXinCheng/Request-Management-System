@@ -16,7 +16,7 @@ import ModuleView from "./modules/module/ModuleView.vue";
 import ProfDashboardView from "./modules/dashboard/views/ProfDashboardView.vue";
 
 const getUserAuthInfo = () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");    
     if (!token) return { authenticated: false, role: null };
 
     try {
@@ -152,7 +152,7 @@ router.beforeEach((to, from, next) => {
     const authInfo = getUserAuthInfo();
     const isLoggedIn = authInfo.authenticated;
     const userRole = authInfo.role;
-  
+
     if (requiresAuth && !isLoggedIn) {
       return next({ 
         name: "Login", 
@@ -168,10 +168,11 @@ router.beforeEach((to, from, next) => {
           return next({ name: "ProfDashboardView" });
         } else if (userRole === "Admin") {
           return next({ name: "AdminUsersView" });
-        } else {
-          localStorage.removeItem("token");
-          return next({ name: "Login" });
-        }
+        } 
+        // else {
+        //   localStorage.removeItem("token");
+        //   return next({ name: "Login" });
+        // }
       }
     }
     next();

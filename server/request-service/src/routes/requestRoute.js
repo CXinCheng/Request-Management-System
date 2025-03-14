@@ -11,6 +11,7 @@ import {
     getAllRequestsByModule,
 } from '../controllers/requestController.js';
 import { ensureConnection } from "../configs/db.js";
+import { verifyToken, authorizeRoles } from '../middlewares/authMiddleware.js';
 
 const dbConnectionMiddleware = async (req, res, next) => {
     try {
@@ -32,19 +33,19 @@ const dbConnectionMiddleware = async (req, res, next) => {
   };
 
 const router = express.Router();
-router.use(dbConnectionMiddleware);
+router.use(dbConnectionMiddleware, verifyToken);
 
-router.get('/student/:studentId', getAllRequestsByStudent);
-router.get('/student/:studentId/:requestId', getRequestDetailsByStudent);
-router.put('/student/:requestId', updateRequestByStudent);
-router.delete('/student/:requestId', deleteRequestByStudent);
+router.get('/student/:studentId', authorizeRoles(['Student']), getAllRequestsByStudent);
+router.get('/student/:studentId/:requestId', authorizeRoles(['Student', 'Professor']), getRequestDetailsByStudent);
+router.put('/student/:requestId', authorizeRoles(['Student', 'Professor']), updateRequestByStudent);
+router.delete('/student/:requestId', authorizeRoles(['Student']), deleteRequestByStudent);
 
-router.get('/module/:moduleCode', getAllRequestsByModule);
+router.get('/module/:moduleCode', authorizeRoles(['Student', 'Professor']), getAllRequestsByModule);
 
-router.get('/professor/:profId', getAllRequestsByProfessor);
-router.put('/professor/:profId/:requestId', updateRequestByProfessor);
+router.get('/professor/:profId',  authorizeRoles(['Professor']), getAllRequestsByProfessor);
+router.put('/professor/:profId/:requestId',authorizeRoles(['Professor']), updateRequestByProfessor);
 
-router.post('/submit',
+router.post('/submit', authorizeRoles(["Student"]),
     upload.single('uploadFile'), 
     [
         body("student").notEmpty().withMessage("Student is required"),
