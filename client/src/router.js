@@ -24,10 +24,13 @@ const getUserAuthInfo = () => {
         if (payload.exp < Date.now() / 1000) {
             localStorage.removeItem("token");
             return { authenticated: false, role: null };
+            return { authenticated: false, role: null };
         }
+        return { authenticated: true, role: payload.role };
         return { authenticated: true, role: payload.role };
     } catch {
         localStorage.removeItem("token");
+        return { authenticated: false, role: null };
         return { authenticated: false, role: null };
     }
 };
@@ -61,11 +64,17 @@ const routes = [
         meta: { requiresAuth: true,
             allowedRoles: ["Student"],
          },
+        meta: { requiresAuth: true,
+            allowedRoles: ["Student"],
+         },
     },
     {
         path: "/leave",
         component: LeaveModuleSelection,
         name: "LeaveModuleSelection",
+        meta: { requiresAuth: true, title: "Leave Application",
+            allowedRoles: ["Student"],
+         },
         meta: { requiresAuth: true, title: "Leave Application",
             allowedRoles: ["Student"],
          },
@@ -77,11 +86,17 @@ const routes = [
         meta: { requiresAuth: true, title: "Request Details",
             allowedRoles: ["Student"],
          },
+        meta: { requiresAuth: true, title: "Request Details",
+            allowedRoles: ["Student"],
+         },
     },
     {
         path: "/requests",
         component: RequestListView,
         name: "RequestListView",
+        meta: { requiresAuth: true, title: "Request List",
+            allowedRoles: ["Student", "Professor"],
+         },
         meta: { requiresAuth: true, title: "Request List",
             allowedRoles: ["Student", "Professor"],
          },
@@ -93,11 +108,17 @@ const routes = [
         meta: { requiresAuth: true, title: "Users",
             allowedRoles: ["Admin"],
          },
+        meta: { requiresAuth: true, title: "Users",
+            allowedRoles: ["Admin"],
+         },
     },
     {
         path: "/admin/modules",
         component: AdminModuleView,
         name: "AdminModuleView",
+        meta: { requiresAuth: true, title: "Modules",
+            allowedRoles: ["Admin"],
+         },
         meta: { requiresAuth: true, title: "Modules",
             allowedRoles: ["Admin"],
          },
@@ -109,11 +130,17 @@ const routes = [
         meta: { requiresAuth: true, title: "Request Details",
             allowedRoles: ["Student", "Professor"],
          },
+        meta: { requiresAuth: true, title: "Request Details",
+            allowedRoles: ["Student", "Professor"],
+         },
     },
     {
         path: "/editRequest/:requestId",
         component: EditRequestView,
         name: "EditRequestView",
+        meta: { requiresAuth: true, title: "Edit Request",
+            allowedRoles: ["Student"],
+         },
         meta: { requiresAuth: true, title: "Edit Request",
             allowedRoles: ["Student"],
          },
@@ -131,11 +158,17 @@ const routes = [
         meta: { requiresAuth: true, title: "Dashboard",
             allowedRoles: ["Professor"],
          },
+        meta: { requiresAuth: true, title: "Dashboard",
+            allowedRoles: ["Professor"],
+         },
     },
     {
         path: "/professor/module/:moduleCode/:moduleName",
         component: ModuleView,
         name: "ModuleView",
+        meta: { requiresAuth: true, title: "Module",
+            allowedRoles: ["Professor"],
+         },
         meta: { requiresAuth: true, title: "Module",
             allowedRoles: ["Professor"],
          },
