@@ -92,12 +92,12 @@ const items = computed(() => {
                 //     href: "/modules",
                 // },
                 {
-                    title: "Leave Applications",
+                    title: "Apply for Leave",
                     icon: "mdi-text-box-edit-outline",
                     href: "/leave",
                 },
                 {
-                    title: "All Requests",
+                    title: "Leave Applications",
                     icon: "mdi-list-box-outline",
                     href: "/requests",
                 },
@@ -117,7 +117,7 @@ const items = computed(() => {
                 {
                     title: "Leave Applications",
                     icon: "mdi-text-box-edit-outline",
-                    href: "/professor/leave-requests",
+                    href: "/requests",
                 },
             ];
         case "Admin":

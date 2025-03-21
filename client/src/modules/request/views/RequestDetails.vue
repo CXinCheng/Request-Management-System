@@ -17,8 +17,8 @@
         <DeleteRequestButton />
       </div>
       <div v-else-if="userRole === 'Professor'">
-        <StatusButton :requestId="request.id" actionType="Approve" @status-updated="handleStatusUpdate" />
-        <StatusButton :requestId="request.id" actionType="Reject" @status-updated="handleStatusUpdate" />
+        <StatusButton :request="request" actionType="Approve" />
+        <StatusButton :request="request" actionType="Reject" />
       </div>
     </div>
     <div v-else>
@@ -42,17 +42,19 @@
     },
     data() {
       return {
-        studentId: '',
+        userId: '',
         userRole: 'unknown',
         requestId: '',
+        module_code: '',
         request: null,
       };
     },
     mounted() {
         this.requestId = this.$route.params.requestId; 
+        this.module_code = this.$route.params.module_code;
         if (localStorage.getItem('user')) {
             let user = JSON.parse(localStorage.getItem('user'));
-            this.studentId = user['matrix_id'];
+            this.userId = user['matrix_id'];
             this.userRole = user['role']
         }
         this.fetchRequest(); // Fetch request on page load
@@ -60,11 +62,15 @@
     methods: {
       async fetchRequest() {
         try {
-          const response = await axios.get(`http://localhost:3002/api/v1/requests/student/${this.studentId}/${this.requestId}`);
+          const response = await axios.get(`http://localhost:3002/api/v1/requests/details/${this.requestId}`, { params: { module_code: this.module_code } });
+          console.log("Response for RequestDetailsView:", response);
           this.request = response.data;
         } catch (error) {
           console.error("Error fetching request:", error);
         }
+      },
+      async handleStatusUpdate(newStatus) {
+        this.request.status = newStatus;
       },
       formatDate(date) {
         return date ? dayjs(date).format("DD MMM YYYY, HH:mm:ss") : "-";

@@ -76,7 +76,7 @@ export default {
     components: {},
     data() {
         return {
-            studentId: "", // Replace with the actual student ID from local storage
+            userId: "", // Replace with the actual student ID from local storage
             userRole: "unknown",
             headers: [
                 { title: "Leave Start", value: "start_date_of_leave" },
@@ -96,24 +96,36 @@ export default {
     mounted() {
         if (localStorage.getItem("user")) {
             let user = JSON.parse(localStorage.getItem("user"));
-            this.studentId = user["matrix_id"];
+            this.userId = user["matrix_id"];
             this.userRole = user["role"];
         }
-        this.fetchRequests();
+        this.fetchRequests(); // Fetch requests on page load
     },
     methods: {
         async fetchRequests() {
+            let response = null;
             try {
-                const response = await axios.get(
-                    `http://localhost:3002/api/v1/requests/student/${this.studentId}`
-                );
+                if (this.userRole === "Student") {
+                    response = await axios.get(
+                        `http://localhost:3002/api/v1/requests/student/${this.userId}`
+                    );
+                    console.log("Response for Student:", response);
+                } else if (this.userRole === "Professor") {
+                    response = await axios.get(
+                        `http://localhost:3002/api/v1/requests/professor/${this.userId}`
+                    );
+                    console.log("Response for Professor:", response);
+                }
+                else {
+                    console.error("Invalid user role:", this.userRole);
+                }
                 this.requests = response.data;
             } catch (error) {
-                console.error("Error fetching request:", error);
+                console.error("Error fetching requests on RequestsTable page:", error);
             }
         },
         formatDate(date) {
-            return date ? dayjs(date).format("DD-MM-YYYY HH:mm:ss") : "-";
+            return date ? dayjs(date).format("DD MMM YYYY") : "-";
         },
         seeRequestDetails(event, { item }) {
             console.log("Item clicked:", item);
@@ -122,6 +134,7 @@ export default {
                 name: "RequestDetailsView",
                 params: {
                     requestId: item.id,
+                    module_code: item.module_code,
                 },
             });
         },

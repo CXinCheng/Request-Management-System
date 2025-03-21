@@ -3,7 +3,7 @@ import { body } from "express-validator";
 import { submitForm, upload } from '../controllers/requestForm/formController.js';
 import { 
     getAllRequestsByStudent, 
-    getRequestDetailsByStudent, 
+    getRequestDetails, 
     getAllRequestsByProfessor, 
     updateRequestByStudent, 
     updateRequestByProfessor,
@@ -13,7 +13,7 @@ import {
 const router = express.Router();
 
 router.get('/student/:studentId', getAllRequestsByStudent);
-router.get('/student/:studentId/:requestId', getRequestDetailsByStudent);
+router.get('/details/:requestId', getRequestDetails);
 router.put('/student/:requestId', updateRequestByStudent);
 router.delete('/student/:requestId', deleteRequestByStudent);
 
