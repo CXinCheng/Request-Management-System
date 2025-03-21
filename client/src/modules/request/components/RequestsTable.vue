@@ -4,11 +4,9 @@
             :headers="headers"
             :items="requests"
             :search="search"
-            :loading="loading"
             :items-per-page="10"
-            :item-class="hover - shadow"
+            v-model:sort-by="sortBy"
             @click:row="seeRequestDetails"
-            v-model="selected"
             class="striped outlined"
             item-value="id"
             fixed-header
@@ -43,19 +41,22 @@
                         <v-icon v-bind="props" small>mdi-dots-vertical</v-icon>
                     </template>
                     <v-list>
-                        <v-list-item clickable @click:item="seeRequestDetails">
+                        <v-list-item 
+                            clickable 
+                            @click="seeRequestDetails(1, { item })"
+                        >
                             <v-list-item-title>View Details</v-list-item-title>
                         </v-list-item>
                         <v-list-item
                             clickable
-                            @click:item="editRequest"
+                            @click="editRequest(item)"
                             v-if="userRole === 'Student'"
                         >
                             <v-list-item-title>Edit</v-list-item-title>
                         </v-list-item>
                         <v-list-item
                             clickable
-                            @click:item="deleteRequest"
+                            @click="deleteRequest(item)"
                             v-if="userRole === 'Student'"
                         >
                             <v-list-item-title>Delete</v-list-item-title>
@@ -75,61 +76,72 @@ export default {
     components: {},
     data() {
         return {
-            studentId: "", // Replace with the actual student ID from local storage
+            userId: "", // Replace with the actual student ID from local storage
             userRole: "unknown",
             headers: [
-                { title: "Leave Start", key: "start_date_of_leave" },
-                { title: "Leave End", key: "end_date_of_leave" },
-                { title: "Submitted", key: "created_at" },
-                { title: "Status", key: "status" },
-                { title: "Module", key: "module_code" },
-                { title: "Approver", key: "approver_name" },
-                { title: "Actions", key: "actions", sortable: false },
+                { title: "Leave Start", value: "start_date_of_leave" },
+                { title: "Leave End", value: "end_date_of_leave" },
+                { title: "Submitted", value: "created_at" },
+                { title: "Status", value: "status" },
+                { title: "Module", value: "module_code" },
+                { title: "Approver", value: "approver_name" },
+                { title: "Actions", value: "actions", sortable: false },
             ],
             requests: [],
             search: "", // For search functionality
             selectedItem: false,
+            sortBy: [{ key: 'created_at', order:'desc'}],
         };
     },
     mounted() {
         if (localStorage.getItem("user")) {
             let user = JSON.parse(localStorage.getItem("user"));
-            this.studentId = user["matrix_id"];
+            this.userId = user["matrix_id"];
             this.userRole = user["role"];
         }
-        this.fetchRequests();
+        this.fetchRequests(); // Fetch requests on page load
     },
     methods: {
         async fetchRequests() {
+            let response = null;
             try {
-                const response = await axios.get(
-                    `http://localhost:3002/api/v1/requests/student/${this.studentId}`
-                );
-                this.requests = response.data;
+                if (this.userRole === "Student") {
+                    response = await axios.get(
+                        `http://localhost:3002/api/v1/requests/student/${this.userId}`
+                    );
+                    console.log("Response for Student:", response);
+                } else if (this.userRole === "Professor") {
+                    response = await axios.get(
+                        `http://localhost:3002/api/v1/requests/professor/${this.userId}`
+                    );
+                    console.log("Response for Professor:", response);
+                }
+                else {
+                    console.error("Invalid user role:", this.userRole);
+                }
+                this.requests = response.data.data;
             } catch (error) {
-                console.error("Error fetching request:", error);
+                console.error("Error fetching requests on RequestsTable page:", error);
             }
         },
         formatDate(date) {
-            return date ? dayjs(date).format("DD-MM-YYYY HH:mm:ss") : "-";
+            return date ? dayjs(date).format("DD MMM YYYY") : "-";
         },
         seeRequestDetails(event, { item }) {
+            console.log("Item clicked:", item);
+            if (!item) return; // Prevent errors
             this.$router.push({
                 name: "RequestDetailsView",
                 params: {
                     requestId: item.id,
+                    module_code: item.module_code,
                 },
             });
         },
-        async editRequest(event, { item }) {
-            this.$router.push({
-                name: "RequestDetailsView",
-                params: {
-                    requestId: item.id,
-                },
-            });
+        editRequest(item) {
+            this.$router.push(`/editRequest/${this.requestId}`);
         },
-        async deleteRequest(event, { item }) {
+        async deleteRequest(item) {
             console.log("Delete Request button clicked");
             try {
                 await axios.delete(
@@ -148,7 +160,8 @@ export default {
 :deep(th span) {
     font-weight: bold !important;
 }
-:deep(tr hover) {
+
+:deep(tr:hover) {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Shadow effect */
     transition: box-shadow 0.01s ease-in-out;
     cursor: pointer;

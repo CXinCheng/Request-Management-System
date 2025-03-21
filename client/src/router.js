@@ -91,7 +91,7 @@ const routes = [
         meta: { requiresAuth: true, title: "Modules" },
     },
     {
-        path: "/requestDetails/:requestId",
+        path: "/requestDetails/:requestId/:module_code",
         component: RequestDetailsView,
         name: "RequestDetailsView",
         meta: { requiresAuth: true, title: "Request Details" },
