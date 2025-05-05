@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 const fetchUserMappedModules = async (userId) => {
   try {
     const response = await gatewayApiService.getModulesTakenByStudent(userId);
-
+    console.log("API Response:", response.data);
     if (!response || response.length === 0) {
       console.warn(`No mapped modules found for user ${userId}`);
       return [];
@@ -18,7 +18,10 @@ const fetchUserMappedModules = async (userId) => {
       module_code,
       name,         
       educator_name: professor?.name || "N/A", // ✅ Extract only the professor's name  
-    }));
+    })).filter(
+      (value, index, self) =>
+        index === self.findIndex((m) => m.module_code === value.module_code)
+    );
   } catch (error) {
     console.error("Error fetching user-mapped modules:", error);
     return [];
