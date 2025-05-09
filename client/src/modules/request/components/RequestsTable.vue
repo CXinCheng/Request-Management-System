@@ -7,14 +7,14 @@
             :items-per-page="10"
             v-model:sort-by="sortBy"
             @click:row="seeRequestDetails"
-            class="striped outlined"
+            class="striped outlined elevation-1"
             item-value="id"
             fixed-header
             dense
         >
             <template v-slot:top>
-                <v-toolbar flat class="bg-white">
-                    <v-spacer></v-spacer>
+                <v-toolbar flat class="bg-primary">
+                    <v-toolbar-title class="white--text">Leave Requests</v-toolbar-title>
                     <v-text-field
                         v-model="search"
                         label="Search"
@@ -23,9 +23,6 @@
                     ></v-text-field>
                 </v-toolbar>
             </template>
-            <template v-slot:item.created_at="{ item }">
-                {{ formatDate(item.created_at) }}
-            </template>
 
             <template v-slot:item.start_date_of_leave="{ item }">
                 {{ formatDate(item.start_date_of_leave) }}
@@ -33,6 +30,10 @@
 
             <template v-slot:item.end_date_of_leave="{ item }">
                 {{ formatDate(item.end_date_of_leave) }}
+            </template>
+
+            <template v-slot:item.created_at="{ item }">
+                {{ formatCreatedDate(item.created_at) }}
             </template>
 
             <template v-slot:item.actions="{ item }">
@@ -81,10 +82,9 @@ export default {
             headers: [
                 { title: "Leave Start", value: "start_date_of_leave" },
                 { title: "Leave End", value: "end_date_of_leave" },
-                { title: "Submitted", value: "created_at" },
+                { title: "Submitted At", value: "created_at" },
                 { title: "Status", value: "status" },
                 { title: "Module", value: "module_code" },
-                { title: "Approver", value: "approver_name" },
                 { title: "Actions", value: "actions", sortable: false },
             ],
             requests: [],
@@ -127,6 +127,9 @@ export default {
         formatDate(date) {
             return date ? dayjs(date).format("DD MMM YYYY") : "-";
         },
+        formatCreatedDate(date) {
+            return date ? dayjs(date).format("DD MMM YYYY, HH:mm:ss") : "-";
+        },
         seeRequestDetails(event, { item }) {
             console.log("Item clicked:", item);
             if (!item) return; // Prevent errors
@@ -157,8 +160,11 @@ export default {
 </script>
 
 <style scoped>
-:deep(th span) {
-    font-weight: bold !important;
+.v-data-table >>> th {
+  font-weight: bold !important;
+  text-align: center !important;
+  background-color: #1867c0 !important; /* Dark blue header */
+  color: white !important;
 }
 
 :deep(tr:hover) {
@@ -166,4 +172,6 @@ export default {
     transition: box-shadow 0.01s ease-in-out;
     cursor: pointer;
 }
+
 </style>
+
