@@ -5,8 +5,10 @@
       <EnrolledModules :modules="modules" />
 
       <!-- Leave Application Section -->
-      <RequestsTable/>
-      
+      <div class="leave-application-container">
+        <h2 class="section-title">Leave Applications</h2>
+        <RequestsTable/>
+      </div>
     </div>
   </div>
 </template>
@@ -60,6 +62,28 @@ export default {
 <style scoped>
 .dashboard-container {
   padding: 16px;
-  max-width: 80%;
+  width: 80%;
+}
+
+/* Leave Application Section Styling */
+.leave-application-container {
+  max-width: 95%;
+  margin: auto;
+  padding: 24px;
+  background-color: #e3f2fd; /* Light blue background */
+  border-radius: 12px;
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Section Title */
+.section-title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #0d47a1; /* Deep blue */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 </style>
