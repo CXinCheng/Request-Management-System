@@ -12,9 +12,9 @@
       >
         <v-card class="module-card" :class="colorClasses[index % colorClasses.length]">
           <v-card-title class="card-title">{{ module.module_code }}</v-card-title>
-          <v-card-subtitle class="card-subtitle">{{ module.name }}</v-card-subtitle>
+          <v-card-text class="card-text">{{ module.name }}</v-card-text>
           <v-card-text class="card-text">
-            <p><strong>Professor:</strong> {{ module.educator_id }}</p>
+            <p><strong>Professor:</strong> {{ module.educator_name }}</p>
           </v-card-text>
         </v-card>
       </v-col>
