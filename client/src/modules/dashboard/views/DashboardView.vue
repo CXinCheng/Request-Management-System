@@ -5,7 +5,8 @@
       <EnrolledModules :modules="modules" />
 
       <!-- Leave Application Section -->
-      <LeaveApplication :leave-data="leaveData" />
+      <RequestsTable/>
+      
     </div>
   </div>
 </template>
@@ -16,12 +17,13 @@ import { ref, onMounted } from "vue";
 import EnrolledModules from "../components/EnrolledModules.vue";
 import LeaveApplication from "../components/LeaveApplication.vue";
 import { aggregateDashboardData } from "../utils/DataAggregator";
+import RequestsTable from "@/modules/request/components/RequestsTable.vue";
 
 export default {
   name: "DashboardView",
   components: {
-    EnrolledModules,
-    LeaveApplication,
+    EnrolledModules,    
+    RequestsTable
   },
   setup() {
     const route = useRoute();
