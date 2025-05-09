@@ -60,5 +60,6 @@ export default {
 <style scoped>
 .dashboard-container {
   padding: 16px;
+  max-width: 80%;
 }
 </style>
