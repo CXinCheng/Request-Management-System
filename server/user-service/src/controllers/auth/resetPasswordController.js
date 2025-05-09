@@ -19,7 +19,7 @@ const verifyEmail = async (req, res) => {
         }
 
         const user = await db.oneOrNone(
-            "SELECT id, email FROM request_management.users WHERE email = $1",
+            "SELECT matrix_id, email FROM request_management.users WHERE email = $1",
             [email]
         );
 
@@ -195,8 +195,8 @@ const resetPassword = async (req, res) => {
         }
 
         await db.none(
-            "UPDATE request_management.otp_store SET is_used = true WHERE id = $1",
-            [otpRecord.id]
+            "UPDATE request_management.otp_store SET is_used = true WHERE otp_code = $1 AND user_email = $2",
+            [otpRecord.otp_code, otpRecord.user_email]
         );
 
         await db.none(
