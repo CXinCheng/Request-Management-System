@@ -17,7 +17,10 @@ export const getAllRequestsByStudent = async (req, res) => {
         AND r.user_id = $1`, 
         [studentId]
         );
-        res.status(200).json(requests);
+        res.status(200).json({
+            success: true,
+            data: requests,
+        });
     } catch (error) {
         console.error('Error fetching requests:', error);
         res.status(500).json({ error: `Failed to fetch requests - ${error}` });
@@ -26,10 +29,11 @@ export const getAllRequestsByStudent = async (req, res) => {
 };
 
 // API to get a request's details for a student
-export const getRequestDetailsByStudent = async (req, res) => {
-    console.log('API hit for getRequestDetailsByStudent:');
+export const getRequestDetails = async (req, res) => {
+    console.log('API hit for getRequestDetails:');
 
-    const { studentId, requestId } = req.params;
+    const { requestId } = req.params;
+    const { module_code } = req.query;
 
     try {
         const request = await db.oneOrNone(
@@ -38,14 +42,9 @@ export const getRequestDetailsByStudent = async (req, res) => {
         WHERE r.id = sr.main_request_id
         AND r.user_id = u1.matrix_id
         AND sr.approver_id = u2.matrix_id
-        AND r.user_id = $1 
-        AND r.id = $2`, 
-        // `SELECT r.*, sr.*, STRING_AGG(sr.module_code, ', ') AS modules
-        // FROM request_management.requests r
-        // JOIN request_management.sub_request sr ON sr.main_request_id = r.id
-        // GROUP BY r.id, r.start_date_of_leave, r.end_date_of_leave
-        // HAVING r.id = $2`,
-        [studentId, requestId]
+        AND r.id = $1
+        AND sr.module_code = $2`,
+        [requestId, module_code]
         );
         res.status(200).json(request);
     } catch (error) {
@@ -158,19 +157,20 @@ export const getAllRequestsByProfessor = async (req, res) => {
 
 // API to get a request's details for a professor
 export const updateRequestByProfessor = async (req, res) => {
-    console.log('API hit for updateRequest:');
+    console.log('API hit for updateRequestByProfessor:');
 
     const { profId, requestId } = req.params;
-    const { status } = req.body;
+    const { status, module_code } = req.body;
 
     try {
         const updatedRequest = await db.oneOrNone(
-        `UPDATE request_management.sub_request sr
-        SET sr.status = $1, sr.modified_at = NOW()
-        WHERE sr.id = $2
-        AND sr.approver_id = $3
+        `UPDATE request_management.sub_request
+        SET status = $1, modified_at = NOW()
+        WHERE main_request_id = $2
+        AND approver_id = $3
+        AND module_code = $4
         RETURNING *`, 
-        [status, requestId, profId]
+        [status, requestId, profId, module_code]
         );
 
         if (!updatedRequest) {

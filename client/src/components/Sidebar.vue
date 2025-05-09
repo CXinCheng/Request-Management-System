@@ -92,7 +92,7 @@ const items = computed(() => {
                 //     href: "/modules",
                 // },
                 {
-                    title: "Leave Applications",
+                    title: "Apply for Leave",
                     icon: "mdi-text-box-edit-outline",
                     href: "/leave",
                 },

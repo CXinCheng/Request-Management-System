@@ -2,7 +2,7 @@
   <button 
     @click="updateStatus"
     :class="buttonClass"
-    class="px-4 py-2 rounded-lg text-white font-semibold"
+    class="px-4 py-2 rounded mr-sm-2"
   >
     {{ actionType }}
   </button>
@@ -13,20 +13,33 @@ import axios from 'axios';
 
 export default {
   props: {
-    requestId: Number, // ID of the request to update
+    request: Object, // the request to update
     actionType: String // 'Approve' or 'Reject'
   },
   computed: {
     buttonClass() {
-      return this.actionType === 'Approve' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600';
+      return this.actionType === 'Approve' ? 'bg-green hover:bg-green-lighten-1' : 'bg-red hover:bg-red-lighten-1';
     }
+  },
+  data() {
+    return {
+      userId: '',
+    };
+  },
+  mounted() {
+      if (localStorage.getItem('user')) {
+          let user = JSON.parse(localStorage.getItem('user'));
+          this.userId = user['matrix_id'];
+      }
   },
   methods: {
     async updateStatus() {
       try {
         const newStatus = this.actionType === 'Approve' ? 'Approved' : 'Rejected';
-        await axios.put(`http://localhost:3002/api/v1/professor/${this.profId}/${this.requestId}`, { status: newStatus });
+        const updatedRequest = await axios.put(`http://localhost:3002/api/v1/requests/professor/${this.userId}/${this.request.id}`, { status: newStatus, module_code: this.request.module_code });
+        console.log(`Request ${this.requestId} updated to ${newStatus}:`, updatedRequest);
         this.$emit('status-updated', newStatus); // Notify parent
+        window.location.reload(); // Refresh page to reflect changes
       } catch (error) {
         console.error(`Error updating request to ${newStatus}:`, error);
       }
