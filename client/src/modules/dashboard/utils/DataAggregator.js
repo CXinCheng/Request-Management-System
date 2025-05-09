@@ -33,14 +33,14 @@ const fetchLeaveApplications = async (userId) => {
   try {
     const response = await requestApiService.getRequestsByStudent(userId);
 
-    console.log("API Response:", response);
+    console.log("fetch leave application API Response:", response);
 
     if (!response || response.length === 0) {
       console.warn(`No leave applications found for user ${userId}`);
       return [];
     }
 
-    return response.map(({ id, start_date_of_leave, end_date_of_leave, created_at, status, module_code, approver_name }) => ({
+    return response.data.map(({ id, start_date_of_leave, end_date_of_leave, created_at, status, module_code, approver_name }) => ({
       id,
       start_date: dayjs(start_date_of_leave).format("DD-MM-YYYY HH:mm:ss"),
       end_date: dayjs(end_date_of_leave).format("DD-MM-YYYY HH:mm:ss"),
