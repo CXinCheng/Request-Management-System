@@ -1,16 +1,41 @@
 <template>
+  <div class="details-container">
     <div v-if="request">
       <button @click="goBack" class="back-button">
         <v-icon>mdi-arrow-left</v-icon> Back
       </button>
+      <br>
       <h1 class="text-xl font-bold">Request Details</h1>
       <hr>
-      <p><strong>Status:</strong> {{ request.status }}</p>
-      <p><strong>Created At:</strong> {{ formatDate(request.created_at) }}</p>
-      <p><strong>Last modified:</strong> {{ formatDate(request.modified_at) }}</p>
-      <p><strong>Dates of request:</strong> {{ formatDate(request.start_date_of_leave) }} - {{ formatDate(request.end_date_of_leave) }}</p>
-      <p><strong>Module:</strong> {{ request.module_code }}</p>
-      <p><strong>Reason:</strong> {{ request.reason_of_leave }}</p>
+      <br>
+      <DetailItem
+        :title="'Status'"
+        :value="request.status"
+      />
+      <DetailItem
+        :title="'Created At'"
+        :value="formatDate(request.created_at)"
+      />
+      <DetailItem
+        :title="'Last modified'"
+        :value="formatDate(request.modified_at)"
+      />
+      <DetailItem
+        :title="'Dates of request'"
+        :value="`${formatDate(request.start_date_of_leave)} - ${formatDate(request.end_date_of_leave)}`"
+      />
+      <DetailItem
+        :title="'Module'"
+        :value="request.module_code"
+      />
+      <DetailItem
+        :title="'Reason'"
+        :value="request.reason_of_leave"
+      />
+      <DetailItem
+        :title="'Attachment'"
+        :value="request.blob_url"
+      />
       
       <div v-if="userRole === 'Student'">
         <EditRequestButton />
@@ -24,6 +49,7 @@
     <div v-else>
       <p>Loading...</p>
     </div>
+  </div>
 </template>
   
   <script>
@@ -32,13 +58,15 @@
   import EditRequestButton from '../components/EditRequestButton.vue';
   import DeleteRequestButton from '../components/DeleteRequestButton.vue';
   import StatusButton from '../components/StatusButton.vue';
+  import DetailItem from "../components/DetailItem.vue";
   
   export default {
     name: "RequestDetailsView",
     components: {
         EditRequestButton,
         DeleteRequestButton,
-        StatusButton
+        StatusButton,
+        DetailItem
     },
     data() {
       return {
@@ -83,11 +111,17 @@
   </script>
 
   <style scoped>
+  .details-container {
+    padding: 16px;
+    width: 80%;
+  }
+
   .back-button {
     cursor: pointer;
     font-size: 20px;
     display: flex;
     align-items: center;
   }
+  
   </style>
 
