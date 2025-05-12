@@ -74,9 +74,7 @@ export const requestApiService = {
 };
 
 // User API
-const userApi = axios.create({
-    baseURL: USER_BASE_URL,
-});
+const userApi = createAuthenticatedApi(USER_BASE_URL);
 
 export const userApiService = {
     getAllUsers: () => userApi.get("/all").then((res) => res.data),

@@ -21,6 +21,8 @@ const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
+
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3001";
 const REQUEST_SERVICE_URL = process.env.REQUEST_SERVICE_URL || "http://localhost:3002";
 const MODULE_SERVICE_URL = process.env.MODULE_SERVICE_URL || "http://localhost:3003"; 
@@ -49,19 +51,29 @@ services.forEach(({ route, target }) => {
     const proxyOptions = {
         target,
         changeOrigin: true,
+        onProxyReq: (proxyReq) => {
+            if (INTERNAL_API_KEY) {
+                proxyReq.setHeader("x-api-key", INTERNAL_API_KEY);
+            }
+        }
         // pathRewrite: {
         //     [`^${route}`]: "",
         // },
     };
 
-    app.use(route, createProxyMiddleware(proxyOptions));
+    if (!route.startsWith("/api/auth")) {
+        app.use(route, verifyToken, createProxyMiddleware(proxyOptions));
+    }
+    else {
+        app.use(route, createProxyMiddleware(proxyOptions));
+    }
+
 });
 
 // Aggreate API call
 app.use("/api/gateway/modules/all", getAllModulesWithEducators);
 app.use(
     "/api/gateway/students/enrolled/:moduleCode",
-    verifyToken,
     authorizeRoles(["Professor"]),
     getEnrolledStudentsByModule
 );

@@ -38,7 +38,7 @@ export const getAllModulesWithEducators = async (req, res) => {
             },
         });
     } catch (error) {
-        console.error("Error fetching all modules:", error);
+        console.error("Error fetching all modules:", error.response ? error.response.data : error);
         return res.status(500).json({
             success: false,
             error: "Error fetching all modules",
