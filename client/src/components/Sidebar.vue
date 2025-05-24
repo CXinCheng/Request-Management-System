@@ -133,6 +133,10 @@ const items = computed(() => {
                     title: "Modules",
                     icon: "mdi-book-open-variant-outline",
                     href: "/admin/modules",
+                },{
+                    title: "Semester",
+                    icon: "mdi-book-open-variant-outline",
+                    href: "/admin/Semester",
                 },
             ];
     }

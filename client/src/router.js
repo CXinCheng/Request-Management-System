@@ -11,9 +11,11 @@ import RequestDetailsView from "./modules/request/views/RequestDetails.vue";
 import EditRequestView from "./modules/request/views/EditRequest.vue";
 import AdminUsersView from "./modules/admin/views/AdminUsersView.vue";
 import AdminModuleView from "./modules/admin/views/AdminModuleView.vue";
+import AdminSemesterView from "./modules/admin/views/AdminSemesterView.vue"
 import ProfileView from "./modules/user/ProfileView.vue";
 import ModuleView from "./modules/module/ModuleView.vue";
 import ProfDashboardView from "./modules/dashboard/views/ProfDashboardView.vue";
+
 
 const isAuthenticated = () => {
     const token = localStorage.getItem("token");
@@ -89,6 +91,12 @@ const routes = [
         component: AdminModuleView,
         name: "AdminModuleView",
         meta: { requiresAuth: true, title: "Modules" },
+    },
+    {
+        path: "/admin/Semester",
+        component: AdminSemesterView,
+        name: "AdminSemesterView",
+        meta: { requiresAuth: true, title: "Semester" },
     },
     {
         path: "/requestDetails/:requestId/:module_code",
