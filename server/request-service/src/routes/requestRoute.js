@@ -3,7 +3,6 @@ import { body } from "express-validator";
 import { submitForm, upload } from '../controllers/requestForm/formController.js';
 import { 
     getAllRequestsByStudent, 
-    getRequestDetails, 
     getAllRequestsByProfessor, 
     updateRequestByStudent, 
     updateRequestByProfessor,
@@ -36,7 +35,6 @@ const router = express.Router();
 router.use(dbConnectionMiddleware, verifyToken);
 
 router.get('/student/:studentId', authorizeRoles(['Student']), getAllRequestsByStudent);
-router.get('/student/:studentId/:requestId', authorizeRoles(['Student', 'Professor']), getRequestDetailsByStudent);
 router.put('/student/:requestId', authorizeRoles(['Student', 'Professor']), updateRequestByStudent);
 router.delete('/student/:requestId', authorizeRoles(['Student']), deleteRequestByStudent);
 
