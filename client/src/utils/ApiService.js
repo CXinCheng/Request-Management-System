@@ -5,7 +5,34 @@ const REQUEST_BASE_URL = "/api/requests";
 const USER_BASE_URL = "/api/user";
 const MODULE_BASE_URL = "/api/module";
 const GATEWAY_BASE_URL = "/api/gateway";
-const ADMIN_BASE_URL = "/api/admin";
+
+const createAuthenticatedApi = (baseURL) => {
+    const api = axios.create({ baseURL });
+    
+    api.interceptors.request.use(
+      config => {
+        const token = localStorage.getItem('token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      error => Promise.reject(error)
+    );
+    
+    api.interceptors.response.use(
+      response => response,
+      error => {
+        // if (error.response && error.response.status === 403) {
+        //   localStorage.removeItem('token');
+        //   window.location.href = '/login';
+        // }
+        return Promise.reject(error);
+      }
+    );
+    
+    return api;
+  };
 
 // Auth API
 const authApi = axios.create({
@@ -26,10 +53,7 @@ export const authApiService = {
 };
 
 // Request API
-const requestApi = axios.create({
-    // baseURL: REQUEST_BASE_URL,
-    baseURL: "http://localhost:3002/api/v1/requests",
-});
+const requestApi = createAuthenticatedApi(REQUEST_BASE_URL);
 
 export const requestApiService = {
     submit: (request) =>
@@ -43,12 +67,14 @@ export const requestApiService = {
         requestApi.get(`/student/${studentId}/${requestId}`).then((res) => res.data),
     getRequestsByProfessor: (professorId) =>
         requestApi.get(`/professor/${professorId}`).then((res) => res.data),
+    deleteRequest: (requestId) =>
+        requestApi.delete(`/${requestId}`).then((res) => res.data),
+    updateRequest: (requestId, status) =>
+        requestApi.put(`/${requestId}`, status).then((res) => res.data),
 };
 
 // User API
-const userApi = axios.create({
-    baseURL: USER_BASE_URL,
-});
+const userApi = createAuthenticatedApi(USER_BASE_URL);
 
 export const userApiService = {
     getAllUsers: () => userApi.get("/all").then((res) => res.data),
@@ -61,10 +87,7 @@ export const userApiService = {
 };
 
 // Module API
-const moduleApi = axios.create({
-    baseURL: MODULE_BASE_URL,
-    // baseURL: "http://localhost:3003/api/v1/module",
-});
+const moduleApi = createAuthenticatedApi(MODULE_BASE_URL);
 
 export const moduleApiService = {
     // getAllModules: () => moduleApi.get('/all').then(res => res.data),
@@ -84,16 +107,7 @@ export const moduleApiService = {
 };
 
 // Gateway API
-const gatewayApi = axios.create({
-    baseURL: GATEWAY_BASE_URL,
-    getAllModules: () => moduleApi.get("/all").then(res => res.data),
-    updateEducator: (data) => moduleApi.post("updateEducator", data).then(res => res.data),
-});
-
-// Admin API
-const adminApi = axios.create({
-    baseURL: ADMIN_BASE_URL,
-});
+const gatewayApi = createAuthenticatedApi(GATEWAY_BASE_URL);
 
 export const gatewayApiService = {
     getAllModules: () => gatewayApi.get("/modules/all").then((res) => res.data),

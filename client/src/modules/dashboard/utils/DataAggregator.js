@@ -33,9 +33,9 @@ const fetchLeaveApplications = async (userId) => {
   try {
     const response = await requestApiService.getRequestsByStudent(userId);
 
-    console.log("fetch leave application API Response:", response);
+    console.log("API Response:", response.data);
 
-    if (!response || response.length === 0) {
+    if (!response.data || response.datalength === 0) {
       console.warn(`No leave applications found for user ${userId}`);
       return [];
     }

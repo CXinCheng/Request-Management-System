@@ -58,13 +58,13 @@
         @click:append-inner="showConfirmPasswordIcon = !showConfirmPasswordIcon"
         v-model="confirmPassword"
       ></v-text-field>
-      <v-select
+      <!-- <v-select
         label="Role"
         density="comfortable"
         v-model="formData.role"
         :items="roleItems"
         :rules="[() => !!formData.role || 'Role is required']"
-      ></v-select>
+      ></v-select> -->
       <slot name="messages"></slot>
       <slot name="actions"></slot>
     </form>
@@ -88,10 +88,10 @@
       type: Boolean,
       default: true
     },
-    roleItems: {
-      type: Array,
-      default: () => ['Student', 'Professor']
-    }
+    // roleItems: {
+    //   type: Array,
+    //   default: () => ['Student', 'Professor']
+    // }
   });
   
   const emit = defineEmits(['submit']);
