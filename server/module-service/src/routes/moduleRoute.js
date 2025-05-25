@@ -8,7 +8,8 @@ import {
     updateEnrollmentByModule,
     getModulesByProfessor,
     getModulesByStudent,
-    getAllFaculties
+    getAllFaculties,
+    updateSystemSemester
 } from "../controllers/moduleController.js";
 import { ensureConnection } from "../configs/db.js";
 
@@ -44,5 +45,6 @@ router.post("/updateEducator", updateEducator);
 router.post("/updateEnrollment/:moduleCode", updateEnrollmentByModule);
 router.get("/classes/:moduleCode", getClassesByModule);
 router.get("/students/:studentID/modules", getModulesByStudent);
+router.post("/updateSystemSemester", updateSystemSemester);
 
 export default router;
