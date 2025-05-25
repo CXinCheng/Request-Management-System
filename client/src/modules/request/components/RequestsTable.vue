@@ -95,7 +95,7 @@ export default {
     mounted() {
         if (localStorage.getItem("user")) {
             let user = JSON.parse(localStorage.getItem("user"));
-            this.studentId = user["matrix_id"];
+            this.userId = user["matrix_id"];
             this.userRole = user["role"];
         }
         this.fetchRequests();
@@ -106,10 +106,19 @@ export default {
                 // const response = await axios.get(
                 //     `http://localhost:3002/api/v1/requests/student/${this.studentId}`
                 // );
-                const response = await requestApiService.getRequestsByStudent(
-                    this.studentId
-                );
-                this.requests = response;
+                let response = null;
+                if (this.userRole === "Student") {
+                    response = await requestApiService.getRequestsByStudent(
+                        this.userId
+                    );
+                }
+                else if (this.userRole === "Professor") {
+                    response = await requestApiService.getRequestsByProfessor(
+                        this.userId
+                    );
+                }
+                this.requests = response.data;
+                
             } catch (error) {
                 console.error("Error fetching request:", error);
             }

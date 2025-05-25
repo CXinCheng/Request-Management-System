@@ -17,7 +17,11 @@ export const getAllRequestsByStudent = async (req, res) => {
         AND r.user_id = $1`, 
         [studentId]
         );
-        res.status(200).json(requests);
+        // res.status(200).json(requests);
+        res.status(200).json({
+            success: true,
+            data: requests,
+        });
     } catch (error) {
         console.error('Error fetching requests:', error);
         res.status(500).json({ error: `Failed to fetch requests - ${error}` });

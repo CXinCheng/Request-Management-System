@@ -70,6 +70,8 @@ services.forEach(({ route, target }) => {
 
 });
 
+app.use("/api/gateway", verifyToken);
+
 // Aggreate API call
 app.use("/api/gateway/modules/all", getAllModulesWithEducators);
 app.use(

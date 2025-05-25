@@ -82,7 +82,7 @@ export const getModulesWithRequestsByProfessor = async (req, res) => {
     } catch (error) {
         console.error(
             "Error fetching all modules with requests by professor:",
-            error
+            error.response ? error.response.data : error
         );
         return res.status(500).json({
             success: false,
