@@ -358,23 +358,10 @@ async function fetchClasses() {
             selectedModule.value.code
         );
         if (response.success) {
-            classes.value = response.data.reduce(
-                (acc, { class_type, class_no }) => {
-                    const existing = acc.find(
-                        (c) => c.classType === class_type
-                    );
-                    if (existing) {
-                        existing.classNo.add(class_no);
-                    } else {
-                        acc.push({
-                            classType: class_type,
-                            classNo: new Set([class_no]),
-                        });
-                    }
-                    return acc;
-                },
-                []
-            );
+            classes.value = response.data.map(classData => ({
+                classType: classData.class_type,
+                classNo: classData.class_no
+            }));
         }
         studentsTableHeaders.value = [];
         classes.value.forEach(({ classType }) => {

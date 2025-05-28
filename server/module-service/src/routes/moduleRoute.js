@@ -44,7 +44,7 @@ router.get("/professor/modules/:professorId", authorizeRoles(['Admin', 'Professo
 router.get("/students/:moduleCode", authorizeRoles(['Admin', 'Professor', 'Student']), getStudentsByModule);
 router.post("/updateEducator", authorizeRoles(['Admin']), updateEducator);
 router.post("/updateEnrollment/:moduleCode", authorizeRoles(['Admin']), updateEnrollmentByModule);
-router.get("/classes/:moduleCode", authorizeRoles(['Admin']), getClassesByModule);
+router.get("/classes/:moduleCode", authorizeRoles(['Admin', 'Professor']), getClassesByModule);
 router.get("/students/:studentID/modules", authorizeRoles(['Admin', 'Student']), getModulesByStudent);
 router.post("/updateSystemSemester",authorizeRoles(['Admin']), updateSystemSemester);
 
