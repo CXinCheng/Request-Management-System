@@ -51,50 +51,47 @@
   </v-container>
 </template>
 
-<script>
-import { moduleApiService} from "@/utils/ApiService";
+<script setup>
+import { ref } from 'vue';
+import { moduleApiService } from "@/utils/ApiService";
 import { useNotificationStore } from "@/utils/NotificationStore";
 
-const notify = useNotificationStore();
+const notificationStore = useNotificationStore();
 
-export default {
-  name: "AdminSemesterView",
-  data() {
-    return {
-      dialog: false,
-      selectedYear: null,
-      selectedSemester: null,
-      availableYears: ["2023-2024", "2024-2025", "2025-2026", "2026-2027"], 
-      availableSemesters: ["1", "2", "3" , "4"], 
-    };
-  },
-  methods: {
-    async submitSemesterChange() {
-      try {
-        const response = await moduleApiService.updateSystemSemester(selectedYear, selectedSemester);
-        this.dialog = false;
-        if (response.status == 200) {
-          notify.showNotification({
-                message: "Semester updated successfully",
-                color: "success",
-            });
-        }
-        else {
-          notify.showNotification({
-                message: "Failed to update semester",
-                color: "error",
-            });
-        }
-        console.log("API response:", response.data);
-      } catch (error) {
-        this.dialog = false;
-        notify.showNotification({
-                message: "Failed to update semester",
-                color: "error",
-            });
-        }
-    },
-  },
+const dialog = ref(false);
+const selectedYear = ref(null);
+const selectedSemester = ref(null);
+const availableYears = ["2023-2024", "2024-2025", "2025-2026", "2026-2027"];
+const availableSemesters = ["1", "2", "3", "4"];
+
+const submitSemesterChange = async () => {
+  try {
+    const response = await moduleApiService.updateSystemSemester(
+      selectedYear.value, 
+      selectedSemester.value
+    );
+    
+    dialog.value = false;
+    
+    if (response.success) {
+      notificationStore.showNotification({
+        message: "Semester updated successfully",
+        color: "success",
+      });
+    } else {
+      notificationStore.showNotification({
+        message: response.message || "Failed to update semester",
+        color: "error",
+      });
+    }
+  } catch (error) {
+    console.error("Error updating semester:", error);
+    dialog.value = false;
+    notificationStore.showNotification({
+      message: error.message || "Failed to update semester",
+      color: "error",
+    });
+  }
 };
 </script>
 
