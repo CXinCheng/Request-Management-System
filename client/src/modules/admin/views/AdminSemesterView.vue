@@ -53,6 +53,9 @@
 
 <script>
 import { moduleApiService} from "@/utils/ApiService";
+import { useNotificationStore } from "@/utils/NotificationStore";
+
+const notify = useNotificationStore();
 
 export default {
   name: "AdminSemesterView",
@@ -68,16 +71,28 @@ export default {
   methods: {
     async submitSemesterChange() {
       try {
-        await moduleApiService.updateSystemSemester(selectedYear, selectedSemester);
-
+        const response = await moduleApiService.updateSystemSemester(selectedYear, selectedSemester);
         this.dialog = false;
-        this.$toast.success("Semester updated successfully.");
+        if (response.status == 200) {
+          notify.showNotification({
+                message: "Semester updated successfully",
+                color: "success",
+            });
+        }
+        else {
+          notify.showNotification({
+                message: "Failed to update semester",
+                color: "error",
+            });
+        }
         console.log("API response:", response.data);
       } catch (error) {
         this.dialog = false;
-        this.$toast.error("Failed to update semester.");
-        console.error("Error:", error);
-      }
+        notify.showNotification({
+                message: "Failed to update semester",
+                color: "error",
+            });
+        }
     },
   },
 };

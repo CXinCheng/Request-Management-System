@@ -103,7 +103,7 @@ export const moduleApiService = {
         moduleApi.get(`/students/${studentID}/modules`).then((res) => res.data),
     getAllFaculties: () => moduleApi.get("/all/faculties").then((res) => res.data),
     updateSystemSemester: (academicYear, semester) =>
-    moduleApi.put("/updateSystemSemester", {
+    moduleApi.post("/updateSystemSemester", {
         academicYear,
         semester,
     }).then((res) => res.data),
