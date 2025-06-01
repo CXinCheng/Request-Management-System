@@ -72,6 +72,7 @@
 <script>
 import axios from "axios";
 import dayjs from "dayjs";
+import { requestApiService } from "@/utils/ApiService";
 
 export default {
     components: {},
@@ -105,21 +106,22 @@ export default {
         async fetchRequests() {
             let response = null;
             try {
+                // const response = await axios.get(
+                //     `http://localhost:3002/api/v1/requests/student/${this.studentId}`
+                // );
+                let response = null;
                 if (this.userRole === "Student") {
-                    response = await axios.get(
-                        `http://localhost:3002/api/v1/requests/student/${this.userId}`
+                    response = await requestApiService.getRequestsByStudent(
+                        this.userId
                     );
-                    console.log("Response for Student:", response);
-                } else if (this.userRole === "Professor") {
-                    response = await axios.get(
-                        `http://localhost:3002/api/v1/requests/professor/${this.userId}`
+                }
+                else if (this.userRole === "Professor") {
+                    response = await requestApiService.getRequestsByProfessor(
+                        this.userId
                     );
-                    console.log("Response for Professor:", response);
                 }
-                else {
-                    console.error("Invalid user role:", this.userRole);
-                }
-                this.requests = response.data.data;
+                this.requests = response.data;
+                
             } catch (error) {
                 console.error("Error fetching requests on RequestsTable page:", error);
             }
@@ -147,9 +149,10 @@ export default {
         async deleteRequest(item) {
             console.log("Delete Request button clicked");
             try {
-                await axios.delete(
-                    `http://localhost:3002/api/v1/requests/student/${item.id}`
-                );
+                // await axios.delete(
+                //     `http://localhost:3002/api/v1/requests/student/${item.id}`
+                // );
+                await requestApiService.deleteRequest(item.id);
                 this.$router.push("/requests"); // redirect to Request List page after deletion
             } catch (error) {
                 console.error("Error deleting request:", error);

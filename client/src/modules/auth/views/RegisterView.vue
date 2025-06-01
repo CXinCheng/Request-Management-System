@@ -4,7 +4,6 @@
 
         <UserForm
             :initial-data="formData"
-            :role-items="['Student', 'Professor']"
             :show-confirm-password="true"
             @submit="handleRegister"
         >

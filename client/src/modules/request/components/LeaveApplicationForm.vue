@@ -74,7 +74,7 @@
             <v-col cols="12">
                 <v-file-input
                     v-model="file"
-                    label="Upload File"
+                    label="Upload Supporting Documents"
                     variant="outlined"
                     accept=".jpg,.png,.pdf,.mp4"
                     hint="Accepted File Format .jpg,.png,.pdf"

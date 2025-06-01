@@ -12,7 +12,12 @@ export const getEnrolledStudentsByModule = async (req, res) => {
         let moduleCode = req.params.moduleCode;
 
         let enrolledStudentsData = await axios.get(
-            `${MODULE_SERVICE_URL}/api/v1/module/students/${moduleCode}`
+            `${MODULE_SERVICE_URL}/api/v1/module/students/${moduleCode}`,
+            {
+                headers: {
+                    Authorization: req.headers.authorization,
+                },
+            }
         );
         const formatedEnrolledStudents = enrolledStudentsData.data.data.reduce(
             (acc, curr) => {
@@ -40,25 +45,29 @@ export const getEnrolledStudentsByModule = async (req, res) => {
             []
         );
 
-        let studentData = await axios.get(`${USER_SERVICE_URL}/api/v1/user/all/students`);
+        let studentData = await axios.get(
+            `${USER_SERVICE_URL}/api/v1/user/all/students`,
+            {
+                headers: {
+                    Authorization: req.headers.authorization,
+                },
+            }
+        );
 
         res.json({
             success: true,
             data: {
-                students: formatedEnrolledStudents.map(
-                    (enrolledStudent) => {
-                        let student = studentData.data.data.find(
-                            (s) =>
-                                s.matrix_id === enrolledStudent.user_matrix_id
-                        );
-                        return {
-                            matrix_id: student.matrix_id,
-                            name: student.name,
-                            email: student.email,
-                            classes: enrolledStudent.classes,
-                        };
-                    }
-                ),
+                students: formatedEnrolledStudents.map((enrolledStudent) => {
+                    let student = studentData.data.data.find(
+                        (s) => s.matrix_id === enrolledStudent.user_matrix_id
+                    );
+                    return {
+                        matrix_id: student.matrix_id,
+                        name: student.name,
+                        email: student.email,
+                        classes: enrolledStudent.classes,
+                    };
+                }),
             },
         });
     } catch (error) {
@@ -77,11 +86,21 @@ export const getAllStudentsByModule = async (req, res) => {
         let moduleCode = req.params.moduleCode;
 
         let enrolledStudentsData = await axios.get(
-            `${MODULE_SERVICE_URL}/api/v1/module/students/${moduleCode}`
+            `${MODULE_SERVICE_URL}/api/v1/module/students/${moduleCode}`,
+            {
+                headers: {
+                    Authorization: req.headers.authorization,
+                },
+            }
         );
 
         let studentData = await axios.get(
-            `${USER_SERVICE_URL}/api/v1/user/all/students`
+            `${USER_SERVICE_URL}/api/v1/user/all/students`,
+            {
+                headers: {
+                    Authorization: req.headers.authorization,
+                },
+            }
         );
 
         res.json({

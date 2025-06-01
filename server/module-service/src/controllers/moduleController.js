@@ -165,13 +165,14 @@ export const getClassesByModule = async (req, res) => {
             [moduleCode]
         );
 
-        if (!module || !module.class_last_updated_at) {
-            await updateService.addClass(moduleCode);
+        const currentSem = new updateService();
+        if (!module || !module.class_last_updated_at) { 
+            await currentSem.addClass(moduleCode); 
         } else if (
             module.class_last_updated_at <
             new Date(Date.now() - 24 * 60 * 60 * 1000)
         ) {
-            await updateService.updateClass(moduleCode);
+            await currentSem.updateClass(moduleCode); 
         }
 
         data = await db.manyOrNone(
@@ -374,3 +375,32 @@ export const getModulesByStudent = async (req, res) => {
         });
     }
 };
+
+export const updateSystemSemester = async (req, res) => {
+    const { academicYear, semester } = req.body;
+    if (!academicYear || !semester) {
+        return res.status(400).json({ message: "Academic year and semester are required." });
+    }
+
+    // academicYear must be of format YYYY-YYYY e.g. 2024-2025 (required by nusmods)
+    const isValidAcademicYear = (year) => {
+        const regex = /^\d{4}-\d{4}$/;
+        if (!regex.test(year)) return false;
+        const [start, end] = year.split("-").map(Number);
+        return end === start + 1;
+    };
+
+    if (!isValidAcademicYear(academicYear)) {
+        return res.status(400).json({ message: "Invalid academic year format. Use 'YYYY-YYYY' (e.g., '2024-2025')." });
+    }
+
+    const newSemester = new updateService(academicYear, parseInt(semester));
+
+    try {
+        const result = await newSemester.initialize();
+        res.status(200).json({ message: "Updated System to new semester" });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to update system to new semester", error: error.message });
+    }
+};
+

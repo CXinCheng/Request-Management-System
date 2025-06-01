@@ -126,7 +126,7 @@
 import { ref, onMounted } from "vue";
 import { useNotificationStore } from "@/utils/NotificationStore";
 import { userApiService } from "@/utils/ApiService";
-import { facultyList } from "@/constants/facultyList";
+import { getFacultyList } from "@/constants/facultyList";
 
 const notificationStore = useNotificationStore();
 
@@ -147,7 +147,7 @@ const passwordForm = ref({
     confirm: "",
 });
 
-const faculties = facultyList;
+const faculties = ref([]);
 
 const emailRules = [
     (v) => !!v || "Email is required",
@@ -183,7 +183,7 @@ const confirmPasswordRules = [
     (v) => !v || v === passwordForm.value.new || "Passwords must match",
 ];
 
-onMounted(() => {
+onMounted(async () => {
     try {
         const userData = JSON.parse(localStorage.getItem("user"));
         if (userData) {
@@ -195,6 +195,15 @@ onMounted(() => {
                 contact: userData.contact,
                 faculty: userData.faculty,
             };
+
+            try {
+                faculties.value = await getFacultyList();
+            } catch (error) {
+                notificationStore.showNotification({
+                    message: "Failed to load faculty list",
+                    color: "warning",
+                });
+            }
         }
     } catch (error) {
         notificationStore.showNotification({

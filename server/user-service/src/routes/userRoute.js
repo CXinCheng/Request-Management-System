@@ -9,6 +9,7 @@ import {
     getProfessors
 } from "../controllers/user/userController.js";
 import { ensureConnection } from "../configs/db.js";
+import { verifyToken, authorizeRoles, checkResourceOwnership } from "../middlewares/authMiddleware.js";
 
 const dbConnectionMiddleware = async (req, res, next) => {
     try {
@@ -30,13 +31,13 @@ const dbConnectionMiddleware = async (req, res, next) => {
   };
 
 const router = express.Router();
-router.use(dbConnectionMiddleware);
-router.get("/all", getAllUsers);
-router.get("/all/professors", getAllProfessors);
-router.get("/all/students", getAllStudents);
-router.get("/professors", getProfessors);
-router.get("/:matrix_id", getUser);
-router.post("/:matrix_id", updateUser);
-router.delete("/:matrix_id", deleteUser);
+router.use(dbConnectionMiddleware, verifyToken);
+router.get("/all", authorizeRoles(['Admin']) ,getAllUsers);
+router.get("/all/professors", authorizeRoles(['Admin']), getAllProfessors);
+router.get("/all/students", authorizeRoles(['Admin', 'Professor']), getAllStudents);
+router.get("/professors", authorizeRoles(['Admin', 'Student']), getProfessors);
+router.get("/:matrix_id", authorizeRoles(['Admin', 'Student', 'Professor']), checkResourceOwnership, getUser);
+router.post("/:matrix_id", authorizeRoles(['Admin', 'Student', 'Professor']), checkResourceOwnership, updateUser);
+router.delete("/:matrix_id", authorizeRoles(['Admin']), deleteUser);
 
 export default router;

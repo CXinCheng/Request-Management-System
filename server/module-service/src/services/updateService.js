@@ -4,18 +4,44 @@ import fs from "fs";
 import { stringify } from "querystring";
 
 class UpdateService {
+    // for this default value should we change it to 
+    // retrieve from what is currently stored in the db?
     DEFATUL_ACADEMIC_YEAR = "2024-2025";
     DEFAULT_SEMESTER = 2;
 
-    constructor() {
-        this.academicYear = this.DEFATUL_ACADEMIC_YEAR;
-        this.semester = this.DEFAULT_SEMESTER;
+    constructor(academicYear, semester) {
+        this.academicYear = academicYear || this.DEFATUL_ACADEMIC_YEAR;
+        this.semester = semester || this.DEFAULT_SEMESTER;
+        this.startDate = this.getSemesterStartDate(this.academicYear, this.semester);
     }
 
     async initialize() {
+        await this.updateSystemSetting();
         await this.loadSettings();
         await this.updateFaculties();
         await this.updateModule();
+    }
+
+    async updateSystemSetting () {
+        try{
+            await db.none(
+                "UPDATE request_management.system_settings SET value = $1 WHERE key = 'academic_year'",
+                [this.academicYear.toString()]
+            );
+
+            await db.none(
+                "UPDATE request_management.system_settings SET value = $1 WHERE key = 'semester_number'",
+                [this.semester.toString()]
+            );
+
+            await db.none(
+                "UPDATE request_management.system_settings SET value = $1 WHERE key = 'semester_start_date'",
+                [this.startDate.toString()]
+            );
+        } catch (error) {
+            console.error("Error updating system settings:", error);
+            throw error;
+        }
     }
 
     async loadSettings() {
@@ -324,6 +350,47 @@ class UpdateService {
         }
         return changes;
     }
+
+    getSemesterStartDate(academicYear, semester) {
+        const [yearStart, yearEnd] = academicYear.split("-").map(Number);
+
+        // Determine calendar year based on semester logic
+        const year = semester === 1 ? yearStart : yearEnd;
+
+        let month;
+        let weekOffset;
+
+        switch (semester) {
+            case 1:
+                month = 7; // August
+                weekOffset = 0; // 1st Monday
+                break;
+            case 2:
+                month = 0; // January
+                weekOffset = 1; // 2nd Monday
+                break;
+            case 3:
+                month = 4; // May
+                weekOffset = 1; // 2nd Monday
+                break;
+            case 4:
+                month = 5; // June
+                weekOffset = 3; // 4th Monday
+                break;
+            default:
+                throw new Error("Invalid semester number. Must be 1–4.");
+        }
+
+        const date = new Date(year, month, 1);
+
+        // Find the first Monday of the month
+        const firstMondayOffset = (8 - date.getDay()) % 7;
+        date.setDate(1 + firstMondayOffset + 7 * weekOffset);
+
+        return date;
+    }
+
 }
 
-export default new UpdateService();
+export default UpdateService;
+// export default new UpdateService();
