@@ -102,6 +102,10 @@ export const moduleApiService = {
     getModulesByStudent: (studentID) =>
         moduleApi.get(`/students/${studentID}/modules`).then((res) => res.data),
     getAllFaculties: () => moduleApi.get("/all/faculties").then((res) => res.data),
+    bulkEnrollStudents: (data) =>
+        moduleApi
+            .post(`/bulkEnroll/${data.moduleCode}`, data.students)
+            .then((res) => res.data),
 };
 
 // Gateway API
