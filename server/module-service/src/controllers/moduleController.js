@@ -1,4 +1,4 @@
-import updateService from "../services/updateService.js";
+import UpdateService from "../services/updateService.js";
 import { db } from "../configs/db.js";
 
 
@@ -165,7 +165,7 @@ export const getClassesByModule = async (req, res) => {
             [moduleCode]
         );
 
-        const currentSem = new updateService();
+        const currentSem = new UpdateService();
         if (!module || !module.class_last_updated_at) { 
             await currentSem.addClass(moduleCode); 
         } else if (
@@ -179,10 +179,28 @@ export const getClassesByModule = async (req, res) => {
             "SELECT * FROM request_management.classes WHERE module_code = $1",
             [moduleCode]
         );
+        
+        // Format the data to return only class type and class number
+        const formattedData = data.reduce((acc, curr) => {
+            const existingType = acc.find(item => item.class_type === curr.class_type);
+            
+            if (existingType) {
+                if (!existingType.class_no.includes(curr.class_no)) {
+                    existingType.class_no.push(curr.class_no);
+                }
+            } else {
+                acc.push({
+                    class_type: curr.class_type,
+                    class_no: [curr.class_no]
+                });
+            }
+            
+            return acc;
+        }, []);
 
         res.json({
             success: true,
-            data: data,
+            data: formattedData,
         });
     } catch (error) {
         console.error("Error fetching module timetable:", error);
@@ -394,7 +412,7 @@ export const updateSystemSemester = async (req, res) => {
         return res.status(400).json({ message: "Invalid academic year format. Use 'YYYY-YYYY' (e.g., '2024-2025')." });
     }
 
-    const newSemester = new updateService(academicYear, parseInt(semester));
+    const newSemester = new UpdateService(academicYear, parseInt(semester));
 
     try {
         const result = await newSemester.initialize();
