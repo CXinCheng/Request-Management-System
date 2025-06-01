@@ -403,12 +403,10 @@ export const updateSystemSemester = async (req, res) => {
   };
 
   if (!isValidAcademicYear(academicYear)) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "Invalid academic year format. Use 'YYYY-YYYY' (e.g., '2024-2025').",
-      });
+    return res.status(400).json({
+      message:
+        "Invalid academic year format. Use 'YYYY-YYYY' (e.g., '2024-2025').",
+    });
   }
 
   const newSemester = new UpdateService(academicYear, parseInt(semester));
@@ -416,14 +414,124 @@ export const updateSystemSemester = async (req, res) => {
   try {
     const result = await newSemester.initialize();
     res.status(200).json({ 
-        success: true,
-        message: "Updated System to new semester" });
+      success: true,
+      message: "Updated System to new semester" });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to update system to new semester",
-        error: error.message,
+    res.status(500).json({
+      message: "Failed to update system to new semester",
+      error: error.message,
+    });
+  }
+};
+
+export const bulkEnrollStudentsByModule = async (req, res) => {
+  const moduleCode = req.params.moduleCode;
+  const students = req.body;
+
+  if (!moduleCode || !students || !Array.isArray(students)) {
+    return res.status(400).json({
+      success: false,
+      error:
+        "Invalid request data. Please provide module code and an array of students.",
+    });
+  }
+
+  try {
+    // Check if module exists
+    const module = await db.oneOrNone(
+      "SELECT * FROM request_management.modules WHERE code = $1",
+      [moduleCode]
+    );
+    if (!module) {
+      return res.status(404).json({
+        success: false,
+        error: "Module not found",
       });
+    }
+    // Check if students exist
+    const studentIds = students.map((student) => student.matrix_id);
+    const existingStudents = await db.any(
+      "SELECT matrix_id FROM request_management.users WHERE matrix_id = ANY($1::text[]) AND role = 'Student'",
+      [studentIds]
+    );
+    const existingStudentIds = existingStudents.map(
+      (student) => student.matrix_id
+    );
+    const nonExistentStudents = studentIds.filter(
+      (id) => !existingStudentIds.includes(id)
+    );
+
+    // Check which students are already enrolled in the module
+    const alreadyEnrolled = await db.any(
+      "SELECT DISTINCT user_matrix_id FROM request_management.user_module_mapping WHERE user_matrix_id = ANY($1::text[]) AND module_code = $2",
+      [studentIds, moduleCode]
+    );
+
+    const alreadyEnrolledIds = alreadyEnrolled.map(
+      (entry) => entry.user_matrix_id
+    );
+
+    // Filter out the students that can be enrolled (exist in users table and not already enrolled)
+    const studentsToEnroll = students.filter(
+      (student) =>
+        existingStudentIds.includes(student.matrix_id) &&
+        !alreadyEnrolledIds.includes(student.matrix_id)
+    );
+
+    // Perform bulk enrollment for valid students
+    if (studentsToEnroll.length > 0) {
+      const enrollmentQueries = [];
+
+      for (const student of studentsToEnroll) {
+        // Process class assignments if provided
+        if (student.classes && Array.isArray(student.classes)) {
+          for (const classInfo of student.classes) {
+            enrollmentQueries.push(
+              db.none(
+                "INSERT INTO request_management.user_module_mapping (user_matrix_id, module_code, class_type, class_no) VALUES ($1, $2, $3, $4)",
+                [
+                  student.matrix_id,
+                  moduleCode,
+                  classInfo.class_type,
+                  classInfo.class_no,
+                ]
+              )
+            );
+          }
+        } else {
+          // If no class information provided, just add the student-module mapping
+          enrollmentQueries.push(
+            db.none(
+              "INSERT INTO request_management.user_module_mapping (user_matrix_id, module_code) VALUES ($1, $2)",
+              [student.matrix_id, moduleCode]
+            )
+          );
+        }
+      }
+
+      await Promise.all(enrollmentQueries);
+    }
+
+    // Prepare response with details about the operation
+    return res.status(200).json({
+      success: true,
+      message: `Processed ${students.length} students: ${studentsToEnroll.length} enrolled successfully`,
+      data: {
+        enrolled: studentsToEnroll,
+        alreadyEnrolled: students.filter((student) =>
+          alreadyEnrolledIds.includes(student.matrix_id)
+        ),
+        nonExistent: students.filter((student) =>
+          nonExistentStudents.includes(student.matrix_id)
+        ),
+      },
+    });
+  } catch (error) {
+    console.error("Error bulk enrolling students:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error bulk enrolling students",
+      error: error.message,
+    });
   }
 };

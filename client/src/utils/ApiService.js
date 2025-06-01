@@ -107,6 +107,10 @@ export const moduleApiService = {
         academicYear,
         semester,
     }).then((res) => res.data),
+    bulkEnrollStudents: (data) =>
+        moduleApi
+            .post(`/bulkEnroll/${data.moduleCode}`, data.students)
+            .then((res) => res.data),
 };
 
 // Gateway API
