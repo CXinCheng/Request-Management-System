@@ -2,7 +2,8 @@ import express from 'express';
 import { body } from "express-validator";
 import { submitForm, upload } from '../controllers/requestForm/formController.js';
 import { 
-    getAllRequestsByStudent, 
+    getAllRequestsByStudent,  
+    getRequestDetails, 
     getAllRequestsByProfessor, 
     updateRequestByStudent, 
     updateRequestByProfessor,
@@ -36,9 +37,10 @@ router.use(dbConnectionMiddleware, verifyToken);
 
 router.get('/student/:studentId', authorizeRoles(['Student']), getAllRequestsByStudent);
 router.put('/student/:requestId', authorizeRoles(['Student', 'Professor']), updateRequestByStudent);
-router.delete('/student/:requestId', authorizeRoles(['Student']), deleteRequestByStudent);
+router.delete('/student/:requestId', authorizeRoles(['Student']), );
 
 router.get('/module/:moduleCode', authorizeRoles(['Student', 'Professor']), getAllRequestsByModule);
+router.get('/details/:requestId', authorizeRoles(['Student', 'Professor']), getRequestDetails);
 
 router.get('/professor/:profId',  authorizeRoles(['Professor']), getAllRequestsByProfessor);
 router.put('/professor/:profId/:requestId',authorizeRoles(['Professor']), updateRequestByProfessor);

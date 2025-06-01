@@ -149,9 +149,6 @@ export default {
         async deleteRequest(item) {
             console.log("Delete Request button clicked");
             try {
-                // await axios.delete(
-                //     `http://localhost:3002/api/v1/requests/student/${item.id}`
-                // );
                 await requestApiService.deleteRequest(item.id);
                 this.$router.push("/requests"); // redirect to Request List page after deletion
             } catch (error) {

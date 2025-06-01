@@ -58,17 +58,20 @@ const requestApi = createAuthenticatedApi(REQUEST_BASE_URL);
 export const requestApiService = {
     submit: (request) =>
         requestApi.post("/submit", request).then((res) => res.data),
-    getAllRequestsByModule: (moduleCode) => requestApi.get(`/module/${moduleCode}`).then((res) => res.data),
+    getAllRequestsByModule: (moduleCode) => 
+        requestApi.get(`/module/${moduleCode}`).then((res) => res.data),
     getAllRequestsByProfessor: (professorId) =>
         requestApi.get(`/professor/${professorId}`).then((res) => res.data),
     getRequestsByStudent: (studentId) =>
         requestApi.get(`/student/${studentId}`).then((res) => res.data),
     getRequestsByProfessor: (professorId) =>
         requestApi.get(`/professor/${professorId}`).then((res) => res.data),
+    getRequestDetails: (requestId, module_code) =>
+        requestApi.get(`/details/${requestId}`, { params: { module_code: module_code } }).then((res) => res.data),
     deleteRequest: (requestId) =>
-        requestApi.delete(`/${requestId}`).then((res) => res.data),
-    updateRequest: (requestId, status) =>
-        requestApi.put(`/${requestId}`, status).then((res) => res.data),
+        requestApi.delete(`/student/${requestId}`).then((res) => res.data),
+    updateRequestStatus: (userId, requestId, module_code, newStatus) =>
+        requestApi.put(`/professor/${userId}/${requestId}`, { status: newStatus, module_code: module_code }).then((res) => res.data),
 };
 
 // User API

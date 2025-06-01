@@ -9,6 +9,7 @@
 
 <script>
 import axios from "axios";
+import { requestApiService } from "@/utils/ApiService";
 
 export default {
     data() {
@@ -28,7 +29,6 @@ export default {
         async deleteRequest() {
             console.log("Delete Request button clicked");
             try {
-                //   await axios.delete(`http://localhost:3002/api/v1/requests/student/${this.requestId}`);
                 await requestApiService.deleteRequest(this.requestId);
                 this.$router.push("/requests"); // redirect to Request List page after deletion
             } catch (error) {

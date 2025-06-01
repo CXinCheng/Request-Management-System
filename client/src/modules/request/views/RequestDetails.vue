@@ -1,7 +1,7 @@
 <template>
   <div class="details-container">
     <div v-if="request">
-      <button @click="goBack" class="back-button">
+      <button @click="$router.back()" class="back-button">
         <v-icon>mdi-arrow-left</v-icon> Back
       </button>
       <br>
@@ -52,13 +52,14 @@
   </div>
 </template>
   
-  <script>
+<script>
   import axios from "axios";
   import dayjs from "dayjs";
   import EditRequestButton from '../components/EditRequestButton.vue';
   import DeleteRequestButton from '../components/DeleteRequestButton.vue';
   import StatusButton from '../components/StatusButton.vue';
   import DetailItem from "../components/DetailItem.vue";
+  import { requestApiService } from "@/utils/ApiService";
   
   export default {
     name: "RequestDetailsView",
@@ -90,27 +91,21 @@
     methods: {
       async fetchRequest() {
         try {
-          const response = await axios.get(`http://localhost:3002/api/v1/requests/details/${this.requestId}`, { params: { module_code: this.module_code } });
+          const response = await requestApiService.getRequestDetails(this.requestId, this.module_code);
           console.log("Response for RequestDetailsView:", response);
-          this.request = response.data;
+          this.request = response;
         } catch (error) {
           console.error("Error fetching request:", error);
         }
       },
-      async handleStatusUpdate(newStatus) {
-        this.request.status = newStatus;
-      },
       formatDate(date) {
         return date ? dayjs(date).format("DD MMM YYYY, HH:mm:ss") : "-";
       },
-      goBack() {
-        this.$router.push({ name: 'RequestListView' });
-      },
     },
   };
-  </script>
+</script>
 
-  <style scoped>
+<style scoped>
   .details-container {
     padding: 16px;
     width: 80%;
@@ -123,5 +118,5 @@
     align-items: center;
   }
   
-  </style>
+</style>
 
