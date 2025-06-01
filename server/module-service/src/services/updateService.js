@@ -12,7 +12,7 @@ class UpdateService {
     constructor(academicYear, semester) {
         this.academicYear = academicYear || this.DEFATUL_ACADEMIC_YEAR;
         this.semester = semester || this.DEFAULT_SEMESTER;
-        this.startDate = getSemesterStartDate(this.academicYear, this.semester);
+        this.startDate = this.getSemesterStartDate(this.academicYear, this.semester);
     }
 
     async initialize() {
