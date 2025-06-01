@@ -102,6 +102,11 @@ export const moduleApiService = {
     getModulesByStudent: (studentID) =>
         moduleApi.get(`/students/${studentID}/modules`).then((res) => res.data),
     getAllFaculties: () => moduleApi.get("/all/faculties").then((res) => res.data),
+    updateSystemSemester: (academicYear, semester) =>
+    moduleApi.put("/updateSystemSemester", {
+        academicYear,
+        semester,
+    }).then((res) => res.data),
 };
 
 // Gateway API
@@ -117,4 +122,5 @@ export const gatewayApiService = {
         gatewayApi.get(`/students/${studentID}/modules`).then((res) => res.data),
     getModulesWithRequestsByProfessor: (profId) =>
         gatewayApi.get(`/modules/${profId}`).then((res) => res.data),
+
 };

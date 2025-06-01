@@ -16,16 +16,9 @@ import ProfileView from "./modules/user/ProfileView.vue";
 import ModuleView from "./modules/module/ModuleView.vue";
 import ProfDashboardView from "./modules/dashboard/views/ProfDashboardView.vue";
 
-<<<<<<< HEAD
-
-const isAuthenticated = () => {
-    const token = localStorage.getItem("token");
-    if (!token) return false;
-=======
 const getUserAuthInfo = () => {
     const token = localStorage.getItem("token");    
     if (!token) return { authenticated: false, role: null };
->>>>>>> dev
 
     try {
         const payload = JSON.parse(atob(token.split(".")[1]));

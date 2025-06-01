@@ -52,6 +52,8 @@
 </template>
 
 <script>
+import { moduleApiService} from "@/utils/ApiService";
+
 export default {
   name: "AdminSemesterView",
   data() {
@@ -59,19 +61,15 @@ export default {
       dialog: false,
       selectedYear: null,
       selectedSemester: null,
-      availableYears: ["2023-2024", "2024-2025", "2025-2026"], 
+      availableYears: ["2023-2024", "2024-2025", "2025-2026", "2026-2027"], 
       availableSemesters: ["1", "2", "3" , "4"], 
     };
   },
   methods: {
     async submitSemesterChange() {
       try {
-        const payload = {
-          academic_year: this.selectedYear,
-          semester: this.selectedSemester,
-        };
+        await moduleApiService.updateSystemSemester(selectedYear, selectedSemester);
 
-        const response = await this.$axios.put("/api/semester/update", payload); //change to use Angel's API
         this.dialog = false;
         this.$toast.success("Semester updated successfully.");
         console.log("API response:", response.data);
