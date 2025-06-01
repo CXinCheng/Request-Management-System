@@ -18,6 +18,7 @@
     "express": "^4.21.2",
     "nodemon": "^3.1.9",
     "pg-promise": "^11.10.2",
+    "jsonwebtoken": "^9.0.2",
     "tunnel-ssh": "^5.2.0"
   }
 }

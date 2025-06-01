@@ -15,20 +15,23 @@ import ProfileView from "./modules/user/ProfileView.vue";
 import ModuleView from "./modules/module/ModuleView.vue";
 import ProfDashboardView from "./modules/dashboard/views/ProfDashboardView.vue";
 
-const isAuthenticated = () => {
-    const token = localStorage.getItem("token");
-    if (!token) return false;
+const getUserAuthInfo = () => {
+    const token = localStorage.getItem("token");    
+    if (!token) return { authenticated: false, role: null };
 
     try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         if (payload.exp < Date.now() / 1000) {
             localStorage.removeItem("token");
-            return false;
+            return { authenticated: false, role: null };
+            return { authenticated: false, role: null };
         }
-        return true;
+        return { authenticated: true, role: payload.role };
+        return { authenticated: true, role: payload.role };
     } catch {
         localStorage.removeItem("token");
-        return false;
+        return { authenticated: false, role: null };
+        return { authenticated: false, role: null };
     }
 };
 
@@ -58,49 +61,89 @@ const routes = [
         path: "/dashboard",
         component: DashboardView,
         name: "Dashboard",
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true,
+            allowedRoles: ["Student"],
+         },
+        meta: { requiresAuth: true,
+            allowedRoles: ["Student"],
+         },
     },
     {
         path: "/leave",
         component: LeaveModuleSelection,
         name: "LeaveModuleSelection",
-        meta: { requiresAuth: true, title: "Leave Application" },
+        meta: { requiresAuth: true, title: "Leave Application",
+            allowedRoles: ["Student"],
+         },
+        meta: { requiresAuth: true, title: "Leave Application",
+            allowedRoles: ["Student"],
+         },
     },
     {
         path: "/leaveDetails",
         component: RequestView,
         name: "RequestView",
-        meta: { requiresAuth: true, title: "Request Details" },
+        meta: { requiresAuth: true, title: "Request Details",
+            allowedRoles: ["Student"],
+         },
+        meta: { requiresAuth: true, title: "Request Details",
+            allowedRoles: ["Student"],
+         },
     },
     {
         path: "/requests",
         component: RequestListView,
         name: "RequestListView",
-        meta: { requiresAuth: true, title: "Request List" },
+        meta: { requiresAuth: true, title: "Request List",
+            allowedRoles: ["Student", "Professor"],
+         },
+        meta: { requiresAuth: true, title: "Request List",
+            allowedRoles: ["Student", "Professor"],
+         },
     },
     {
         path: "/admin/users",
         component: AdminUsersView,
         name: "AdminUsersView",
-        meta: { requiresAuth: true, title: "Users" },
+        meta: { requiresAuth: true, title: "Users",
+            allowedRoles: ["Admin"],
+         },
+        meta: { requiresAuth: true, title: "Users",
+            allowedRoles: ["Admin"],
+         },
     },
     {
         path: "/admin/modules",
         component: AdminModuleView,
         name: "AdminModuleView",
-        meta: { requiresAuth: true, title: "Modules" },
+        meta: { requiresAuth: true, title: "Modules",
+            allowedRoles: ["Admin"],
+         },
+        meta: { requiresAuth: true, title: "Modules",
+            allowedRoles: ["Admin"],
+         },
     },
     {
         path: "/requestDetails/:requestId/:module_code",
         component: RequestDetailsView,
         name: "RequestDetailsView",
-        meta: { requiresAuth: true, title: "Request Details" },
+        meta: { requiresAuth: true, title: "Request Details",
+            allowedRoles: ["Student", "Professor"],
+         },
+        meta: { requiresAuth: true, title: "Request Details",
+            allowedRoles: ["Student", "Professor"],
+         },
     },
     {
         path: "/editRequest/:requestId",
         component: EditRequestView,
         name: "EditRequestView",
-        meta: { requiresAuth: true, title: "Edit Request" },
+        meta: { requiresAuth: true, title: "Edit Request",
+            allowedRoles: ["Student"],
+         },
+        meta: { requiresAuth: true, title: "Edit Request",
+            allowedRoles: ["Student"],
+         },
     },
     {
         path: "/profile",
@@ -112,13 +155,23 @@ const routes = [
         path: "/professor/dashboard",
         component: ProfDashboardView,
         name: "ProfDashboardView",
-        meta: { requiresAuth: true, title: "Dashboard" },
+        meta: { requiresAuth: true, title: "Dashboard",
+            allowedRoles: ["Professor"],
+         },
+        meta: { requiresAuth: true, title: "Dashboard",
+            allowedRoles: ["Professor"],
+         },
     },
     {
         path: "/professor/module/:moduleCode/:moduleName",
         component: ModuleView,
         name: "ModuleView",
-        meta: { requiresAuth: true, title: "Module" },
+        meta: { requiresAuth: true, title: "Module",
+            allowedRoles: ["Professor"],
+         },
+        meta: { requiresAuth: true, title: "Module",
+            allowedRoles: ["Professor"],
+         },
     },
 ];
 
@@ -129,13 +182,33 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-    const isLoggedIn = isAuthenticated();
+    const authInfo = getUserAuthInfo();
+    const isLoggedIn = authInfo.authenticated;
+    const userRole = authInfo.role;
 
     if (requiresAuth && !isLoggedIn) {
-        next({ name: "Login", query: { redirect: to.fullPath } });
-    } else {
-        next();
+      return next({ 
+        name: "Login", 
+        query: { redirect: to.fullPath } 
+      });
     }
-});
+  
+    if (to.meta.allowedRoles && isLoggedIn) {
+      if (!to.meta.allowedRoles.includes(userRole)) {
+        if (userRole === "Student") {
+          return next({ name: "Dashboard" });
+        } else if (userRole === "Professor") {
+          return next({ name: "ProfDashboardView" });
+        } else if (userRole === "Admin") {
+          return next({ name: "AdminUsersView" });
+        } 
+        // else {
+        //   localStorage.removeItem("token");
+        //   return next({ name: "Login" });
+        // }
+      }
+    }
+    next();
+  });
 
 export default router;
