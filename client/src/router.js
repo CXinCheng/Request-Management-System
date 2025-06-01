@@ -11,6 +11,7 @@ import RequestDetailsView from "./modules/request/views/RequestDetails.vue";
 import EditRequestView from "./modules/request/views/EditRequest.vue";
 import AdminUsersView from "./modules/admin/views/AdminUsersView.vue";
 import AdminModuleView from "./modules/admin/views/AdminModuleView.vue";
+import AdminSemesterView from "./modules/admin/views/AdminSemesterView.vue"
 import ProfileView from "./modules/user/ProfileView.vue";
 import ModuleView from "./modules/module/ModuleView.vue";
 import ProfDashboardView from "./modules/dashboard/views/ProfDashboardView.vue";
@@ -24,13 +25,10 @@ const getUserAuthInfo = () => {
         if (payload.exp < Date.now() / 1000) {
             localStorage.removeItem("token");
             return { authenticated: false, role: null };
-            return { authenticated: false, role: null };
         }
-        return { authenticated: true, role: payload.role };
         return { authenticated: true, role: payload.role };
     } catch {
         localStorage.removeItem("token");
-        return { authenticated: false, role: null };
         return { authenticated: false, role: null };
     }
 };
@@ -122,6 +120,12 @@ const routes = [
         meta: { requiresAuth: true, title: "Modules",
             allowedRoles: ["Admin"],
          },
+    },
+    {
+        path: "/admin/Semester",
+        component: AdminSemesterView,
+        name: "AdminSemesterView",
+        meta: { requiresAuth: true, title: "Semester" },
     },
     {
         path: "/requestDetails/:requestId/:module_code",
