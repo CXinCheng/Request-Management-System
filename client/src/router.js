@@ -25,13 +25,10 @@ const getUserAuthInfo = () => {
         if (payload.exp < Date.now() / 1000) {
             localStorage.removeItem("token");
             return { authenticated: false, role: null };
-            return { authenticated: false, role: null };
         }
-        return { authenticated: true, role: payload.role };
         return { authenticated: true, role: payload.role };
     } catch {
         localStorage.removeItem("token");
-        return { authenticated: false, role: null };
         return { authenticated: false, role: null };
     }
 };
