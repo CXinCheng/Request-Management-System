@@ -1,6 +1,6 @@
 <template>
   <v-container class="semester-view-container" fluid>
-    <v-card class="mx-auto" max-width="500" elevation="10">
+    <v-card class="larger-card" max-width="750" elevation="10">
       <v-card-title class="headline">Academic Term Management</v-card-title>
       <v-card-text>
         Select the academic year and semester you want to set:
@@ -33,7 +33,7 @@
     </v-card>
 
     <!-- Confirmation Dialog -->
-    <v-dialog v-model="dialog" max-width="400">
+    <v-dialog v-model="dialog" max-width="500">
       <v-card>
         <v-card-title class="headline">Confirm Semester Change</v-card-title>
         <v-card-text>
@@ -62,8 +62,8 @@ const dialog = ref(false);
 const selectedYear = ref(null);
 const selectedSemester = ref(null);
 const availableYears = ["2023-2024", "2024-2025", "2025-2026", "2026-2027"];
-const availableSemesters = ["Semester 1", "Semester 2", "Special Semester 3", "Special Semester 4"];
-const semesterMapping = {  "Semester 1": 1,  "Semester 2": 2,  "Special Semester 3": 3,  "Special Semester 4": 4,}; //Maps semester names to integer numbers
+const availableSemesters = ["Semester 1", "Semester 2", "Special Semester 1", "Special Semester 2"];
+const semesterMapping = {  "Semester 1": 1,  "Semester 2": 2,  "Special Semester 1": 3,  "Special Semester 2": 4,}; //Maps semester names to integer numbers
 
 const submitSemesterChange = async () => {
   try {
@@ -102,5 +102,23 @@ const submitSemesterChange = async () => {
   margin-top: 40px;
   display: flex;
   justify-content: center;
+}
+.larger-card {
+  font-size: 2rem;
+  padding: 24px;
+}
+
+.larger-card .v-card-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.larger-card .v-select input {
+  font-size: 1.25rem;
+}
+
+.larger-card .v-btn {
+  font-size: 1.3rem;
+  padding: 24px 24px;
 }
 </style>
