@@ -62,13 +62,15 @@ const dialog = ref(false);
 const selectedYear = ref(null);
 const selectedSemester = ref(null);
 const availableYears = ["2023-2024", "2024-2025", "2025-2026", "2026-2027"];
-const availableSemesters = ["1", "2", "3", "4"];
+const availableSemesters = ["Semester 1", "Semester 2", "Special Semester 3", "Special Semester 4"];
+const semesterMapping = {  "Semester 1": 1,  "Semester 2": 2,  "Special Semester 3": 3,  "Special Semester 4": 4,}; //Maps semester names to integer numbers
 
 const submitSemesterChange = async () => {
   try {
+    const semesterInteger = semesterMapping[selectedSemester.value]; // Uses semester integer value
     const response = await moduleApiService.updateSystemSemester(
       selectedYear.value, 
-      selectedSemester.value
+      semesterInteger
     );
     
     dialog.value = false;
