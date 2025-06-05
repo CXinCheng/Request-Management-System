@@ -54,6 +54,7 @@
 <script setup>
 import { ref } from 'vue';
 import { moduleApiService } from "@/utils/ApiService";
+import { gatewayApiService } from '@/utils/ApiService';
 import { useNotificationStore } from "@/utils/NotificationStore";
 
 const notificationStore = useNotificationStore();
@@ -68,7 +69,7 @@ const semesterMapping = {  "Semester 1": 1,  "Semester 2": 2,  "Special Semester
 const submitSemesterChange = async () => {
   try {
     const semesterInteger = semesterMapping[selectedSemester.value]; // Uses semester integer value
-    const response = await moduleApiService.updateSystemSemester(
+    const response = await gatewayApiService.updateSystemSemester(
       selectedYear.value, 
       semesterInteger
     );

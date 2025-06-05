@@ -157,3 +157,27 @@ export const getModulesTakenByStudent = async (req, res) => {
         });
     }
 };
+
+export const updateSystemSemester = async (req, res) => {
+  const { academicYear, semester } = req.body;
+
+  try {
+    const response = await axios.put(
+      `${process.env.MODULE_SERVICE_URL}/api/v1/module/updateSystemSemester`,
+      { academicYear, semester }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Semester updated successfully",
+      data: response.data,
+    });
+  } catch (error) {
+    console.error("Error updating semester:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update semester",
+      error: error.message,
+    });
+  }
+};
