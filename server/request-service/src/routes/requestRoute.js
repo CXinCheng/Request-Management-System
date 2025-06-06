@@ -6,9 +6,10 @@ import {
     getRequestDetails, 
     getAllRequestsByProfessor, 
     updateRequestByStudent, 
-    updateRequestByProfessor,
+    updateRequestStatus,
     deleteRequestByStudent,
     getAllRequestsByModule,
+    archiveAllRequests,
 } from '../controllers/requestController.js';
 import { ensureConnection } from "../configs/db.js";
 import { verifyToken, authorizeRoles } from '../middlewares/authMiddleware.js';
@@ -37,13 +38,15 @@ router.use(dbConnectionMiddleware, verifyToken);
 
 router.get('/student/:studentId', authorizeRoles(['Student']), getAllRequestsByStudent);
 router.put('/student/:requestId', authorizeRoles(['Student', 'Professor']), updateRequestByStudent);
-router.delete('/student/:requestId', authorizeRoles(['Student']), );
+router.delete('/student/:requestId', authorizeRoles(['Student']), deleteRequestByStudent);
 
 router.get('/module/:moduleCode', authorizeRoles(['Student', 'Professor']), getAllRequestsByModule);
 router.get('/details/:requestId', authorizeRoles(['Student', 'Professor']), getRequestDetails);
 
 router.get('/professor/:profId',  authorizeRoles(['Professor']), getAllRequestsByProfessor);
-router.put('/professor/:profId/:requestId',authorizeRoles(['Professor']), updateRequestByProfessor);
+router.put('/professor/:profId/:requestId',authorizeRoles(['Professor']), updateRequestStatus);
+
+router.post('/archive', authorizeRoles(['Admin']), archiveAllRequests);
 
 router.post('/submit', authorizeRoles(["Student"]),
     upload.single('uploadFile'), 

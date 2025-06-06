@@ -157,8 +157,8 @@ export const getAllRequestsByProfessor = async (req, res) => {
 };
 
 // API to get a request's details for a professor
-export const updateRequestByProfessor = async (req, res) => {
-    console.log('API hit for updateRequestByProfessor:');
+export const updateRequestStatus = async (req, res) => {
+    console.log('API hit for updateRequestStatus:');
 
     const { profId, requestId } = req.params;
     const { status, module_code } = req.body;
@@ -203,5 +203,26 @@ export const getAllRequestsByModule = async (req, res) => {
     catch (error) {
         console.error('Error fetching requests:', error);
         res.status(500).json({ error: `Failed to fetch requests - ${error}` });
+    }
+}
+
+export const archiveAllRequests = async (req, res) => {
+    try {
+        await db.none(
+            `UPDATE request_management.requests
+            SET is_archived = TRUE
+            WHERE is_archived = FALSE`
+        );
+        res.status(200).json({
+            success: true,
+            message: 'All requests archived successfully.',
+        });
+    }
+    catch (error) {
+        console.error('Error archiving requests:', error);
+        res.status(500).json({ 
+            success: false,
+            error: `Failed to archive requests - ${error}` 
+        });
     }
 }
