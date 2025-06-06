@@ -49,7 +49,7 @@
             </v-card-text>
         </v-card>
 
-        <v-dialog v-model="dialog" max-width="500px">
+        <v-dialog v-model="addUserDialog" max-width="500px">
             <v-card>
                 <v-card-title>
                     <span class="text-h5">Add New User</span>
@@ -58,6 +58,7 @@
                 <v-card-text>
                     <UserForm
                         :initial-data="formData"
+                        :show-role="true"
                         :role-items="['Student', 'Professor', 'Admin']"
                         :show-confirm-password="false"
                         @submit="handleSave"
@@ -68,7 +69,7 @@
                                 <v-btn
                                     color="error"
                                     text
-                                    @click="dialog = false"
+                                    @click="addUserDialog = false"
                                     >Cancel</v-btn
                                 >
                                 <v-btn color="primary" text type="submit"
@@ -81,16 +82,17 @@
             </v-card>
         </v-dialog>
 
-        <v-dialog v-model="dialog" max-width="500px">
+        <v-dialog v-model="editUserDialog" max-width="500px">
             <v-card>
                 <v-card-title>
                     <span class="text-h5"
-                        >{{ isEdit ? "Edit" : "Add" }} User</span
+                        >Edit User</span
                     >
                 </v-card-title>
                 <v-card-text>
                     <UserForm
                         :initial-data="formData"
+                        :show-role="true"
                         :role-items="['Student', 'Professor', 'Admin']"
                         :show-confirm-password="false"
                         @submit="handleSave"
@@ -101,7 +103,7 @@
                                 <v-btn
                                     color="error"
                                     text
-                                    @click="dialog = false"
+                                    @click="editUserDialog = false"
                                     >Cancel</v-btn
                                 >
                                 <v-btn color="primary" text type="submit"
@@ -145,7 +147,8 @@ const search = ref("");
 const roleFilter = ref("All");
 const loading = ref(false);
 const users = ref([]);
-const dialog = ref(false);
+const addUserDialog = ref(false);
+const editUserDialog = ref(false);
 const isEdit = ref(false);
 const deleteDialog = ref(false);
 const selectedUser = ref(null);
@@ -168,7 +171,7 @@ const userTableHeaders = [
 
 const addUser = () => {
     isEdit.value = false;
-    dialog.value = true;
+    addUserDialog.value = true;
     formData.value = {
         name: "",
         matrix_id: "",
@@ -181,7 +184,7 @@ const addUser = () => {
 const editUser = (user) => {
     isEdit.value = true;
     formData.value = { ...user };
-    dialog.value = true;
+    editUserDialog.value = true;
 };
 
 const confirmDelete = (user) => {
@@ -197,7 +200,8 @@ const handleSave = async (userData) => {
             : await authApiService.register(userData);
         if (response.success) {
             await fetchUsers();
-            dialog.value = false;
+            addUserDialog.value = false;
+            editUserDialog.value = false;
             notificationStore.showNotification({
                 message: isEdit.value
                     ? "User updated successfully"

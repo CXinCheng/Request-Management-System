@@ -20,7 +20,7 @@ app.use(cors());
 // DB connection
 await initialize();
 
-await new UpdateService().initialize();
+// await new UpdateService().initialize();
 
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
