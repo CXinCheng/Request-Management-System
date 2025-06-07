@@ -72,6 +72,8 @@ export const requestApiService = {
         requestApi.delete(`/student/${requestId}`).then((res) => res.data),
     updateRequestStatus: (userId, requestId, module_code, newStatus) =>
         requestApi.put(`/professor/${userId}/${requestId}`, { status: newStatus, module_code: module_code }).then((res) => res.data),
+    archiveAllRequests: () =>
+        requestApi.post("/archive").then((res) => res.data),
 };
 
 // User API
