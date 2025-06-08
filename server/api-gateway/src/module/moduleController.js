@@ -181,3 +181,24 @@ export const updateSystemSemester = async (req, res) => {
     });
   }
 };
+
+export const archiveAllRequests = async (req, res) => {
+    try {
+    const response = await axios.put(
+      `${process.env.REQUEST_SERVICE_URL}/api/v1/request/archiveAllRequests`,
+      { academicYear, semester }
+    );
+        res.status(200).json({
+            success: true,
+            message: 'All requests archived successfully.',
+            data: response.data,
+        });
+    }
+    catch (error) {
+        console.error('Error archiving requests:', error);
+        res.status(500).json({ 
+            success: false,
+            error: `Failed to archive requests - ${error}` 
+        });
+    }
+}
