@@ -159,14 +159,14 @@ export const getClassesByModule = async (req, res) => {
       [moduleCode]
     );
 
-    const currentSem = new UpdateService();
-    if (!module || !module.class_last_updated_at) {
-      await currentSem.addClass(moduleCode);
-    } else if (
-      module.class_last_updated_at < new Date(Date.now() - 24 * 60 * 60 * 1000)
-    ) {
-      await currentSem.updateClass(moduleCode);
-    }
+    // const currentSem = new UpdateService();
+    // if (!module || !module.class_last_updated_at) {
+    //   await currentSem.addClass(moduleCode);
+    // } else if (
+    //   module.class_last_updated_at < new Date(Date.now() - 24 * 60 * 60 * 1000)
+    // ) {
+    //   await currentSem.updateClass(moduleCode);
+    // }
 
     data = await db.manyOrNone(
       "SELECT * FROM request_management.classes WHERE module_code = $1",

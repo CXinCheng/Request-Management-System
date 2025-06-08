@@ -165,7 +165,7 @@ export const updateSemester = async (req, res) => {
   const { academicYear, semester } = req.body;
 
   try {
-    const response = await axios.post(
+    let response = await axios.post(
       `${process.env.MODULE_SERVICE_URL}/api/v1/module/updateSemester`,
       { academicYear, semester },
       {
