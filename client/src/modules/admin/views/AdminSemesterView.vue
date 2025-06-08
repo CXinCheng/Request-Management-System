@@ -95,6 +95,30 @@ const submitSemesterChange = async () => {
       color: "error",
     });
   }
+  try {
+      const response = await gatewayApiService.archiveAllRequests();
+      
+    dialog.value = false;
+    
+    if (response.success) {
+      notificationStore.showNotification({
+        message: "requests archive successfully",
+        color: "success",
+      });
+    } else {
+      notificationStore.showNotification({
+        message: response.message || "Failed to archive requests",
+        color: "error",
+      });
+    }
+  } catch (error) {
+    console.error("Error archiving requests:", error);
+    dialog.value = false;
+    notificationStore.showNotification({
+      message: error.message || "Failed to archive requests",
+      color: "error",
+    });
+  }
 };
 </script>
 

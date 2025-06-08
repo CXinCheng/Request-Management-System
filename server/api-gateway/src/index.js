@@ -13,6 +13,7 @@ import {
     getEnrolledStudentsByModule,
 } from "./user/userController.js";
 import { verifyToken, authorizeRoles } from "./middlewares/authMiddleware.js";
+import { archiveAllRequests } from "../../request-service/src/controllers/requestController.js";
 
 // Access .env file
 dotenv.config();
@@ -86,6 +87,7 @@ app.use("/api/gateway/students/:moduleCode", getAllStudentsByModule);
 app.use("/api/gateway/modules/:profId", getModulesWithRequestsByProfessor);
 
 app.use("/api/gateway/admin/Semester", authorizeRoles(["Admin"]), updateSystemSemester);
+app.use("/api/gateway/admin/Semester", authorizeRoles(["Admin"]), archiveAllRequests);
 
 app.use((_req, res) => {
     res.status(404).json({

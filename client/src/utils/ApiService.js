@@ -132,9 +132,10 @@ export const gatewayApiService = {
     getModulesWithRequestsByProfessor: (profId) =>
         gatewayApi.get(`/modules/${profId}`).then((res) => res.data),
     updateSystemSemester: (academicYear, semester) =>
-    moduleApi.post("/updateSystemSemester", {
+        gatewayApi.post("/updateSystemSemester", {
         academicYear,
         semester,
     }).then((res) => res.data),
-
+    archiveAllRequests: () => 
+        gatewayApi.post("/archiveAllRequests").then((res) => res.data),
 };
