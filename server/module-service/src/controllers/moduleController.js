@@ -386,7 +386,7 @@ export const getModulesByStudent = async (req, res) => {
   }
 };
 
-export const updateSystemSemester = async (req, res) => {
+export const updateSemester = async (req, res) => {
   const { academicYear, semester } = req.body;
   if (!academicYear || !semester) {
     return res

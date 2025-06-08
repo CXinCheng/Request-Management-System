@@ -72,8 +72,6 @@ export const requestApiService = {
         requestApi.delete(`/student/${requestId}`).then((res) => res.data),
     updateRequestStatus: (userId, requestId, module_code, newStatus) =>
         requestApi.put(`/professor/${userId}/${requestId}`, { status: newStatus, module_code: module_code }).then((res) => res.data),
-    archiveAllRequests: () =>
-        requestApi.post("/archive").then((res) => res.data),
 };
 
 // User API
@@ -107,11 +105,6 @@ export const moduleApiService = {
     getModulesByStudent: (studentID) =>
         moduleApi.get(`/students/${studentID}/modules`).then((res) => res.data),
     getAllFaculties: () => moduleApi.get("/all/faculties").then((res) => res.data),
-    updateSystemSemester: (academicYear, semester) =>
-    moduleApi.post("/updateSystemSemester", {
-        academicYear,
-        semester,
-    }).then((res) => res.data),
     bulkEnrollStudents: (data) =>
         moduleApi
             .post(`/bulkEnroll/${data.moduleCode}`, data.students)
@@ -131,11 +124,6 @@ export const gatewayApiService = {
         gatewayApi.get(`/students/${studentID}/modules`).then((res) => res.data),
     getModulesWithRequestsByProfessor: (profId) =>
         gatewayApi.get(`/modules/${profId}`).then((res) => res.data),
-    updateSystemSemester: (academicYear, semester) =>
-        gatewayApi.post("/updateSystemSemester", {
-        academicYear,
-        semester,
-    }).then((res) => res.data),
-    archiveAllRequests: () => 
-        gatewayApi.post("/archiveAllRequests").then((res) => res.data),
+    updateSemester: (data) =>
+        gatewayApi.post("/updateSemester", data).then((res) => res.data),
 };

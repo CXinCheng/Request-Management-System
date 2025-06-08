@@ -26,7 +26,11 @@
         </v-row>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" @click="dialog = true" :disabled="!selectedYear || !selectedSemester">
+        <v-btn
+          color="primary"
+          @click="dialog = true"
+          :disabled="!selectedYear || !selectedSemester"
+        >
           Confirm Change
         </v-btn>
       </v-card-actions>
@@ -39,12 +43,17 @@
         <v-card-text>
           Change academic term to:
           <br />
-          <strong>{{ selectedYear }} - Semester {{ selectedSemester }}</strong>?
+          <strong>{{ selectedYear }} - Semester {{ selectedSemester }}</strong
+          >?
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn color="green darken-1" @click="submitSemesterChange" text>Confirm</v-btn>
-          <v-btn color="red darken-1" @click="dialog = false" text>Cancel</v-btn>
+          <v-btn color="green darken-1" @click="submitSemesterChange" text
+            >Confirm</v-btn
+          >
+          <v-btn color="red darken-1" @click="dialog = false" text
+            >Cancel</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -52,9 +61,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { moduleApiService } from "@/utils/ApiService";
-import { gatewayApiService } from '@/utils/ApiService';
+import { ref } from "vue";
+import { gatewayApiService } from "@/utils/ApiService";
 import { useNotificationStore } from "@/utils/NotificationStore";
 
 const notificationStore = useNotificationStore();
@@ -63,19 +71,29 @@ const dialog = ref(false);
 const selectedYear = ref(null);
 const selectedSemester = ref(null);
 const availableYears = ["2023-2024", "2024-2025", "2025-2026", "2026-2027"];
-const availableSemesters = ["Semester 1", "Semester 2", "Special Semester 1", "Special Semester 2"];
-const semesterMapping = {  "Semester 1": 1,  "Semester 2": 2,  "Special Semester 1": 3,  "Special Semester 2": 4,}; //Maps semester names to integer numbers
+const availableSemesters = [
+  "Semester 1",
+  "Semester 2",
+  "Special Semester 1",
+  "Special Semester 2",
+];
+const semesterMapping = {
+  "Semester 1": 1,
+  "Semester 2": 2,
+  "Special Semester 1": 3,
+  "Special Semester 2": 4,
+}; //Maps semester names to integer numbers
 
 const submitSemesterChange = async () => {
   try {
     const semesterInteger = semesterMapping[selectedSemester.value]; // Uses semester integer value
-    const response = await gatewayApiService.updateSystemSemester(
-      selectedYear.value, 
-      semesterInteger
-    );
-    
+    const response = await gatewayApiService.updateSemester({
+      academicYear: selectedYear.value,
+      semester: semesterInteger,
+    });
+
     dialog.value = false;
-    
+
     if (response.success) {
       notificationStore.showNotification({
         message: "Semester updated successfully",
@@ -92,30 +110,6 @@ const submitSemesterChange = async () => {
     dialog.value = false;
     notificationStore.showNotification({
       message: error.message || "Failed to update semester",
-      color: "error",
-    });
-  }
-  try {
-      const response = await gatewayApiService.archiveAllRequests();
-      
-    dialog.value = false;
-    
-    if (response.success) {
-      notificationStore.showNotification({
-        message: "requests archive successfully",
-        color: "success",
-      });
-    } else {
-      notificationStore.showNotification({
-        message: response.message || "Failed to archive requests",
-        color: "error",
-      });
-    }
-  } catch (error) {
-    console.error("Error archiving requests:", error);
-    dialog.value = false;
-    notificationStore.showNotification({
-      message: error.message || "Failed to archive requests",
       color: "error",
     });
   }
