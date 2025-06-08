@@ -542,8 +542,6 @@ export const getSemesterStartDate = async (req, res) => {
       "SELECT value FROM request_management.system_settings WHERE key = 'semester_start_date'"
     );
 
-    console.log(`Module Coontroller semesterStartDate: ${semesterStartDate}`)
-
     return res.status(200).json({
       success: true,
       message: `Successfully retrieved Semester Start Date`,

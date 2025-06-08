@@ -15,7 +15,6 @@ const createAuthenticatedApi = (baseURL) => {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
-        console.log("token present, adding it to header: ", config, "token: ", token)
         return config;
       },
       error => Promise.reject(error)
@@ -117,6 +116,8 @@ export const moduleApiService = {
         moduleApi
             .post(`/bulkEnroll/${data.moduleCode}`, data.students)
             .then((res) => res.data),
+    getSemesterStartDate: () =>
+        moduleApi.get(`/getSemesterStartDate`).then((res) => res.data), 
 };
 
 // Gateway API
@@ -136,7 +137,5 @@ export const gatewayApiService = {
     moduleApi.post("/updateSystemSemester", {
         academicYear,
         semester,
-    }).then((res) => res.data),    
-    getSemesterStartDate: () =>
-        gatewayApi.get(`/getSemesterStartDate`).then((res) => res.data), 
+    }).then((res) => res.data)
 };

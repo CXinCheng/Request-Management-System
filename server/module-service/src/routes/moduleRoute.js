@@ -40,7 +40,7 @@ router.use(dbConnectionMiddleware, verifyToken);
 
 // Module routes
 router.get("/all", authorizeRoles(['Admin']), getAllModules);
-router.get("/getCurrentSemesterStartDate",verifyToken,getSemesterStartDate); // called only internally
+router.get("/getSemesterStartDate",authorizeRoles(['Admin', 'Professor', 'Student']),getSemesterStartDate); // called only internally
 router.get("/all/faculties", authorizeRoles(['Admin', 'Professor', 'Student']), getAllFaculties);
 router.get("/all/enrolled", authorizeRoles(['Admin', 'Professor']), getAllModulesWithNumbersOfEnrolledStudents);
 router.get("/professor/modules/:professorId", authorizeRoles(['Admin', 'Professor']), getModulesByProfessor);

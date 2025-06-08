@@ -76,7 +76,6 @@ app.use("/api/gateway", verifyToken);
 
 // Aggreate API call
 app.use("/api/gateway/modules/all", getAllModulesWithEducators);
-app.use("/api/gateway/getSemesterStartDate", getSemesterStartDate)
 app.use(
     "/api/gateway/students/enrolled/:moduleCode",
     authorizeRoles(["Professor"]),
@@ -88,7 +87,6 @@ app.use("/api/gateway/students/:moduleCode", getAllStudentsByModule);
 app.use("/api/gateway/modules/:profId", getModulesWithRequestsByProfessor);
 
 app.use("/api/gateway/admin/Semester", authorizeRoles(["Admin"]), updateSystemSemester);
-
 app.use((_req, res) => {
     res.status(404).json({
         code: 404,
