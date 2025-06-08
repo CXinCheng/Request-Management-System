@@ -2,6 +2,7 @@ import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import cors from "cors";
 import dotenv from "dotenv";
+import bodyParser from "body-parser";
 import {
     getAllModulesWithEducators,
     getModulesTakenByStudent,
@@ -53,11 +54,6 @@ services.forEach(({ route, target }) => {
     const proxyOptions = {
         target,
         changeOrigin: true,
-        onProxyReq: (proxyReq) => {
-            if (INTERNAL_API_KEY) {
-                proxyReq.setHeader("x-api-key", INTERNAL_API_KEY);
-            }
-        }
         // pathRewrite: {
         //     [`^${route}`]: "",
         // },
@@ -71,6 +67,9 @@ services.forEach(({ route, target }) => {
     }
 
 });
+
+// Middleware
+app.use(bodyParser.json());
 
 app.use("/api/gateway", verifyToken);
 
@@ -86,7 +85,7 @@ app.use("/api/gateway/students/:moduleCode", getAllStudentsByModule);
 
 app.use("/api/gateway/modules/:profId", getModulesWithRequestsByProfessor);
 
-app.use("/api/gateway/admin/Semester", authorizeRoles(["Admin"]), updateSystemSemester);
+app.use('/api/gateway/updateSemester', authorizeRoles(["Admin"]), updateSemester)
 app.use((_req, res) => {
     res.status(404).json({
         code: 404,

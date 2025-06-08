@@ -1,21 +1,13 @@
 {
-    "name": "root",
-    "version": "1.0.0",
-    "private": true,
-    "scripts": {
-        "postinstall": "concurrently \"cd client && npm install\" \"cd server/user-service && npm install\" \"cd server/request-service && npm install\" \"cd server/module-service && npm install\" \"cd server/api-gateway && npm install\"",
-        "start": "concurrently \"npm run dev --prefix client\" \"npm run start --prefix server/user-service\" \"npm run start --prefix server/request-service\" \"npm run start --prefix server/module-service\" \"npm run start --prefix server/api-gateway\"",
-        "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server/user-service\" \"npm run dev --prefix server/request-service\" \"npm run dev --prefix server/module-service\" \"npm run dev --prefix server/api-gateway\""
-    },
-    "devDependencies": {
-        "concurrently": "^7.0.0"
-    },
-    "dependencies": {
-        "@azure/identity": "^4.6.0",
-        "@azure/storage-blob": "^12.26.0",
-        "chart.js": "^4.4.6",
-        "dotenv": "^16.4.7",
-        "p-limit": "^6.2.0",
-        "uuid": "^11.0.5"
-    }
+  "name": "root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "concurrently \"cd client && npm install\" \"cd server/user-service && npm install\" \"cd server/request-service && npm install\" \"cd server/module-service && npm install\" \"cd server/api-gateway && npm install\"",
+    "start": "concurrently \"npm run dev --prefix client\" \"npm run start --prefix server/user-service\" \"npm run start --prefix server/request-service\" \"npm run start --prefix server/module-service\" \"npm run start --prefix server/api-gateway\"",
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server/user-service\" \"npm run dev --prefix server/request-service\" \"npm run dev --prefix server/module-service\" \"npm run dev --prefix server/api-gateway\""
+  },
+  "dependencies": {
+    "concurrently": "^7.0.0"
+  }
 }

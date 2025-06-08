@@ -207,6 +207,8 @@ export const getAllRequestsByModule = async (req, res) => {
 }
 
 export const archiveAllRequests = async (req, res) => {
+    console.log('API hit for archiveAllRequests:');
+    
     try {
         await db.none(
             `UPDATE request_management.requests
