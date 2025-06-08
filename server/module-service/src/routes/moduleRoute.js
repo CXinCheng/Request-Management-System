@@ -9,7 +9,7 @@ import {
     getModulesByProfessor,
     getModulesByStudent,
     getAllFaculties,
-    updateSystemSemester,
+    updateSemester,
     bulkEnrollStudentsByModule,
     getSemesterStartDate
 } from "../controllers/moduleController.js";

@@ -7,8 +7,7 @@ import {
     getAllModulesWithEducators,
     getModulesTakenByStudent,
     getModulesWithRequestsByProfessor,
-    getSemesterStartDate,
-    updateSystemSemester,
+    updateSemester
 } from "./module/moduleController.js";
 import {
     getAllStudentsByModule,
