@@ -2,18 +2,18 @@ import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import cors from "cors";
 import dotenv from "dotenv";
+import bodyParser from "body-parser";
 import {
     getAllModulesWithEducators,
     getModulesTakenByStudent,
     getModulesWithRequestsByProfessor,
-    updateSystemSemester,
+    updateSemester,
 } from "./module/moduleController.js";
 import {
     getAllStudentsByModule,
     getEnrolledStudentsByModule,
 } from "./user/userController.js";
 import { verifyToken, authorizeRoles } from "./middlewares/authMiddleware.js";
-import { archiveAllRequests } from "../../request-service/src/controllers/requestController.js";
 
 // Access .env file
 dotenv.config();
@@ -23,7 +23,8 @@ const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 
-const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
+// Middleware
+app.use(bodyParser.json());
 
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3001";
 const REQUEST_SERVICE_URL = process.env.REQUEST_SERVICE_URL || "http://localhost:3002";
@@ -53,11 +54,6 @@ services.forEach(({ route, target }) => {
     const proxyOptions = {
         target,
         changeOrigin: true,
-        onProxyReq: (proxyReq) => {
-            if (INTERNAL_API_KEY) {
-                proxyReq.setHeader("x-api-key", INTERNAL_API_KEY);
-            }
-        }
         // pathRewrite: {
         //     [`^${route}`]: "",
         // },
@@ -86,8 +82,7 @@ app.use("/api/gateway/students/:moduleCode", getAllStudentsByModule);
 
 app.use("/api/gateway/modules/:profId", getModulesWithRequestsByProfessor);
 
-app.use("/api/gateway/admin/Semester", authorizeRoles(["Admin"]), updateSystemSemester);
-app.use("/api/gateway/admin/Semester", authorizeRoles(["Admin"]), archiveAllRequests);
+app.use('/api/gateway/updateSemester', authorizeRoles(["Admin"]), updateSemester)
 
 app.use((_req, res) => {
     res.status(404).json({

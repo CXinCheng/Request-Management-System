@@ -9,7 +9,7 @@ import {
     getModulesByProfessor,
     getModulesByStudent,
     getAllFaculties,
-    updateSystemSemester,
+    updateSemester,
     bulkEnrollStudentsByModule
 } from "../controllers/moduleController.js";
 import { ensureConnection } from "../configs/db.js";
@@ -47,7 +47,7 @@ router.post("/updateEducator", authorizeRoles(['Admin']), updateEducator);
 router.post("/updateEnrollment/:moduleCode", authorizeRoles(['Admin']), updateEnrollmentByModule);
 router.get("/classes/:moduleCode", authorizeRoles(['Admin', 'Professor']), getClassesByModule);
 router.get("/students/:studentID/modules", authorizeRoles(['Admin', 'Student']), getModulesByStudent);
-router.post("/updateSystemSemester",authorizeRoles(['Admin']), updateSystemSemester);
+router.post("/updateSemester",authorizeRoles(['Admin']), updateSemester);
 router.post("/bulkEnroll/:moduleCode", authorizeRoles(['Professor']), bulkEnrollStudentsByModule);
 
 export default router;
