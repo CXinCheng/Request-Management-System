@@ -535,3 +535,27 @@ export const bulkEnrollStudentsByModule = async (req, res) => {
     });
   }
 };
+
+export const getSemesterStartDate = async (req, res) => {
+  try {
+    const semesterStartDate = await db.one(
+      "SELECT value FROM request_management.system_settings WHERE key = 'semester_start_date'"
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Successfully retrieved Semester Start Date`,
+      data: {
+        startDate: semesterStartDate,
+      },
+    });
+
+  } catch (error){
+    console.error("Error retrieving semester start date:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error retrieving semester start date",
+      error: error.message,
+    });
+  }
+}

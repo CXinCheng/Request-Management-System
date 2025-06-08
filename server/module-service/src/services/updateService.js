@@ -1,5 +1,4 @@
 import { db, initialize, close } from "../configs/db.js";
-import fs from "fs";
 import pLimit from 'p-limit';
 
 

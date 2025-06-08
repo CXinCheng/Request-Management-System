@@ -61,7 +61,7 @@
 
 <script setup>
 import { ref, onMounted, watch, computed, watchEffect } from "vue";
-import { gatewayApiService } from "@/utils/ApiService";
+import { gatewayApiService, moduleApiService } from "@/utils/ApiService";
 import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
 import { useModuleStore } from "../stores/useModuleStore";
 import { useRouter } from "vue-router";
@@ -76,6 +76,8 @@ const selectedEndDate = ref(null);
 const leaveDateStore = useLeaveDateStore()
 const moduleStore = useModuleStore()
 
+const weeksInSemester = ref({})
+
 const getDayNumber = (day) => {
   const daysMap = { 
       "Sunday": 0, 
@@ -89,35 +91,19 @@ const getDayNumber = (day) => {
   return daysMap[day];
 };
 
-const weeksInSemester = {
-  0: { "start": "2025-02-22" }, // 0 -- recess week 
-  1: { "start": "2025-01-13" },
-  2: { "start": "2025-01-20" },
-  3: { "start": "2025-01-27" },
-  4: { "start": "2025-02-03" },
-  5: { "start": "2025-02-10" },
-  6: { "start": "2025-02-17" },
-  7: { "start": "2025-03-03" },
-  8: { "start": "2025-03-10" },
-  9: { "start": "2025-03-17" },
-  10: { "start": "2025-03-24" },
-  11: { "start": "2025-03-31" },
-  12: { "start": "2025-04-07" }, 
-  13: { "start": "2025-04-14" } 
-};
-
-const startDateOfSem = new Date(weeksInSemester[1].start);
-startDateOfSem.setHours(0,0,0,0)
-
-const endDateOfSem = new Date(weeksInSemester[13].start);
-endDateOfSem.setDate(endDateOfSem.getDate() + 6);
+const formatDate = (date) => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
 
 const allowedDates = (dateString)=>{
   const date = new Date(dateString);
 
-  const recessWeekStart = new Date(weeksInSemester[0].start); 
+  const recessWeekStart = new Date(weeksInSemester.value[0].start); 
   recessWeekStart.setHours(0,0,0,0);
-  const recessWeekEnd = new Date(weeksInSemester[0].start);
+  const recessWeekEnd = new Date(weeksInSemester.value[0].start);
   recessWeekEnd.setDate(recessWeekEnd.getDate() + 7);
 
   // Block Recess Week
@@ -132,8 +118,10 @@ const getWeekOfSem = (date) => {
   const normalizedInputDate = new Date(date);
   normalizedInputDate.setHours(0, 0, 0, 0);
 
-  for (let week in weeksInSemester) {
-    const startDate = new Date(weeksInSemester[week].start);
+  console.log("weeksInSemester.value", weeksInSemester.value)
+  for (let week in weeksInSemester.value) {
+    console.log("week in weeksInSemester:", weeksInSemester.value[week].start)
+    const startDate = new Date(weeksInSemester.value[week].start);
     startDate.setHours(0, 0, 0, 0);
     const nextWeekStart = new Date(startDate);
     nextWeekStart.setDate(nextWeekStart.getDate() + 7);
@@ -142,11 +130,12 @@ const getWeekOfSem = (date) => {
       return week
     }
   }
-
   console.error("Date is out of semester range: ", date)
 };
 
-const currentWeek = getWeekOfSem(new Date())
+const currentWeek = computed(() => {
+  return getWeekOfSem(new Date());
+});
 
 const filterByWeekday = (data, sDate, eDate) => {
   const startDate = new Date(sDate)
@@ -177,9 +166,46 @@ const filterByWeekday = (data, sDate, eDate) => {
   });
 };
 
+const startDateOfSem = computed(() => {
+  if (!weeksInSemester.value[1]) return null;
+  const d = new Date(weeksInSemester.value[1].start);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString().split('T')[0]
+});
+
+const endDateOfSem = computed(() => {
+  if (!weeksInSemester.value[13]) return null;
+  const d = new Date(weeksInSemester.value[13].start);
+  d.setDate(d.getDate() + 6);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString().split('T')[0]
+});
+
 const allModules = ref(null)
 
 onMounted(async()=>{
+  try {
+    const semesterStartDateResp = await moduleApiService.getSemesterStartDate();
+    console.log(`semesterStartDateResp:`,semesterStartDateResp.data.startDate.value)
+    const week1Start = new Date(semesterStartDateResp.data.startDate.value); 
+    const weeks = {};
+
+    // Generate Weeks 1 to 13
+    for (let i = 1; i <= 13; i++) {
+      const weekStart = new Date(week1Start);
+      weekStart.setDate(week1Start.getDate() + (i - 1) * 7);
+      weeks[i] = { start: formatDate(weekStart) };
+    }
+
+    const recessWeekStart = new Date(week1Start);
+    recessWeekStart.setDate(recessWeekStart.getDate() + 6 * 7);
+    weeks[0] = { start: formatDate(recessWeekStart) };
+
+    weeksInSemester.value = weeks;
+  } catch (err) {
+    console.error('Error fetching semester start date:', err);
+  }
+
   try { 
     const studentID = JSON.parse(localStorage.getItem("user")).matrix_id;
     const response = await gatewayApiService.getModulesTakenByStudent(studentID);
@@ -193,6 +219,8 @@ onMounted(async()=>{
     } catch (error) {
         console.error("Error fetching modules:", error);
     }
+
+    console.log("startDateOfSem:", startDateOfSem.value)
 })
 
 const formattedModules = computed(() => {
@@ -203,6 +231,8 @@ const formattedModules = computed(() => {
   }));
 
   if (selectedStartDate.value && selectedEndDate.value) {
+    console.log("selectedStartDate.value: ", selectedStartDate.value)
+    console.log("selectedEndDate.value: ", selectedEndDate.value)
     const weekOfStartDate = getWeekOfSem(selectedStartDate.value)
     const weekOfEndDate = getWeekOfSem(selectedEndDate.value)
 
@@ -222,7 +252,6 @@ const formattedModules = computed(() => {
 
       return isWithinRange;
     });
-
 
     // Apply first filter on days
     filtered = filterByWeekday(filtered, selectedStartDate.value, selectedEndDate.value);
@@ -244,8 +273,8 @@ const goToLeaveDetails = () => {
 watch([selectedStartDate, selectedEndDate], () => {
   if (selectedStartDate && selectedEndDate){
     leaveDateStore.setSelectedLeaveDates({
-      "startDate": selectedStartDate,
-      "endDate": selectedEndDate,
+      "startDate": selectedStartDate.value,
+      "endDate": selectedEndDate.value,
     })
   } 
 });

@@ -7,7 +7,7 @@ import {
     getAllModulesWithEducators,
     getModulesTakenByStudent,
     getModulesWithRequestsByProfessor,
-    updateSemester,
+    updateSemester
 } from "./module/moduleController.js";
 import {
     getAllStudentsByModule,
@@ -22,6 +22,8 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors());
+
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY; 
 
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3001";
 const REQUEST_SERVICE_URL = process.env.REQUEST_SERVICE_URL || "http://localhost:3002";
@@ -83,7 +85,6 @@ app.use("/api/gateway/students/:moduleCode", getAllStudentsByModule);
 app.use("/api/gateway/modules/:profId", getModulesWithRequestsByProfessor);
 
 app.use('/api/gateway/updateSemester', authorizeRoles(["Admin"]), updateSemester)
-
 app.use((_req, res) => {
     res.status(404).json({
         code: 404,
