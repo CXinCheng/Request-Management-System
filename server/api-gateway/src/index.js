@@ -6,6 +6,7 @@ import {
     getAllModulesWithEducators,
     getModulesTakenByStudent,
     getModulesWithRequestsByProfessor,
+    getSemesterStartDate,
     updateSystemSemester,
 } from "./module/moduleController.js";
 import {
@@ -22,7 +23,7 @@ const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 
-const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY; 
 
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://localhost:3001";
 const REQUEST_SERVICE_URL = process.env.REQUEST_SERVICE_URL || "http://localhost:3002";
@@ -75,6 +76,7 @@ app.use("/api/gateway", verifyToken);
 
 // Aggreate API call
 app.use("/api/gateway/modules/all", getAllModulesWithEducators);
+app.use("/api/gateway/getSemesterStartDate", getSemesterStartDate)
 app.use(
     "/api/gateway/students/enrolled/:moduleCode",
     authorizeRoles(["Professor"]),
