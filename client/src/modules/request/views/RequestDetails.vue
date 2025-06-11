@@ -93,7 +93,7 @@
         try {
           const response = await requestApiService.getRequestDetails(this.requestId, this.module_code);
           console.log("Response for RequestDetailsView:", response);
-          this.request = response;
+          this.request = response.data;
         } catch (error) {
           console.error("Error fetching request:", error);
         }

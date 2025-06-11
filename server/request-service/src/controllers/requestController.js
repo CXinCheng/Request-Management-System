@@ -14,10 +14,10 @@ export const getAllRequestsByStudent = async (req, res) => {
         WHERE r.id = sr.main_request_id
         AND r.user_id = u1.matrix_id
         AND sr.approver_id = u2.matrix_id
+        AND r.is_archived = FALSE
         AND r.user_id = $1`, 
         [studentId]
         );
-        // res.status(200).json(requests);
         res.status(200).json({
             success: true,
             data: requests,
@@ -38,21 +38,32 @@ export const getRequestDetails = async (req, res) => {
 
     try {
         const request = await db.oneOrNone(
-        `SELECT r.*, sr.*, u1.name AS user_name, u2.name AS approver_name
-        FROM request_management.requests r, request_management.sub_request sr, request_management.users u1, request_management.users u2
-        WHERE r.id = sr.main_request_id
-        AND r.user_id = u1.matrix_id
-        AND sr.approver_id = u2.matrix_id
-        AND r.id = $1
-        AND sr.module_code = $2`,
-        [requestId, module_code]
+            `SELECT r.*, sr.*, u1.name AS user_name, u2.name AS approver_name
+            FROM request_management.requests r, request_management.sub_request sr, request_management.users u1, request_management.users u2
+            WHERE r.id = sr.main_request_id
+            AND r.user_id = u1.matrix_id
+            AND sr.approver_id = u2.matrix_id
+            AND r.id = $1
+            AND sr.module_code = $2`,
+            [requestId, module_code]
         );
-        res.status(200).json(request);
+
+        if (!request) {
+            return res.status(404).json({ success: false, error: 'Request not found' });
+        }
+
+        if (request.is_archived) {
+            return res.status(403).json({ success: false, error: 'Request is archived and cannot be accessed' });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: request,
+        });
     } catch (error) {
         console.error('Error fetching request details:', error);
-        res.status(500).json({ error: `Failed to fetch request details - ${error}` });
+        res.status(500).json({ success: false, error: `Failed to fetch request details - ${error}` });
     }
-  
 };
 
 // API for student to update a request
@@ -142,6 +153,7 @@ export const getAllRequestsByProfessor = async (req, res) => {
         WHERE r.id = sr.main_request_id
         AND r.user_id = u1.matrix_id
         AND sr.approver_id = u2.matrix_id
+        AND r.is_archived = FALSE
         AND sr.approver_id = $1`, 
         [profId]
         );
@@ -192,7 +204,9 @@ export const getAllRequestsByModule = async (req, res) => {
         const requests = await db.any(
             `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, sr.module_code, r.user_id 
             FROM request_management.requests r, request_management.sub_request sr
-            WHERE r.id = sr.main_request_id AND sr.module_code = $1`,
+            WHERE r.id = sr.main_request_id 
+            AND r.is_archived = FALSE
+            AND sr.module_code = $1`,
             [moduleCode]
         );
         res.status(200).json({

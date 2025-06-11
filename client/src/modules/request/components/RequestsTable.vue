@@ -111,14 +111,10 @@ export default {
                 // );
                 let response = null;
                 if (this.userRole === "Student") {
-                    response = await requestApiService.getRequestsByStudent(
-                        this.userId
-                    );
+                    response = await requestApiService.getRequestsByStudent(this.userId);
                 }
                 else if (this.userRole === "Professor") {
-                    response = await requestApiService.getRequestsByProfessor(
-                        this.userId
-                    );
+                    response = await requestApiService.getRequestsByProfessor(this.userId);
                 }
                 this.requests = response.data;
                 
