@@ -37,7 +37,7 @@
         :value="request.blob_url"
       />
       
-      <div v-if="userRole === 'Student'">
+      <div v-if="userRole === 'Student' && request.status === 'Pending'">
         <EditRequestButton />
         <DeleteRequestButton />
       </div>

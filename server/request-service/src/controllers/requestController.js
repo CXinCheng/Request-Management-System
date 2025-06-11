@@ -24,7 +24,7 @@ export const getAllRequestsByStudent = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching requests:', error);
-        res.status(500).json({ error: `Failed to fetch requests - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to fetch requests - ${error}` });
     }
   
 };
@@ -49,11 +49,11 @@ export const getRequestDetails = async (req, res) => {
         );
 
         if (!request) {
-            return res.status(404).json({ success: false, error: 'Request not found' });
+            return res.status(404).json({ success: false, message: 'Request not found' });
         }
 
         if (request.is_archived) {
-            return res.status(403).json({ success: false, error: 'Request is archived and cannot be accessed' });
+            return res.status(403).json({ success: false, message: 'Request is archived and cannot be accessed' });
         }
 
         res.status(200).json({
@@ -62,7 +62,7 @@ export const getRequestDetails = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching request details:', error);
-        res.status(500).json({ success: false, error: `Failed to fetch request details - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to fetch request details - ${error}` });
     }
 };
 
@@ -96,7 +96,7 @@ export const updateRequestByStudent = async (req, res) => {
         res.status(200).json({ message: 'Request updated successfully' });
     } catch (error) {
         console.error('Error updating request:', error);
-        res.status(500).json({ error: `Failed to update request - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to update request - ${error}` });
     }
   
 };
@@ -111,10 +111,23 @@ export const deleteRequestByStudent = async (req, res) => {
         // Ensure the request exists before deleting
         const existing = await db.oneOrNone(
             `SELECT id 
-            FROM request_management.requests r
+            FROM request_management.requests r, request_management.sub_request sr
+            WHERE r.id = sr.main_request_id
             WHERE r.id = $1`, 
-            [requestId]);
-        if (!existing) return res.status(404).json({ message: 'Request not found' });
+            [requestId]
+        );
+        
+        if (!existing) return res.status(404).json({ 
+            success: false, 
+            message: 'Request not found' 
+        });
+
+        if (existing.status !== 'Pending') {
+            return res.status(403).json({
+                success: false,
+                message: 'Cannot delete a request that has already been processed'
+            });
+        }
 
         await db.tx(async (t) => {
             // Update sub_request table
@@ -134,7 +147,7 @@ export const deleteRequestByStudent = async (req, res) => {
         res.status(200).json({ message: 'Request deleted successfully' });
     } catch (error) {
         console.error('Error deleting request:', error);
-        res.status(500).json({ error: `Failed to delete request - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to delete request - ${error}` });
     }
   
 };
@@ -163,7 +176,7 @@ export const getAllRequestsByProfessor = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching requests:', error);
-        res.status(500).json({ error: `Failed to fetch requests - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to fetch requests - ${error}` });
     }
   
 };
@@ -187,13 +200,13 @@ export const updateRequestStatus = async (req, res) => {
         );
 
         if (!updatedRequest) {
-            return res.status(404).json({ message: "Request not found" });
+            return res.status(404).json({ success: false, message: "Request not found" });
         }
 
         res.status(200).json(updatedRequest);
     } catch (error) {
         console.error('Error updating request:', error);
-        res.status(500).json({ error: `Failed to update request - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to update request - ${error}` });
     }
   
 };
@@ -216,7 +229,7 @@ export const getAllRequestsByModule = async (req, res) => {
     }
     catch (error) {
         console.error('Error fetching requests:', error);
-        res.status(500).json({ error: `Failed to fetch requests - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to fetch requests - ${error}` });
     }
 }
 
@@ -236,7 +249,7 @@ export const archiveAllRequests = async (req, res) => {
         console.error('Error archiving requests:', error);
         res.status(500).json({ 
             success: false,
-            error: `Failed to archive requests - ${error}` 
+            message: `Failed to archive requests - ${error}` 
         });
     }
 }
