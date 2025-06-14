@@ -1,29 +1,34 @@
 <template>
   <v-container class="semester-view-container" fluid>
-    <v-card class="larger-card" max-width="750" elevation="10">
+    <v-card class="mx-auto larger-card" max-width="750" elevation="10">
       <v-card-title class="headline">Academic Term Management</v-card-title>
+
       <v-card-text>
-        Select the academic year and semester you want to set:
-        <v-row class="mt-4">
-          <v-col cols="6">
-            <v-select
-              v-model="selectedYear"
-              :items="availableYears"
-              label="Academic Year"
-              outlined
-              dense
-            />
-          </v-col>
-          <v-col cols="6">
-            <v-select
-              v-model="selectedSemester"
-              :items="availableSemesters"
-              label="Semester"
-              outlined
-              dense
-            />
-          </v-col>
-        </v-row>
+        Select the academic year:
+
+        <!-- infinite scroll picker for years -->
+        <v-infinite-scroll
+          :height="300"
+          :items="availableYears"
+          @load="loadMoreYears">
+          <template v-for="(item, index) in availableYears" :key="item">
+            <v-list-item
+              :class="index % 2 === 0 ? 'bg-grey-lighten-2' : ''"
+              @click="selectYear(item)"> 
+              {{ item }}
+            </v-list-item>
+          </template>
+        </v-infinite-scroll>
+
+        <v-select
+          v-model="selectedSemester"
+          :items="availableSemesters"
+          item-text="text"
+          item-value="value"
+          label="Semester"
+          outlined
+          dense
+        />
       </v-card-text>
       <v-card-actions>
         <v-btn
@@ -35,6 +40,20 @@
         </v-btn>
       </v-card-actions>
     </v-card>
+
+    <!-- Loading Indicator -->
+    <v-dialog v-model="loading" persistent max-width="300">
+      <v-card color="grey lighten-4" class="p-4">
+        <v-progress-circular
+          indeterminate
+          color="blue"
+          size="64">
+        </v-progress-circular>
+        <div class="text-center mt-4">
+          Updating semester, please wait...
+        </div>
+      </v-card>
+    </v-dialog>
 
     <!-- Confirmation Dialog -->
     <v-dialog v-model="dialog" max-width="500">
@@ -70,7 +89,7 @@ const notificationStore = useNotificationStore();
 const dialog = ref(false);
 const selectedYear = ref(null);
 const selectedSemester = ref(null);
-const availableYears = ["2023-2024", "2024-2025", "2025-2026", "2026-2027"];
+const availableYears = ref(["2023-2024", "2024-2025", "2025-2026", "2026-2027"]);
 const availableSemesters = [
   "Semester 1",
   "Semester 2",
@@ -84,6 +103,42 @@ const semesterMapping = {
   "Special Semester 2": 4,
 }; //Maps semester names to integer numbers
 
+// Loading additional years when you reach bottom
+async function addMoreYears() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const last = availableYears.value.at(-1);
+      const [start, end] = last.split("-").map(Number);
+      const newStart = start + 1;
+      const newEnd = end + 1;
+
+      resolve({ newStart, newEnd });
+    }, 1000);
+  });
+}
+
+async function loadMoreYears({ done }) {
+  try {
+    // Wait for addMoreYears to compute the new range
+    const { newStart, newEnd } = await addMoreYears();
+
+    // Push the new range into the array
+    availableYears.value.push(
+      `${newStart}-${newEnd}`
+    );
+
+    done("ok");
+
+  } catch (error) {
+    console.error("Error adding more years.", error);
+    done("error");
+
+  }
+}
+
+function selectYear(year) {
+  selectedYear.value = year;
+}
 const submitSemesterChange = async () => {
   try {
     const semesterInteger = semesterMapping[selectedSemester.value]; // Uses semester integer value
