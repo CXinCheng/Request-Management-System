@@ -56,6 +56,7 @@ export const login = async (req, res) => {
                     matrix_id: user.matrix_id,
                     faculty: user.faculty,
                     contact: user.contact_number,
+                    email_interval: user.email_interval,
                 }
             }
         });

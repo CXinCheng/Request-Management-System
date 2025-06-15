@@ -109,7 +109,8 @@ export const updateUser = async (req, res) => {
             });
         }
 
-        const { name, email, role, password, faculty, contact, currentPassword } = req.body;
+        const { name, email, role, email_interval, password, faculty, contact, currentPassword } = req.body;
+
 
         const updates = { name, email, role };
         const queryParams = [];
@@ -121,6 +122,11 @@ export const updateUser = async (req, res) => {
             return `${key} = $${paramCount++}`;
             });
         
+        if (email_interval) {
+            setStatements.push(`email_interval = $${paramCount++}`);
+            queryParams.push(email_interval);
+        }
+
         if (currentPassword) {
             const isValidPassword = await bcrypt.compare(currentPassword, user.password);
             if (!isValidPassword) {
@@ -151,7 +157,13 @@ export const updateUser = async (req, res) => {
             UPDATE request_management.users 
             SET ${setStatements.join(', ')}
             WHERE matrix_id = $${paramCount}
-            RETURNING matrix_id`;
+            RETURNING *`;
+
+        // const updateQuery = `
+        //     UPDATE request_management.users 
+        //     SET ${setStatements.join(', ')}
+        //     WHERE matrix_id = $${paramCount}
+        //     RETURNING matrix_id`;
 
         const updatedUser = await db.oneOrNone(updateQuery, queryParams);
 
@@ -161,7 +173,8 @@ export const updateUser = async (req, res) => {
                 error: "User not found"
             });
         }
-
+        
+        notifyIntervalChange(updatedUser)
         res.json({
             success: true,
             message: "User updated successfully",
@@ -237,40 +250,3 @@ export const getProfessors = async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 };
-
-// API to set Email Notification Interval
-export const setEmailInterval = async (req, res) => {
-    // interval is in number of days 
-    const { profId } = req.params;
-    const { interval } = req.body;
-    const intervalInt = parseInt(interval, 10);
-    if (isNaN(intervalInt) || !Number.isInteger(intervalInt)) {
-        return res.status(400).json({ error: "Must be an integer" });
-    }
-
-    // const intervalInMins = intervalInt * 1440;
-    const intervalInMins = intervalInt; 
-
-    try {
-        console.log(`Updating ${profId} email interval to: ${intervalInMins}`)
-        const prof = await db.oneOrNone(
-            `UPDATE request_management.users as u
-            SET email_interval_minutes = $1
-            WHERE u.matrix_id = $2
-            RETURNING *;`,
-            [intervalInMins, profId]
-        );
-
-        notifyIntervalChange(prof);
-
-        res.status(200).json({
-            success: true,
-            message: `Sucessfully Updated Interval ${profId} to ${intervalInMins} mins`,
-        });
-    }
-    catch (error) {
-        console.error('Error updating email interval:', error);
-        res.status(500).json({ error: `Failed to update email notification time interval - ${error}` });
-    }
-
-}

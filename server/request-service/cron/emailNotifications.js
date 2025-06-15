@@ -24,18 +24,17 @@ redisSubscriber.on('message', (channel, message) => {
 });
 
 function createOrUpdateCronJob(prof) {
-    console.log(`Reloading/Creating cron job for ${prof.matrix_id} with interval ${prof.email_interval_minutes} minutes`);
     if (cronJobs[prof.matrix_id]) {
         cronJobs[prof.matrix_id].stop();
         delete cronJobs[prof.matrix_id];
         console.log(`Stopped existing cron for ${prof.matrix_id}`);
     }
 
-    const interval = prof.email_interval_minutes || 1440; // default: once daily
+    const interval = prof.email_interval || 'daily'; // default: once daily
     const cronExpr = getCronExpr(interval);
 
     if (!cronExpr) {
-        console.warn(`Invalid interval for ${prof.matrix_id}: ${prof.email_interval_minutes}`);
+        console.warn(`Invalid interval for ${prof.matrix_id}: ${prof.email_interval}`);
         return;
     }
 
@@ -57,7 +56,7 @@ export const setupDynamicCrons = async () => {
     }
 
     const professors = await db.manyOrNone(`
-        SELECT matrix_id, email, name, email_interval_minutes
+        SELECT matrix_id, email, name, email_interval
         FROM request_management.users
         WHERE role = 'Professor'
     `);
@@ -67,13 +66,17 @@ export const setupDynamicCrons = async () => {
     }
 };
 
-const getCronExpr = (minutes) => {
-    if (minutes < 60) return `*/${minutes} * * * *`;
-    if (minutes % 60 === 0) {
-    const hours = minutes / 60;
-    return `0 */${hours} * * *`;
+const getCronExpr = (interval) => {
+    switch (interval) {
+    case 'daily':
+        return '0 8 * * *'; // 8 AM daily
+    case 'weekly':
+        return '0 8 * * 1'; // 8 AM every Monday
+    case 'monthly':
+        return '0 8 1 * *'; // 8 AM on 1st of every month
+    default:
+        return null;
     }
-    return null; // unsupported
 };
 
 const notifyPendingRequestsForProfessor = async (professor) => {

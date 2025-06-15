@@ -49,6 +49,16 @@
                                 density="comfortable"
                             />
                         </v-col>
+                        
+                        <v-col v-if="profile.role === 'Professor'" cols="12" md="6">
+                            <v-select
+                                v-model="profile.email_interval"
+                                :items="['daily', 'weekly', 'monthly']"
+                                label="Email Notification Interval"
+                                density="comfortable"
+                            />
+                        </v-col>
+
                     </v-row>
 
                     <v-divider class="my-4"></v-divider>
@@ -140,6 +150,7 @@ const profile = ref({
     contact: "",
     faculty: "",
     role: "",
+    email_interval: "",
 });
 const passwordForm = ref({
     current: "",
@@ -194,6 +205,7 @@ onMounted(async () => {
                 email: userData.email,
                 contact: userData.contact,
                 faculty: userData.faculty,
+                email_interval: userData.email_interval,
             };
 
             try {
