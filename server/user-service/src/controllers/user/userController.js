@@ -1,5 +1,15 @@
 import bcrypt from "bcrypt";
 import { db } from "../../configs/db.js";
+import Redis from 'ioredis';
+
+// Publish to Queue when there's an update in email intervals
+const redisPublisher = new Redis();
+
+async function notifyIntervalChange(prof) {
+  const message = JSON.stringify({ prof });
+  await redisPublisher.publish('user:interval:update', message);
+  console.log('Published interval update:', message);
+}
 
 // Get all users
 export const getAllUsers = async (req, res) => {
@@ -227,3 +237,40 @@ export const getProfessors = async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 };
+
+// API to set Email Notification Interval
+export const setEmailInterval = async (req, res) => {
+    // interval is in number of days 
+    const { profId } = req.params;
+    const { interval } = req.body;
+    const intervalInt = parseInt(interval, 10);
+    if (isNaN(intervalInt) || !Number.isInteger(intervalInt)) {
+        return res.status(400).json({ error: "Must be an integer" });
+    }
+
+    // const intervalInMins = intervalInt * 1440;
+    const intervalInMins = intervalInt; 
+
+    try {
+        console.log(`Updating ${profId} email interval to: ${intervalInMins}`)
+        const prof = await db.oneOrNone(
+            `UPDATE request_management.users as u
+            SET email_interval_minutes = $1
+            WHERE u.matrix_id = $2
+            RETURNING *;`,
+            [intervalInMins, profId]
+        );
+
+        notifyIntervalChange(prof);
+
+        res.status(200).json({
+            success: true,
+            message: `Sucessfully Updated Interval ${profId} to ${intervalInMins} mins`,
+        });
+    }
+    catch (error) {
+        console.error('Error updating email interval:', error);
+        res.status(500).json({ error: `Failed to update email notification time interval - ${error}` });
+    }
+
+}
