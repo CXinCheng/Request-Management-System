@@ -48,7 +48,14 @@
                   :readonly="item.requests === 0"
                   size="small"
                   text
-                  @click="$router.push({ name: 'RequestListView', params: {} })"
+                  @click="
+                    $router.push({
+                      name: 'RequestListView',
+                      query: {
+                        moduleFilter: moduleCode,
+                      },
+                    })
+                  "
                 >
                   <div v-if="item.requests === 0">0 Requests</div>
                   <div v-else>{{ item.requests }} Requests</div>
@@ -770,34 +777,36 @@ const saveEnrollments = async () => {
     loading.value = true;
     // Find students whose class assignments have changed
     const modifiedStudents = {
-        addedStudents: [],
-        updatedStudents: [],
-        deletedStudents: [],
+      addedStudents: [],
+      updatedStudents: [],
+      deletedStudents: [],
     };
 
     // Find students whose class assignments have changed
-    modifiedStudents.updatedStudents = updatedEnrolledStudents.value.filter((updatedStudent) => {
-      const originalStudent = enrolledStudents.value.find(
-      (s) => s.matrix_id === updatedStudent.matrix_id
-      );
-      if (!originalStudent) return false;
+    modifiedStudents.updatedStudents = updatedEnrolledStudents.value
+      .filter((updatedStudent) => {
+        const originalStudent = enrolledStudents.value.find(
+          (s) => s.matrix_id === updatedStudent.matrix_id
+        );
+        if (!originalStudent) return false;
 
-      // Compare class assignments for each class type
-      return moduleData.value.classes.some(({ classType }) => {
-      const key = `${classType.toLowerCase()}_class_no`;
-      return updatedStudent[key] !== originalStudent[key];
+        // Compare class assignments for each class type
+        return moduleData.value.classes.some(({ classType }) => {
+          const key = `${classType.toLowerCase()}_class_no`;
+          return updatedStudent[key] !== originalStudent[key];
+        });
+      })
+      .map((student) => {
+        // Only send relevant fields
+        const updated = {
+          matrix_id: student.matrix_id,
+          classes: moduleData.value.classes.map(({ classType }) => ({
+            classType: classType,
+            classNo: student[`${classType.toLowerCase()}_class_no`],
+          })),
+        };
+        return updated;
       });
-    }).map((student) => {
-      // Only send relevant fields
-      const updated = {
-      matrix_id: student.matrix_id,
-      classes: moduleData.value.classes.map(({ classType }) => ({
-        classType: classType,
-        classNo: student[`${classType.toLowerCase()}_class_no`],
-      })),
-      };
-      return updated;
-    });
 
     if (modifiedStudents.length === 0) {
       enrollDialog.value = false;
@@ -806,9 +815,9 @@ const saveEnrollments = async () => {
 
     // Send updates to API
     const response = await moduleApiService.updateEnrollmentByModule({
-            moduleCode: moduleCode,
-            modifiedStudents: modifiedStudents,
-        });
+      moduleCode: moduleCode,
+      modifiedStudents: modifiedStudents,
+    });
 
     if (!response.success) {
       throw new Error(response.message || "Failed to update class assignments");
