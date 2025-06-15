@@ -40,7 +40,7 @@ const authApi = axios.create({
 });
 
 export const authApiService = {
-    login: (credentials) =>
+        login: (credentials) =>
         authApi.post("/login", credentials).then((res) => res.data),
     register: (userData) =>
         authApi.post("/register", userData).then((res) => res.data),

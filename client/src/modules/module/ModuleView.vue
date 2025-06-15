@@ -16,10 +16,15 @@
               hide-details
             />
           </v-col>
-          <v-col cols="2">
-            <v-btn color="primary" @click="openImportDialog"
-              >Enroll Student</v-btn
-            >
+          <v-col cols="4" class="d-flex">
+            <v-btn color="primary" class="mr-2" @click="openImportDialog">
+              <v-icon left>mdi-file-import</v-icon>
+              Import Students
+            </v-btn>
+            <v-btn color="success" @click="openEnrollDialog">
+              <v-icon left>mdi-account-multiple-plus</v-icon>
+              Assign Classes
+            </v-btn>
           </v-col>
         </v-row>
       </v-card-title>
@@ -64,7 +69,7 @@
       </v-card-text>
     </v-card>
 
-    <v-dialog v-model="enrollStudentDialog" max-width="500px">
+    <v-dialog v-model="importStudentDialog" max-width="500px">
       <v-card>
         <v-card-title class="text-h5">Import Students</v-card-title>
         <v-card-text>
@@ -132,7 +137,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="error" text @click="enrollStudentDialog = false"
+          <v-btn color="error" text @click="importStudentDialog = false"
             >Cancel</v-btn
           >
           <v-btn
@@ -159,7 +164,6 @@
                   v-if="enrollResults.enrolled.length > 0"
                   color="success"
                   icon="mdi-check-circle"
-                  border="start"
                   class="mb-3"
                 >
                   Successfully enrolled
@@ -170,7 +174,6 @@
                   v-if="enrollResults.alreadyEnrolled.length > 0"
                   color="info"
                   icon="mdi-information"
-                  border="start"
                   class="mb-3"
                 >
                   {{ enrollResults.alreadyEnrolled.length }} students were
@@ -181,7 +184,6 @@
                   v-if="enrollResults.nonExistent.length > 0"
                   color="warning"
                   icon="mdi-alert"
-                  border="start"
                   class="mb-3"
                 >
                   {{ enrollResults.nonExistent.length }} students do not exist
@@ -225,28 +227,69 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="editUserDialog" max-width="500px">
+    <v-dialog v-model="enrollDialog" max-width="1100px">
       <v-card>
         <v-card-title>
-          <span class="text-h5">Edit Studnet</span>
+          <v-row class="mx-2 mt-2">
+            <span class="text-h5 align-self-center"
+              >Enroll Students to {{ moduleCode }}</span
+            >
+            <v-spacer></v-spacer>
+            <v-col cols="4">
+              <v-text-field
+                v-model="searchEnrollStudents"
+                label="Search Students"
+                prepend-inner-icon="mdi-magnify"
+                density="compact"
+                hide-details
+              />
+            </v-col>
+          </v-row>
         </v-card-title>
         <v-card-text>
-          <UserForm
-            :initial-data="formData"
-            :show-confirm-password="false"
-            @submit="handleSave"
+          <UserTable
+            :additionalHeaders="enrollTableHeaders"
+            :users="updatedEnrolledStudents"
+            :loading="loading"
+            :search="searchEnrollStudents"
+            :no-data-text="
+              updatedEnrolledStudents.length
+                ? ''
+                : 'No students enrolled in this module'
+            "
           >
-            <template v-slot:actions>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="error" text @click="editUserDialog = false"
-                  >Cancel</v-btn
-                >
-                <v-btn color="primary" text type="submit">Save</v-btn>
-              </v-card-actions>
+            <template
+              v-for="header in enrollTableHeaders"
+              :key="header.key"
+              v-slot:[header.key]="{ item }"
+            >
+              <div class="d-flex align-center justify-space-between">
+                <v-select
+                  max-width="150px"
+                  :items="
+                    Array.from(
+                      moduleData.classes.find(
+                        (c) => c.classType === header.type
+                      )?.classNo
+                    )
+                  "
+                  :value="item[header.key]"
+                  v-model="item[header.key]"
+                  density="compact"
+                  hide-details
+                  placeholder="Not Assigned"
+                />
+              </div>
             </template>
-          </UserForm>
+          </UserTable>
         </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" text @click="enrollDialog = false">
+            Cancel
+          </v-btn>
+          <v-btn color="primary" text @click="saveEnrollments"> Save </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -277,7 +320,6 @@ import {
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import UserTable from "@/modules/admin/components/UsersTable.vue";
-import { authApiService, userApiService } from "@/utils/ApiService";
 import { useNotificationStore } from "@/utils/NotificationStore";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -286,7 +328,7 @@ const route = useRoute();
 const moduleCode = route.params.moduleCode;
 const moduleName = route.params.moduleName;
 const loading = ref(false);
-const enrollStudentDialog = ref(false);
+const importStudentDialog = ref(false);
 const deleteDialog = ref(false);
 const notificationStore = useNotificationStore();
 const selectedUser = ref(null);
@@ -294,7 +336,11 @@ const fileInput = ref(null);
 const selectedFile = ref(null);
 const importing = ref(false);
 const enrolledStudents = ref([]);
+const updatedEnrolledStudents = ref([]);
+const enrollTableHeaders = ref([]);
 const bulkEnrollStudents = ref([]);
+const enrollDialog = ref(false);
+const searchEnrollStudents = ref("");
 
 const moduleData = ref({
   code: moduleCode,
@@ -317,13 +363,12 @@ const resultDialog = ref(false);
 const enrollResults = ref({
   enrolled: [],
   alreadyEnrolled: [],
-  nonExistent: []
+  nonExistent: [],
 });
-
 
 const openImportDialog = () => {
   selectedFile.value = null;
-  enrollStudentDialog.value = true;
+  importStudentDialog.value = true;
 };
 
 const triggerFileInput = () => {
@@ -402,6 +447,16 @@ const updateTableHeaders = () => {
       headerProps: {
         style: "font-weight: 600; font-size:20px;",
       },
+    });
+  });
+
+  moduleData.value.classes.forEach(({ classType }) => {
+    enrollTableHeaders.value.push({
+      type: `${classType}`,
+      title: `${classType} Class`,
+      key: `${classType.toLowerCase()}_class_no`,
+      align: "start",
+      headerProps: { style: "font-weight: 600; font-size:20px;" },
     });
   });
 };
@@ -494,11 +549,11 @@ const validateImportData = (data) => {
 // Process and import students
 const importStudents = async () => {
   if (!selectedFile.value) return;
-  
+
   importing.value = true;
   try {
     const data = await readExcelFile(selectedFile.value);
-    
+
     // Validate data format
     if (!validateImportData(data)) {
       notificationStore.showNotification({
@@ -509,45 +564,44 @@ const importStudents = async () => {
       importing.value = false;
       return;
     }
-    
+
     // Format data for API
-    bulkEnrollStudents.value = data.map(row => ({
+    bulkEnrollStudents.value = data.map((row) => ({
       matrix_id: row.matrix_id,
       name: row.name,
       email: row.email,
-      classes: moduleData.value.classes.map(classInfo => {
+      classes: moduleData.value.classes.map((classInfo) => {
         const classKey = `${classInfo.classType.toLowerCase()}_class_no`;
         return {
           class_type: classInfo.classType,
-          class_no: row[classKey] || classInfo.classNo[0]  // Use first class as default
+          class_no: row[classKey] || classInfo.classNo[0], // Use first class as default
         };
-      })
+      }),
     }));
-    
+
     // Call API to enroll students
     const response = await moduleApiService.bulkEnrollStudents({
       moduleCode: moduleCode,
-      students: bulkEnrollStudents.value
+      students: bulkEnrollStudents.value,
     });
-    
+
     if (!response.success) {
       throw new Error(response.message || "Failed to import students");
     }
-    
+
     // Store results for display
     enrollResults.value = {
       enrolled: response.data.enrolled || [],
       alreadyEnrolled: response.data.alreadyEnrolled || [],
-      nonExistent: response.data.nonExistent || []
+      nonExistent: response.data.nonExistent || [],
     };
-    
+
     // Refresh student list
     await refreshEnrolledStudents();
-    
+
     // Show results dialog instead of notification
-    enrollStudentDialog.value = false;
+    importStudentDialog.value = false;
     resultDialog.value = true;
-    
   } catch (error) {
     console.error("Error importing students:", error);
     notificationStore.showNotification({
@@ -654,56 +708,133 @@ const downloadResults = () => {
     const resultsData = [];
 
     // Add successfully enrolled students
-    enrollResults.value.enrolled.forEach(student => {
-        resultsData.push({
-          matrix_id: student.matrix_id,
-          name: student.name || '',
-          email: student.email || '',
-          status: 'Successfully Enrolled'  
-        });
-    });
-    
-    // Add already enrolled students
-    enrollResults.value.alreadyEnrolled.forEach(student => {
-        resultsData.push({
-          matrix_id: student.matrix_id,
-          name: student.name || '',
-          email: student.email || '',
-          status: 'Already enrolled'
-        });
-    });
-    
-    // Add non-existent students
-    enrollResults.value.nonExistent.forEach(student => {
+    enrollResults.value.enrolled.forEach((student) => {
       resultsData.push({
         matrix_id: student.matrix_id,
-        name: student.name || '',
-        email: student.email || '',
-        status: 'Does not exist'
+        name: student.name || "",
+        email: student.email || "",
+        status: "Successfully Enrolled",
       });
     });
-    
+
+    // Add already enrolled students
+    enrollResults.value.alreadyEnrolled.forEach((student) => {
+      resultsData.push({
+        matrix_id: student.matrix_id,
+        name: student.name || "",
+        email: student.email || "",
+        status: "Already enrolled",
+      });
+    });
+
+    // Add non-existent students
+    enrollResults.value.nonExistent.forEach((student) => {
+      resultsData.push({
+        matrix_id: student.matrix_id,
+        name: student.name || "",
+        email: student.email || "",
+        status: "Does not exist",
+      });
+    });
+
     // Generate CSV content
-    let csvContent = 'Matrix ID,Name,Email,Status\n';
-    
-    resultsData.forEach(row => {
+    let csvContent = "Matrix ID,Name,Email,Status\n";
+
+    resultsData.forEach((row) => {
       csvContent += `"${row.matrix_id}","${row.name}","${row.email}","${row.status}"\n`;
     });
-    
+
     // Create and download the file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     saveAs(blob, `${moduleCode}_enrollment_results.csv`);
-    
   } catch (error) {
-    console.error('Error downloading results:', error);
+    console.error("Error downloading results:", error);
     notificationStore.showNotification({
-      message: 'Error generating results file',
-      color: 'error',
+      message: "Error generating results file",
+      color: "error",
       timeout: 3000,
     });
   }
 };
 
+const openEnrollDialog = async () => {
+  // Deep copy enrolledStudents to updatedEnrolledStudents
+  updatedEnrolledStudents.value = enrolledStudents.value.map((student) => ({
+    ...student,
+  }));
+  enrollDialog.value = true;
+};
+
+const saveEnrollments = async () => {
+  try {
+    loading.value = true;
+    // Find students whose class assignments have changed
+    const modifiedStudents = {
+        addedStudents: [],
+        updatedStudents: [],
+        deletedStudents: [],
+    };
+
+    // Find students whose class assignments have changed
+    modifiedStudents.updatedStudents = updatedEnrolledStudents.value.filter((updatedStudent) => {
+      const originalStudent = enrolledStudents.value.find(
+      (s) => s.matrix_id === updatedStudent.matrix_id
+      );
+      if (!originalStudent) return false;
+
+      // Compare class assignments for each class type
+      return moduleData.value.classes.some(({ classType }) => {
+      const key = `${classType.toLowerCase()}_class_no`;
+      return updatedStudent[key] !== originalStudent[key];
+      });
+    }).map((student) => {
+      // Only send relevant fields
+      const updated = {
+      matrix_id: student.matrix_id,
+      classes: moduleData.value.classes.map(({ classType }) => ({
+        classType: classType,
+        classNo: student[`${classType.toLowerCase()}_class_no`],
+      })),
+      };
+      return updated;
+    });
+
+    if (modifiedStudents.length === 0) {
+      enrollDialog.value = false;
+      return;
+    }
+
+    // Send updates to API
+    const response = await moduleApiService.updateEnrollmentByModule({
+            moduleCode: moduleCode,
+            modifiedStudents: modifiedStudents,
+        });
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to update class assignments");
+    }
+
+    // Refresh student list
+    await refreshEnrolledStudents();
+
+    // Close dialog and show success notification
+    enrollDialog.value = false;
+    notificationStore.showNotification({
+      message: "Class assignments updated successfully",
+      color: "success",
+      timeout: 3000,
+    });
+  } catch (error) {
+    console.error("Error saving class assignments:", error);
+    notificationStore.showNotification({
+      message: error.message || "Error updating class assignments",
+      color: "error",
+      timeout: 3000,
+    });
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
 
 <style scoped>
