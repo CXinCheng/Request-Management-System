@@ -8,6 +8,18 @@
       <h1 class="text-xl font-bold">Request Details</h1>
       <hr>
       <br>
+
+      <div v-if="userRole === 'Professor'">
+        <DetailItem
+          :title="'Requested By'"
+          :value="request.user_name"
+        />
+        <DetailItem
+          :title="'Student ID'"
+          :value="request.user_id"
+        />
+      </div>
+      
       <DetailItem
         :title="'Status'"
         :value="request.status"
