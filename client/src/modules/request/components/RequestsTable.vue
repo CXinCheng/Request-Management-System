@@ -36,6 +36,12 @@
                 {{ formatCreatedDate(item.created_at) }}
             </template>
 
+            <template v-slot:item.status="{ item }">
+                <span class="status-pill" :class="item.status?.toLowerCase()">
+                  {{ item.status }}
+                </span>
+            </template>
+
             <template v-slot:item.actions="{ item }">
                 <v-menu offset-y>
                     <template v-slot:activator="{ props }">
@@ -104,11 +110,7 @@ export default {
     },
     methods: {
         async fetchRequests() {
-            let response = null;
             try {
-                // const response = await axios.get(
-                //     `http://localhost:3002/api/v1/requests/student/${this.studentId}`
-                // );
                 let response = null;
                 if (this.userRole === "Student") {
                     response = await requestApiService.getRequestsByStudent(this.userId);
@@ -156,7 +158,7 @@ export default {
 </script>
 
 <style scoped>
-.v-data-table >>> th {
+:deep(th) {
   font-weight: bold !important;
   text-align: center !important;
   background-color: #1867c0 !important; /* Dark blue header */
@@ -169,5 +171,24 @@ export default {
     cursor: pointer;
 }
 
+.status-pill {
+  display: inline-block;
+  padding: 2px 14px;
+  border-radius: 999px;
+  font-size: 0.95em;
+  font-weight: 600;
+  color: #fff;
+  background-color: #bdbdbd;
+  text-transform: capitalize;
+}
+.status-pill.approved {
+  background-color: #5acc5f;
+}
+.status-pill.pending {
+  background-color: #5d90ff;
+}
+.status-pill.rejected {
+  background-color: #ff4b48;
+}
 </style>
 
