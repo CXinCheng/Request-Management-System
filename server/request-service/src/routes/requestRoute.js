@@ -10,6 +10,7 @@ import {
     deleteRequestByStudent,
     getAllRequestsByModule,
     archiveAllRequests,
+    getAllRequestsDetailsByProfessor
 } from '../controllers/requestController.js';
 import { ensureConnection } from "../configs/db.js";
 import { verifyToken, authorizeRoles } from '../middlewares/authMiddleware.js';
@@ -43,6 +44,7 @@ router.delete('/student/:requestId', authorizeRoles(['Student']), deleteRequestB
 router.get('/module/:moduleCode', authorizeRoles(['Student', 'Professor']), getAllRequestsByModule);
 router.get('/details/:requestId', authorizeRoles(['Student', 'Professor']), getRequestDetails);
 
+router.get('/professor/details/:profId', authorizeRoles(['Professor']), getAllRequestsDetailsByProfessor);
 router.get('/professor/:profId',  authorizeRoles(['Professor']), getAllRequestsByProfessor);
 router.put('/professor/:profId/:requestId',authorizeRoles(['Professor']), updateRequestStatus);
 

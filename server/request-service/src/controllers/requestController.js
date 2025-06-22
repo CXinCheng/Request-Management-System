@@ -1,15 +1,14 @@
 import { db } from "../configs/db.js";
 
-
 // API to get all requests for a student
 export const getAllRequestsByStudent = async (req, res) => {
-    console.log('API hit for getAllRequests:');
+  console.log("API hit for getAllRequests:");
 
-    const { studentId } = req.params;
+  const { studentId } = req.params;
 
-    try {
-        const requests = await db.any(
-        `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, sr.module_code, u1.name AS user_name, u2.name AS approver_name
+  try {
+    const requests = await db.any(
+      `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, sr.module_code, u1.name AS user_name, u2.name AS approver_name
         FROM request_management.requests r, request_management.sub_request sr, request_management.users u1, request_management.users u2
         WHERE r.id = sr.main_request_id
         AND r.user_id = u1.matrix_id
@@ -31,10 +30,10 @@ export const getAllRequestsByStudent = async (req, res) => {
 
 // API to get a request's details for a student
 export const getRequestDetails = async (req, res) => {
-    console.log('API hit for getRequestDetails:');
+  console.log("API hit for getRequestDetails:");
 
-    const { requestId } = req.params;
-    const { module_code } = req.query;
+  const { requestId } = req.params;
+  const { module_code } = req.query;
 
     try {
         const request = await db.oneOrNone(
@@ -68,30 +67,30 @@ export const getRequestDetails = async (req, res) => {
 
 // API for student to update a request
 export const updateRequestByStudent = async (req, res) => {
-    console.log('API hit for updateRequest:');
+  console.log("API hit for updateRequest:");
 
-    const { requestId } = req.params;
-    const { start_date, end_date, modules } = req.body;
+  const { requestId } = req.params;
+  const { start_date, end_date, modules } = req.body;
 
-    try {
-        await db.tx(async (t) => {
-            // Update requests table
-            await t.oneOrNone(
-            `UPDATE request_management.requests
+  try {
+    await db.tx(async (t) => {
+      // Update requests table
+      await t.oneOrNone(
+        `UPDATE request_management.requests
             SET start_date_of_leave = $1, end_date_of_leave = $2
             WHERE id = $3
-            RETURNING *`, 
-            [start_date, end_date, requestId]
-            );
+            RETURNING *`,
+        [start_date, end_date, requestId]
+      );
 
-            // Update sub_request table
-            await t.none(
-            `UPDATE request_management.sub_request
+      // Update sub_request table
+      await t.none(
+        `UPDATE request_management.sub_request
             SET module_code = $1
             WHERE main_request_id = $2`,
-            [modules[0].code, requestId]
-            );
-        });
+        [modules[0].code, requestId]
+      );
+    });
 
         res.status(200).json({ message: 'Request updated successfully' });
     } catch (error) {
@@ -103,9 +102,9 @@ export const updateRequestByStudent = async (req, res) => {
 
 // API for student to delete a request
 export const deleteRequestByStudent = async (req, res) => {
-    console.log('API hit for deleteRequestByStudent:');
+  console.log("API hit for deleteRequestByStudent:");
 
-    const { requestId } = req.params;
+  const { requestId } = req.params;
 
     try {
         // Ensure the request exists before deleting
@@ -129,20 +128,20 @@ export const deleteRequestByStudent = async (req, res) => {
             });
         }
 
-        await db.tx(async (t) => {
-            // Update sub_request table
-            await t.none(
-                `DELETE FROM request_management.sub_request sr 
+    await db.tx(async (t) => {
+      // Update sub_request table
+      await t.none(
+        `DELETE FROM request_management.sub_request sr 
                 WHERE sr.main_request_id = $1`,
-                [requestId]
-            );
-            // Update requests table
-            await t.none(
-                `DELETE FROM request_management.requests r 
+        [requestId]
+      );
+      // Update requests table
+      await t.none(
+        `DELETE FROM request_management.requests r 
                 WHERE r.id = $1`,
-                [requestId]
-            );
-        });
+        [requestId]
+      );
+    });
 
         res.status(200).json({ message: 'Request deleted successfully' });
     } catch (error) {
@@ -152,16 +151,15 @@ export const deleteRequestByStudent = async (req, res) => {
   
 };
 
-
 // API to get all requests for a professor
 export const getAllRequestsByProfessor = async (req, res) => {
-    console.log('API hit for getAllRequestsByProfessor:');
+  console.log("API hit for getAllRequestsByProfessor:");
 
-    const { profId } = req.params;
+  const { profId } = req.params;
 
-    try {
-        const requests = await db.any(
-        `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, sr.module_code, u1.name AS user_name, u2.name AS approver_name
+  try {
+    const requests = await db.any(
+      `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, sr.module_code, u1.name AS user_name, u2.name AS approver_name
         FROM request_management.requests r, request_management.sub_request sr, request_management.users u1, request_management.users u2
         WHERE r.id = sr.main_request_id
         AND r.user_id = u1.matrix_id
@@ -183,21 +181,21 @@ export const getAllRequestsByProfessor = async (req, res) => {
 
 // API to get a request's details for a professor
 export const updateRequestStatus = async (req, res) => {
-    console.log('API hit for updateRequestStatus:');
+  console.log("API hit for updateRequestStatus:");
 
-    const { profId, requestId } = req.params;
-    const { status, module_code } = req.body;
+  const { profId, requestId } = req.params;
+  const { status, module_code } = req.body;
 
-    try {
-        const updatedRequest = await db.oneOrNone(
-        `UPDATE request_management.sub_request
+  try {
+    const updatedRequest = await db.oneOrNone(
+      `UPDATE request_management.sub_request
         SET status = $1, modified_at = NOW()
         WHERE main_request_id = $2
         AND approver_id = $3
         AND module_code = $4
-        RETURNING *`, 
-        [status, requestId, profId, module_code]
-        );
+        RETURNING *`,
+      [status, requestId, profId, module_code]
+    );
 
         if (!updatedRequest) {
             return res.status(404).json({ success: false, message: "Request not found" });
@@ -212,10 +210,10 @@ export const updateRequestStatus = async (req, res) => {
 };
 
 export const getAllRequestsByModule = async (req, res) => {
-    const { moduleCode } = req.params;
-    try {
-        const requests = await db.any(
-            `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, sr.module_code, r.user_id 
+  const { moduleCode } = req.params;
+  try {
+    const requests = await db.any(
+      `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, sr.module_code, r.user_id 
             FROM request_management.requests r, request_management.sub_request sr
             WHERE r.id = sr.main_request_id 
             AND r.is_archived = FALSE
@@ -234,11 +232,11 @@ export const getAllRequestsByModule = async (req, res) => {
 }
 
 export const archiveAllRequests = async (req, res) => {
-    console.log('API hit for archiveAllRequests:');
-    
-    try {
-        await db.none(
-            `UPDATE request_management.requests
+  console.log("API hit for archiveAllRequests:");
+
+  try {
+    await db.none(
+      `UPDATE request_management.requests
             SET is_archived = TRUE
             WHERE is_archived = FALSE`
         );
@@ -254,4 +252,27 @@ export const archiveAllRequests = async (req, res) => {
             message: `Failed to archive requests - ${error}` 
         });
     }
-}
+};
+
+export const getAllRequestsDetailsByProfessor = async (req, res) => {
+  const { profId } = req.params;
+
+  try {
+    const requests = await db.any(
+      `SELECT r.id AS id, r.created_at AS request_date, r.start_date_of_leave AS start_date, r.end_date_of_leave AS end_date, r.reason_of_leave AS reason, 
+            r.blob_url AS attachment_url, sr.status, sr.module_code, u.name AS user_name, u.email
+            FROM request_management.requests r, request_management.sub_request sr, request_management.users u
+            WHERE r.id = sr.main_request_id
+            AND r.user_id = u.matrix_id
+            AND sr.approver_id = $1`,
+      [profId]
+    );
+    res.status(200).json({
+      success: true,
+      data: requests,
+    });
+  } catch (error) {
+    console.error("Error fetching requests:", error);
+    res.status(500).json({ error: `Failed to fetch requests - ${error}` });
+  }
+};
