@@ -41,6 +41,14 @@
                     :to="{ name: 'ProfileView' }"
                     link
                 ></v-list-item>
+                <v-list-item
+                    v-if="user && user.role === 'Admin'"
+                    title="Semester Setting"
+                    prepend-icon="mdi-calendar-month-outline"
+                    to="/admin/Semester"
+                    active-class="SelectedTile-active"
+                    link
+                ></v-list-item>
                 <!-- <v-list-item
                     title="Notification Preferences"
                     prepend-icon="mdi-bell-outline"
@@ -78,6 +86,9 @@ const handleLogout = () => {
 };
 
 const items = computed(() => {
+
+    if (!user.value) return []; // Guard against user not being loaded yet
+
     switch (user.value.role) {
         case "Student":
             return [
@@ -133,11 +144,12 @@ const items = computed(() => {
                     title: "Modules",
                     icon: "mdi-book-open-variant-outline",
                     href: "/admin/modules",
-                },{
-                    title: "Semester",
-                    icon: "mdi-book-open-variant-outline",
-                    href: "/admin/Semester",
                 },
+                // {
+                //     title: "Semester",
+                //     icon: "mdi-book-open-variant-outline",
+                //     href: "/admin/Semester",
+                // },
             ];
     }
 });
