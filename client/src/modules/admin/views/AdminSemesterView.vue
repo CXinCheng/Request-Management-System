@@ -116,46 +116,63 @@ const semesterMapping = {
 // --- NEW STATE FOR INFINITE SCROLL ---
 const loadingYears = ref(false); // Prevents multiple simultaneous loads
 const allYearsLoaded = ref(false); // Flag to stop loading when we've reached the end
-const endYearLimit = 2050; // Set a practical limit to stop fetching years
+const endYearLimit = 2100; // Set a practical limit to stop fetching years
 
-// Add the next year using "0000-0000" format
-async function addMoreYears() {
+// This function now calculates and returns a whole batch of years.
+async function addMoreYears(batchSize = 5) {
   return new Promise((resolve) => {
+    // The timeout now simulates a single network call for the entire batch
     setTimeout(() => {
-      const last = availableYears.value.at(-1);
-      const [start, end] = last.split("-").map(Number);
-      const newStart = start + 1;
-      const newEnd = end + 1;
-      resolve({ newStart, newEnd });
-    }, 500); // Using 500ms to better see the loading spinner
+      const newYearsBatch = [];
+      let lastKnownYear = availableYears.value.at(-1);
+      let [start, end] = lastKnownYear.split('-').map(Number);
+
+      // Loop to generate the batch of new years
+      for (let i = 0; i < batchSize; i++) {
+        const nextStart = start + 1;
+        const nextEnd = end + 1;
+
+        // Stop if we reach the predefined limit
+        if (nextStart >= endYearLimit) {
+          break;
+        }
+
+        newYearsBatch.push(`${nextStart}-${nextEnd}`);
+        
+        // Update the start/end for the next iteration of the loop
+        start = nextStart;
+        end = nextEnd;
+      }
+      
+      resolve(newYearsBatch);
+    }, 100); 
   });
 }
 
 // Fetch more years
 const fetchMoreYears = async () => {
-  // Guard clauses: Do nothing if we are already loading or if all years are loaded.
   if (loadingYears.value || allYearsLoaded.value) {
     return;
   }
 
   loadingYears.value = true;
   try {
-    const { newStart, newEnd } = await addMoreYears();
+    const batchSize = 5; // Define how many years to fetch at a time
+    const newYears = await addMoreYears(batchSize);
 
-    // Check if we have reached the predefined limit
-    if (newStart >= endYearLimit) {
-      allYearsLoaded.value = true;
-      console.log("All available years have been loaded.");
-      return; // Stop here
+    // Add the new years to the list if the batch isn't empty
+    if (newYears && newYears.length > 0) {
+      availableYears.value.push(...newYears);
     }
 
-    // Add the new year to the list
-    availableYears.value.push(`${newStart}-${newEnd}`);
-
+    // If the returned batch is smaller than requested, we've reached the end
+    if (!newYears || newYears.length < batchSize) {
+      allYearsLoaded.value = true;
+      console.log("All available years have been loaded.");
+    }
   } catch (error) {
     console.error("Error adding more years.", error);
   } finally {
-    // IMPORTANT: Always set loading back to false
     loadingYears.value = false;
   }
 };
