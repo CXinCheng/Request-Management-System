@@ -8,6 +8,18 @@
       <h1 class="text-xl font-bold">Request Details</h1>
       <hr>
       <br>
+
+      <div v-if="userRole === 'Professor'">
+        <DetailItem
+          :title="'Requested By'"
+          :value="request.user_name"
+        />
+        <DetailItem
+          :title="'Student ID'"
+          :value="request.user_id"
+        />
+      </div>
+      
       <DetailItem
         :title="'Status'"
         :value="request.status"
@@ -37,7 +49,7 @@
         :value="request.blob_url"
       />
       
-      <div v-if="userRole === 'Student'">
+      <div v-if="userRole === 'Student' && request.status === 'Pending'">
         <EditRequestButton />
         <DeleteRequestButton />
       </div>
@@ -93,7 +105,7 @@
         try {
           const response = await requestApiService.getRequestDetails(this.requestId, this.module_code);
           console.log("Response for RequestDetailsView:", response);
-          this.request = response;
+          this.request = response.data;
         } catch (error) {
           console.error("Error fetching request:", error);
         }

@@ -14,17 +14,17 @@ export const getAllRequestsByStudent = async (req, res) => {
         WHERE r.id = sr.main_request_id
         AND r.user_id = u1.matrix_id
         AND sr.approver_id = u2.matrix_id
+        AND r.is_archived = FALSE
         AND r.user_id = $1`, 
         [studentId]
         );
-        // res.status(200).json(requests);
         res.status(200).json({
             success: true,
             data: requests,
         });
     } catch (error) {
         console.error('Error fetching requests:', error);
-        res.status(500).json({ error: `Failed to fetch requests - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to fetch requests - ${error}` });
     }
   
 };
@@ -38,21 +38,32 @@ export const getRequestDetails = async (req, res) => {
 
     try {
         const request = await db.oneOrNone(
-        `SELECT r.*, sr.*, u1.name AS user_name, u2.name AS approver_name
-        FROM request_management.requests r, request_management.sub_request sr, request_management.users u1, request_management.users u2
-        WHERE r.id = sr.main_request_id
-        AND r.user_id = u1.matrix_id
-        AND sr.approver_id = u2.matrix_id
-        AND r.id = $1
-        AND sr.module_code = $2`,
-        [requestId, module_code]
+            `SELECT r.*, sr.*, u1.name AS user_name, u2.name AS approver_name
+            FROM request_management.requests r, request_management.sub_request sr, request_management.users u1, request_management.users u2
+            WHERE r.id = sr.main_request_id
+            AND r.user_id = u1.matrix_id
+            AND sr.approver_id = u2.matrix_id
+            AND r.id = $1
+            AND sr.module_code = $2`,
+            [requestId, module_code]
         );
-        res.status(200).json(request);
+
+        if (!request) {
+            return res.status(404).json({ success: false, message: 'Request not found' });
+        }
+
+        if (request.is_archived) {
+            return res.status(403).json({ success: false, message: 'Request is archived and cannot be accessed' });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: request,
+        });
     } catch (error) {
         console.error('Error fetching request details:', error);
-        res.status(500).json({ error: `Failed to fetch request details - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to fetch request details - ${error}` });
     }
-  
 };
 
 // API for student to update a request
@@ -85,7 +96,7 @@ export const updateRequestByStudent = async (req, res) => {
         res.status(200).json({ message: 'Request updated successfully' });
     } catch (error) {
         console.error('Error updating request:', error);
-        res.status(500).json({ error: `Failed to update request - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to update request - ${error}` });
     }
   
 };
@@ -100,10 +111,23 @@ export const deleteRequestByStudent = async (req, res) => {
         // Ensure the request exists before deleting
         const existing = await db.oneOrNone(
             `SELECT id 
-            FROM request_management.requests r
+            FROM request_management.requests r, request_management.sub_request sr
+            WHERE r.id = sr.main_request_id
             WHERE r.id = $1`, 
-            [requestId]);
-        if (!existing) return res.status(404).json({ message: 'Request not found' });
+            [requestId]
+        );
+        
+        if (!existing) return res.status(404).json({ 
+            success: false, 
+            message: 'Request not found' 
+        });
+
+        if (existing.status !== 'Pending') {
+            return res.status(403).json({
+                success: false,
+                message: 'Cannot delete a request that has already been processed'
+            });
+        }
 
         await db.tx(async (t) => {
             // Update sub_request table
@@ -123,7 +147,7 @@ export const deleteRequestByStudent = async (req, res) => {
         res.status(200).json({ message: 'Request deleted successfully' });
     } catch (error) {
         console.error('Error deleting request:', error);
-        res.status(500).json({ error: `Failed to delete request - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to delete request - ${error}` });
     }
   
 };
@@ -142,6 +166,7 @@ export const getAllRequestsByProfessor = async (req, res) => {
         WHERE r.id = sr.main_request_id
         AND r.user_id = u1.matrix_id
         AND sr.approver_id = u2.matrix_id
+        AND r.is_archived = FALSE
         AND sr.approver_id = $1`, 
         [profId]
         );
@@ -151,7 +176,7 @@ export const getAllRequestsByProfessor = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching requests:', error);
-        res.status(500).json({ error: `Failed to fetch requests - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to fetch requests - ${error}` });
     }
   
 };
@@ -175,13 +200,13 @@ export const updateRequestStatus = async (req, res) => {
         );
 
         if (!updatedRequest) {
-            return res.status(404).json({ message: "Request not found" });
+            return res.status(404).json({ success: false, message: "Request not found" });
         }
 
         res.status(200).json(updatedRequest);
     } catch (error) {
         console.error('Error updating request:', error);
-        res.status(500).json({ error: `Failed to update request - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to update request - ${error}` });
     }
   
 };
@@ -192,7 +217,9 @@ export const getAllRequestsByModule = async (req, res) => {
         const requests = await db.any(
             `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, sr.module_code, r.user_id 
             FROM request_management.requests r, request_management.sub_request sr
-            WHERE r.id = sr.main_request_id AND sr.module_code = $1`,
+            WHERE r.id = sr.main_request_id 
+            AND r.is_archived = FALSE
+            AND sr.module_code = $1`,
             [moduleCode]
         );
         res.status(200).json({
@@ -202,7 +229,7 @@ export const getAllRequestsByModule = async (req, res) => {
     }
     catch (error) {
         console.error('Error fetching requests:', error);
-        res.status(500).json({ error: `Failed to fetch requests - ${error}` });
+        res.status(500).json({ success: false, message: `Failed to fetch requests - ${error}` });
     }
 }
 
@@ -224,7 +251,7 @@ export const archiveAllRequests = async (req, res) => {
         console.error('Error archiving requests:', error);
         res.status(500).json({ 
             success: false,
-            error: `Failed to archive requests - ${error}` 
+            message: `Failed to archive requests - ${error}` 
         });
     }
 }
