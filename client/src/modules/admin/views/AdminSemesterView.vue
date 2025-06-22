@@ -8,7 +8,7 @@
         <v-select
           v-model="selectedYear"
           :items="availableYears"
-          label="Academic Year"
+          label="2024-2025"
           outlined
           dense
         >
@@ -31,7 +31,7 @@
         <v-select
           v-model="selectedSemester"
           :items="availableSemesters"
-          label="Semester"
+          label="Semester 2"
           outlined
           dense
         />
