@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "postinstall": "concurrently \"cd client && npm install\" \"cd server/user-service && npm install\" \"cd server/request-service && npm install\" \"cd server/module-service && npm install\" \"cd server/api-gateway && npm install\"",
+    "postinstall": "concurrently \"cd client && npm ci\" \"cd server/user-service && npm ci\" \"cd server/request-service && npm ci\" \"cd server/module-service && npm ci\" \"cd server/api-gateway && npm ci\"",
     "start": "concurrently \"npm run dev --prefix client\" \"npm run start --prefix server/user-service\" \"npm run start --prefix server/request-service\" \"npm run start --prefix server/module-service\" \"npm run start --prefix server/api-gateway\"",
-    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server/user-service\" \"npm run dev --prefix server/request-service\" \"npm run dev --prefix server/module-service\" \"npm run dev --prefix server/api-gateway\""
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server/user-service\" \"npm run dev --prefix server/request-service\" \"npm run dev --prefix server/module-service\" \"npm run dev --prefix server/api-gateway\"",
+    "test:api-gateway": "npm run test --prefix server/api-gateway"
   },
   "dependencies": {
-    "concurrently": "^7.0.0"
+    "concurrently": "^7.0.0",
+    "ioredis": "^5.6.1",
+    "node-cron": "^4.1.0",
+    "nodemailer": "^7.0.3"
   }
 }

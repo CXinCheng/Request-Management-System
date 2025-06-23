@@ -1,78 +1,95 @@
 <template>
-    <v-container>
-        <v-data-table
-            :headers="headers"
-            :items="requests"
-            :search="search"
-            :items-per-page="10"
-            v-model:sort-by="sortBy"
-            @click:row="seeRequestDetails"
-            class="striped outlined elevation-1"
-            item-value="id"
-            fixed-header
-            dense
-        >
-            <template v-slot:top>
-                <v-toolbar flat class="bg-primary">
-                    <v-toolbar-title class="white--text">Leave Requests</v-toolbar-title>
-                    <v-text-field
-                        v-model="search"
-                        label="Search"
-                        single-line
-                        hide-details
-                    ></v-text-field>
-                </v-toolbar>
-            </template>
+  <v-container>
+    <v-data-table
+      :headers="headers"
+      :items="filteredRequests"
+      :search="search"
+      :items-per-page="10"
+      v-model:sort-by="sortBy"
+      @click:row="seeRequestDetails"
+      class="striped outlined elevation-1"
+      item-value="id"
+      fixed-header
+      dense
+    >
+      <template v-slot:top>
+        <v-toolbar flat class="bg-primary">
+          <v-toolbar-title class="white--text">Leave Requests</v-toolbar-title>
+          <v-text-field
+            v-model="search"
+            label="Search"
+            single-line
+            hide-details
+          ></v-text-field>
+          <v-spacer></v-spacer>
+          <v-btn
+            v-if="userRole === 'Professor'"
+            color="white"
+            variant="text"
+            :loading="downloading"
+            @click="downloadRequests"
+            class="download-btn"
+          >
+            <v-icon start>mdi-file-download</v-icon>
+            Download CSV
+          </v-btn>
+        </v-toolbar>
+      </template>
 
-            <template v-slot:item.start_date_of_leave="{ item }">
-                {{ formatDate(item.start_date_of_leave) }}
-            </template>
+      <template v-slot:item.start_date_of_leave="{ item }">
+        {{ formatDate(item.start_date_of_leave) }}
+      </template>
 
-            <template v-slot:item.end_date_of_leave="{ item }">
-                {{ formatDate(item.end_date_of_leave) }}
-            </template>
+      <template v-slot:item.end_date_of_leave="{ item }">
+        {{ formatDate(item.end_date_of_leave) }}
+      </template>
 
             <template v-slot:item.created_at="{ item }">
                 {{ formatCreatedDate(item.created_at) }}
             </template>
 
-            <template v-slot:item.actions="{ item }">
-                <v-menu offset-y>
-                    <template v-slot:activator="{ props }">
-                        <v-icon v-bind="props" small>mdi-dots-vertical</v-icon>
-                    </template>
-                    <v-list>
-                        <v-list-item 
-                            clickable 
-                            @click="seeRequestDetails(1, { item })"
-                        >
-                            <v-list-item-title>View Details</v-list-item-title>
-                        </v-list-item>
-                        <v-list-item
-                            clickable
-                            @click="editRequest(item)"
-                            v-if="userRole === 'Student'"
-                        >
-                            <v-list-item-title>Edit</v-list-item-title>
-                        </v-list-item>
-                        <v-list-item
-                            clickable
-                            @click="deleteRequest(item)"
-                            v-if="userRole === 'Student'"
-                        >
-                            <v-list-item-title>Delete</v-list-item-title>
-                        </v-list-item>
-                    </v-list>
-                </v-menu>
+            <template v-slot:item.status="{ item }">
+                <span class="status-pill" :class="item.status?.toLowerCase()">
+                  {{ item.status }}
+                </span>
             </template>
-        </v-data-table>
-    </v-container>
+
+      <template v-slot:item.actions="{ item }">
+        <v-menu offset-y>
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props" small>mdi-dots-vertical</v-icon>
+          </template>
+          <v-list>
+            <v-list-item clickable @click="seeRequestDetails(1, { item })">
+              <v-list-item-title>View Details</v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              clickable
+              @click="editRequest(item)"
+              v-if="userRole === 'Student'"
+            >
+              <v-list-item-title>Edit</v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              clickable
+              @click="deleteRequest(item)"
+              v-if="userRole === 'Student'"
+            >
+              <v-list-item-title>Delete</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </template>
+    </v-data-table>
+  </v-container>
 </template>
 
 <script>
-import axios from "axios";
 import dayjs from "dayjs";
 import { requestApiService } from "@/utils/ApiService";
+import { computed, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import { saveAs } from "file-saver";
 
 export default {
     components: {},
@@ -104,21 +121,13 @@ export default {
     },
     methods: {
         async fetchRequests() {
-            let response = null;
             try {
-                // const response = await axios.get(
-                //     `http://localhost:3002/api/v1/requests/student/${this.studentId}`
-                // );
                 let response = null;
                 if (this.userRole === "Student") {
-                    response = await requestApiService.getRequestsByStudent(
-                        this.userId
-                    );
+                    response = await requestApiService.getRequestsByStudent(this.userId);
                 }
                 else if (this.userRole === "Professor") {
-                    response = await requestApiService.getRequestsByProfessor(
-                        this.userId
-                    );
+                    response = await requestApiService.getRequestsByProfessor(this.userId);
                 }
                 this.requests = response.data;
                 
@@ -160,7 +169,7 @@ export default {
 </script>
 
 <style scoped>
-.v-data-table >>> th {
+:deep(th) {
   font-weight: bold !important;
   text-align: center !important;
   background-color: #1867c0 !important; /* Dark blue header */
@@ -173,5 +182,23 @@ export default {
     cursor: pointer;
 }
 
+.status-pill {
+  display: inline-block;
+  padding: 2px 14px;
+  border-radius: 999px;
+  font-size: 0.95em;
+  font-weight: 600;
+  color: #fff;
+  background-color: #bdbdbd;
+  text-transform: capitalize;
+}
+.status-pill.approved {
+  background-color: #5acc5f;
+}
+.status-pill.pending {
+  background-color: #5d90ff;
+}
+.status-pill.rejected {
+  background-color: #ff4b48;
+}
 </style>
-

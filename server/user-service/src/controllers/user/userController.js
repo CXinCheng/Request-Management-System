@@ -1,5 +1,15 @@
 import bcrypt from "bcrypt";
 import { db } from "../../configs/db.js";
+import Redis from 'ioredis';
+
+// Publish to Queue when there's an update in email intervals
+const redisPublisher = new Redis();
+
+async function notifyIntervalChange(prof) {
+  const message = JSON.stringify({ prof });
+  await redisPublisher.publish('user:interval:update', message);
+  console.log('Published interval update:', message);
+}
 
 // Get all users
 export const getAllUsers = async (req, res) => {
@@ -99,7 +109,8 @@ export const updateUser = async (req, res) => {
             });
         }
 
-        const { name, email, role, password, faculty, contact, currentPassword } = req.body;
+        const { name, email, role, email_interval, password, faculty, contact, currentPassword } = req.body;
+
 
         const updates = { name, email, role };
         const queryParams = [];
@@ -111,6 +122,11 @@ export const updateUser = async (req, res) => {
             return `${key} = $${paramCount++}`;
             });
         
+        if (email_interval) {
+            setStatements.push(`email_interval = $${paramCount++}`);
+            queryParams.push(email_interval);
+        }
+
         if (currentPassword) {
             const isValidPassword = await bcrypt.compare(currentPassword, user.password);
             if (!isValidPassword) {
@@ -141,7 +157,13 @@ export const updateUser = async (req, res) => {
             UPDATE request_management.users 
             SET ${setStatements.join(', ')}
             WHERE matrix_id = $${paramCount}
-            RETURNING matrix_id`;
+            RETURNING *`;
+
+        // const updateQuery = `
+        //     UPDATE request_management.users 
+        //     SET ${setStatements.join(', ')}
+        //     WHERE matrix_id = $${paramCount}
+        //     RETURNING matrix_id`;
 
         const updatedUser = await db.oneOrNone(updateQuery, queryParams);
 
@@ -151,7 +173,8 @@ export const updateUser = async (req, res) => {
                 error: "User not found"
             });
         }
-
+        
+        notifyIntervalChange(updatedUser)
         res.json({
             success: true,
             message: "User updated successfully",

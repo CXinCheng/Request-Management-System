@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import formRoutes from "./src/routes/requestRoute.js";
 import cors from 'cors';
 import { initialize, close } from './src/configs/db.js';
+import { setupDynamicCrons } from './cron/emailNotifications.js';
 
 const app = express();
 
@@ -33,6 +34,7 @@ await initialize();
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
     console.log(`Request service is running on port ${PORT}.`);
+    setupDynamicCrons();
 });
 
 process.on('SIGTERM', () => {
