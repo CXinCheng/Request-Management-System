@@ -39,6 +39,10 @@ const databaseConfig = {
     idleTimeoutMillis: 10000,
     connectionTimeoutMillis: 2000,
 };
+// Mock DB for testing purposes
+export const _setDbForTest = (mockDb) => {
+    db = mockDb;
+};
 
 let db = null;
 let sshTunnel = null;
