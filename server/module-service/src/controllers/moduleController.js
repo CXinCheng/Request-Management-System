@@ -91,7 +91,7 @@ export const updateEducator = async (req, res) => {
       if (!existingProfessor) {
         return res.status(404).json({
           success: false,
-          error: "Matrix ID not found or User is not a Professor",
+          error: "Matrix ID/module code not found or User is not a Professor",
         });
       }
     }
