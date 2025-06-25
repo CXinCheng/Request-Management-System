@@ -96,6 +96,19 @@ export const updateEducator = async (req, res) => {
       }
     }
 
+    if (module_code) {
+      const existingModule = await db.oneOrNone(
+        "SELECT * FROM request_management.modules WHERE code = $1",
+        [module_code]
+      );
+      if (!existingModule) {
+        return res.status(404).json({
+          success: false,
+          error: "Module code not found",
+        });
+      }
+    }
+
     await db.none(
       "UPDATE request_management.modules SET educator_id = $1 WHERE code = $2",
       [educator_id, module_code]
@@ -413,9 +426,10 @@ export const updateSemester = async (req, res) => {
 
   try {
     const result = await newSemester.initialize();
-    res.status(200).json({ 
+    res.status(200).json({
       success: true,
-      message: "Updated System to new semester" });
+      message: "Updated System to new semester",
+    });
   } catch (error) {
     res.status(500).json({
       message: "Failed to update system to new semester",
@@ -549,8 +563,7 @@ export const getSemesterStartDate = async (req, res) => {
         startDate: semesterStartDate,
       },
     });
-
-  } catch (error){
+  } catch (error) {
     console.error("Error retrieving semester start date:", error);
     return res.status(500).json({
       success: false,
@@ -558,4 +571,4 @@ export const getSemesterStartDate = async (req, res) => {
       error: error.message,
     });
   }
-}
+};
