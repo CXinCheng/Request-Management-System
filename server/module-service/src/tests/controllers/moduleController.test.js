@@ -97,27 +97,36 @@ describe("Module Controller Unit Tests", () => {
 
         it("should successfully un-assign an educator when educator_id is null", async () => {
             req.body = { educator_id: null, module_code: "CS1010" };
-            mockDb.none.resolves(); // The update should succeed
-
+            // Mock configuration for module check
+            mockDb.oneOrNone
+            .withArgs(sinon.match(/SELECT \* FROM request_management.modules/), ["CS1010"])
+            .resolves({ code: "CS1010" }); // Simulate that the module was found.
+            mockDb.none.resolves();
             await updateEducator(req, res);
-
-            assert(res.status.calledWith(200));
-            assert(mockDb.oneOrNone.notCalled, "Should not check for professor existence when un-assigning");
-            assert(mockDb.none.calledWith(sinon.match.string, [null, "CS1010"]));
+            assert(res.status.calledWith(200), "Expected status 200");
+            // Check that the professor check was skipped, but the module check was made.
+            assert(mockDb.oneOrNone.callCount === 1, "Expected oneOrNone to be called only once for the module check");
+            assert(mockDb.none.calledWith(sinon.match(/UPDATE/), [null, "CS1010"]));
         });
 
         it("should return 404 if module_code is invalid", async () => {
             req.body = { educator_id: "P001", module_code: "CS9999" };
-            // Simulate that the module does not exist.
-            mockDb.oneOrNone.withArgs(sinon.match(/SELECT code FROM/), ["CS9999"]).resolves(null);
-
+            // Mock configuration for professor check
+            mockDb.oneOrNone
+                .withArgs(sinon.match(/FROM request_management.users/), ["P001"])
+                .resolves({ matrix_id: "P001" }); // Simulate professor exists
+            // Mock configuration for module check
+            mockDb.oneOrNone
+                .withArgs(sinon.match(/FROM request_management.modules/), ["CS9999"])
+                .resolves(null); // Simulate module does NOT exist
             await updateEducator(req, res);
-
             assert(res.status.calledWith(404));
             assert(res.json.calledWith({
                 success: false,
-                error: "Module with code 'CS9999' not found."
+                error: "Module code not found" 
             }));
+            //Ensure the final UPDATE query was never run
+            assert(mockDb.none.notCalled, "db.none() should not have been called");
         });
     });
 
