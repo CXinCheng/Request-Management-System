@@ -13,5 +13,8 @@
     "ioredis": "^5.6.1",
     "node-cron": "^4.1.0",
     "nodemailer": "^7.0.3"
+  },
+  "devDependencies": {
+    "sinon": "^21.0.0"
   }
 }

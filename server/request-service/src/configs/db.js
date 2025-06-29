@@ -134,4 +134,9 @@ const close = () => {
     reconnectionPromise = null;
 };
 
-export { initialize, close, db, ensureConnection };
+// Added this function for test mocking
+const _setDbForTest = (mockDb) => {
+    db = mockDb;
+};
+
+export { initialize, close, db, ensureConnection, _setDbForTest };
