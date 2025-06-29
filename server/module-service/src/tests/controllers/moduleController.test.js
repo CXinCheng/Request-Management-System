@@ -160,7 +160,6 @@ describe("Module Controller Unit Tests", () => {
 
             assert(res.json.calledOnceWith(mockData));
         });
-
         it("should handle database errors", async () => {
             req.params.userId = "A123";
             mockDb.any.rejects(new Error("DB Error"));
@@ -169,6 +168,11 @@ describe("Module Controller Unit Tests", () => {
 
             assert(res.status.calledWith(500));
             assert(res.json.calledOnceWith({ error: "Failed to fetch user module mapping" }));
+        });
+        it("should return 500 on database error", async () => {
+            mockDb.manyOrNone.rejects(new Error("DB Error"));
+            await getAllModules(req, res);
+            assert(res.status.calledWith(500));
         });
     });
     
@@ -181,6 +185,13 @@ describe("Module Controller Unit Tests", () => {
             
             assert(res.status.calledWith(201));
             assert(res.json.calledOnceWith({ message: "User added to module successfully" }));
+        });
+        it("should return 500 on database error", async () => {
+            req.body = { user_matrix_id: "A123", module_code: "CS1010", class_no: "T01" };
+            mockDb.none.rejects(new Error('Constraint violation'));
+            await addUserMappedModule(req, res);
+            assert(res.status.calledWith(500));
+            assert(res.json.calledWith({ error: "Failed to add user to module" }));
         });
     });
 
@@ -203,14 +214,12 @@ describe("Module Controller Unit Tests", () => {
             assert(res.json.calledWithMatch({ success: true }));
             assert.strictEqual(res.json.firstCall.args[0].data[0].user_matrix_id, "A123");
         });
-
         it("should return a success with an empty array if module has no students", async () => {
             mockDb.oneOrNone.resolves({ code: "CS1010" });
             mockDb.manyOrNone.resolves([]);
             await getStudentsByModule(req, res);
             assert(res.json.calledOnceWith({ success: true, data: [] }));
         });
-
         it("should return 404 if the module does not exist", async () => {
             mockDb.oneOrNone.resolves(null);
             await getStudentsByModule(req, res);
@@ -300,17 +309,21 @@ describe("Module Controller Unit Tests", () => {
         it("should call UpdateService and return 200 on success", async () => {
             req.body = { academicYear: "2024-2025", semester: "1" };
             const initializeStub = sinon.stub(UpdateService.prototype, 'initialize').resolves();
-            
             await updateSemester(req, res);
-
             assert(initializeStub.calledOnce);
             assert(res.status.calledWith(200));
         });
-
          it("should return 400 for invalid academic year", async () => {
             req.body = { academicYear: "2024", semester: "1" };
             await updateSemester(req, res);
             assert(res.status.calledWith(400));
+        });
+        it("should return 500 if UpdateService fails to initialize", async () => {
+            req.body = { academicYear: "2024-2025", semester: "1" };
+            const initializeStub = sinon.stub(UpdateService.prototype, 'initialize').rejects(new Error('Init failed'));
+            await updateSemester(req, res);
+            assert(initializeStub.calledOnce);
+            assert(res.status.calledWith(500));
         });
     });
 
@@ -324,7 +337,12 @@ describe("Module Controller Unit Tests", () => {
             await bulkEnrollStudentsByModule(req, res);
             assert(res.status.calledWith(400));
         });
-    
+        it("should return 404 if the module does not exist", async () => {
+            req.body = [{ matrix_id: 'A123' }];
+            mockDb.oneOrNone.withArgs(sinon.match(/modules/), ["CS1010"]).resolves(null);
+            await bulkEnrollStudentsByModule(req, res);
+            assert(res.status.calledWith(404));
+        });   
         it("should correctly categorize students into enrolled, already enrolled, and non-existent", async () => {
             req.body = [{ matrix_id: "A001" }, { matrix_id: "A002" }, { matrix_id: "A003" }];
     
@@ -351,6 +369,13 @@ describe("Module Controller Unit Tests", () => {
                 success: true,
                 message: "Successfully retrieved Semester Start Date",
                 data: { startDate: mockDate }
+            }));
+        });
+        it("should return 500 on database error", async () => {
+            mockDb.one.rejects(new Error('DB connection lost'));
+            await getSemesterStartDate(req, res);
+            assert(res.status.calledWith(500));
+            assert(res.json.calledWithMatch({ message: "Error retrieving semester start date" 
             }));
         });
     });
