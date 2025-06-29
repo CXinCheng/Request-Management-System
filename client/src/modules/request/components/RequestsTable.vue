@@ -2,7 +2,7 @@
   <v-container>
     <v-data-table
       :headers="headers"
-      :items="filteredRequests"
+      :items="requests"
       :search="search"
       :items-per-page="10"
       v-model:sort-by="sortBy"
@@ -130,7 +130,6 @@ export default {
                     response = await requestApiService.getRequestsByProfessor(this.userId);
                 }
                 this.requests = response.data;
-                
             } catch (error) {
                 console.error("Error fetching requests on RequestsTable page:", error);
             }
