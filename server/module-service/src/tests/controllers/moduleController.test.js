@@ -128,6 +128,19 @@ describe("Module Controller Unit Tests", () => {
             //Ensure the final UPDATE query was never run
             assert(mockDb.none.notCalled, "db.none() should not have been called");
         });
+        it("should return 500 on database error during update", async () => {
+            req.body = { educator_id: "P001", module_code: "CS1010" };
+            mockDb.oneOrNone.resolves({ matrix_id: "P001" }); // Professor check passes
+            mockDb.none.rejects(new Error("DB constraint violation")); // UPDATE query fails
+
+            await updateEducator(req, res);
+
+            assert(res.status.calledWith(500), "Expected status 500 on DB error");
+            assert(res.json.calledWith({
+                success: false,
+                error: "Error updating educator"
+            }), "Expected the correct error JSON response");
+        });
     });
 
     describe("getClassesByModule", () => {
@@ -140,13 +153,45 @@ describe("Module Controller Unit Tests", () => {
             await getClassesByModule(req, res);
             assert.deepStrictEqual(res.json.firstCall.args[0], { success: true, data: expectedFormattedData });
         });
-
         it("should return a success response with empty data for a module with no classes", async () => {
             req.params.moduleCode = "CS1010";
             mockDb.oneOrNone.resolves({ code: "CS1010" });
             mockDb.manyOrNone.resolves([]); // No classes found
             await getClassesByModule(req, res);
             assert.deepStrictEqual(res.json.firstCall.args[0], { success: true, data: [] });
+        });
+        it("should return 500 if the initial module check fails", async () => {
+            mockDb.oneOrNone.rejects(new Error("DB connection error"));
+            await getClassesByModule(req, res);
+            assert(res.status.calledWith(500));
+            assert(res.json.calledOnceWith({
+                success: false,
+                error: "Error fetching module timetable"
+            }));
+            assert(mockDb.manyOrNone.notCalled);
+        });
+        it("should return 500 if fetching classes fails after module is found", async () => {
+            mockDb.oneOrNone.resolves({ code: "CS1010" });
+            mockDb.manyOrNone.rejects(new Error("DB error on class fetch"));
+            await getClassesByModule(req, res);
+            assert(res.status.calledWith(500));
+            assert(res.json.calledOnceWith({
+                success: false,
+                error: "Error fetching module timetable"
+            }));
+        });
+        it("should return 500 on database error", async () => {
+            // Set up a valid request but with failed DB call
+            req.params.moduleCode = "CS1010";
+            mockDb.oneOrNone.rejects(new Error("DB connection is down"));
+
+            await getClassesByModule(req, res);
+
+            assert(res.status.calledWith(500), "Expected status 500");
+            assert(res.json.calledWith({
+                success: false,
+                error: "Error fetching module timetable"
+            }));
         });
     });
 
@@ -202,6 +247,15 @@ describe("Module Controller Unit Tests", () => {
             await getAllModulesWithNumbersOfEnrolledStudents(req, res);
             assert(res.json.calledOnceWith({ success: true, data: mockData }));
         });
+        it("should return 500 on database error", async () => {
+            mockDb.manyOrNone.rejects(new Error("DB aggregate query failed"));
+            await getAllModulesWithNumbersOfEnrolledStudents(req, res);
+            assert(res.status.calledWith(500));
+            assert(res.json.calledOnceWith({
+                success: false,
+                error: "Error fetching all modules with enrolled students"
+            }));
+        });
     });
 
     describe("getStudentsByModule", () => {
@@ -235,6 +289,21 @@ describe("Module Controller Unit Tests", () => {
 
             assert(res.json.calledOnceWith({ success: true, data: [] }));
         });
+        it("should return 500 on database error", async () => {
+            req.params.moduleCode = "CS1010";
+            mockDb.oneOrNone.rejects(new Error("DB server is offline"));
+
+            await getStudentsByModule(req, res);
+
+            assert(res.status.calledWith(500), "Expected status 500 on DB error");
+            assert(res.json.calledWith({
+                success: false,
+                error: "Error fetching all students by module"
+            }), "Expected the correct error JSON response");
+            
+            // Also assert that the second db call was never made
+            assert(mockDb.manyOrNone.notCalled, "db.manyOrNone should not be called if the first query fails");
+        });
     });
 
     describe("updateEnrollmentByModule", () => {
@@ -262,12 +331,33 @@ describe("Module Controller Unit Tests", () => {
             await updateEnrollmentByModule(req, res);
             assert(mockDb.none.calledWith(sinon.match(/INSERT/)));
         });
-    
         it("should correctly handle only deleted students", async () => {
             req.body = { deletedStudents: ["A123"] };
             mockDb.none.resolves();
             await updateEnrollmentByModule(req, res);
             assert(mockDb.none.calledWith(sinon.match(/DELETE/)));
+        });
+        it("should return 500 on database failure during student update", async () => {
+            // Valid request to update one student
+            req.params.moduleCode = "CS1010";
+            req.body = {
+                updatedStudents: [{
+                    matrix_id: "A123",
+                    classes: [{ classType: "Lecture", classNo: "L02" }]
+                }]
+            };
+            // Successful module check
+            mockDb.oneOrNone.withArgs(sinon.match(/modules/), ["CS1010"]).resolves({ code: "CS1010" });
+            // Fail module check inside the mapping loop
+            mockDb.oneOrNone.withArgs(sinon.match(/user_module_mapping/), sinon.match.any).rejects(new Error("DB transaction failed"));
+
+            await updateEnrollmentByModule(req, res);
+
+            assert(res.status.calledWith(500), "Expected status 500 on DB error");
+            assert(res.json.calledWith({
+                success: false,
+                error: "Error updating enrollment"
+            }), "Expected the correct error message");
         });
     });
 
@@ -279,6 +369,15 @@ describe("Module Controller Unit Tests", () => {
             await getModulesByProfessor(req, res);
             assert(res.json.calledOnceWith({ success: true, data: mockData }));
         });
+        it("should return 500 on database error", async () => {
+            mockDb.manyOrNone.rejects(new Error("DB query failed"));
+            await getModulesByProfessor(req, res);
+            assert(res.status.calledWith(500));
+            assert(res.json.calledOnceWith({
+                success: false,
+                error: "Error fetching modules by professor"
+            }));
+        });
     });
 
     describe("getAllFaculties", () => {
@@ -287,6 +386,15 @@ describe("Module Controller Unit Tests", () => {
             mockDb.manyOrNone.resolves(mockFaculties);
             await getAllFaculties(req, res);
             assert(res.json.calledWith({ success: true, data: mockFaculties }));
+        });
+        it("should return 500 on database error", async () => {
+            mockDb.manyOrNone.rejects(new Error("Connection to DB lost"));
+            await getAllFaculties(req, res);
+            assert(res.status.calledWith(500));
+            assert(res.json.calledWith({
+                success: false,
+                error: "Error fetching all faculties"
+            }));
         });
     });
 
@@ -303,6 +411,18 @@ describe("Module Controller Unit Tests", () => {
             await getModulesByStudent(req, res);
             assert(res.status.calledWith(400));
         });
+        it("should return 500 on database error", async () => {
+            req.params.studentID = "A123";
+            mockDb.manyOrNone.rejects(new Error("DB connection error"));
+
+            await getModulesByStudent(req, res);
+
+            assert(res.status.calledWith(500), "Expected status 500");
+            assert(res.json.calledWith({
+                success: false,
+                error: "Error fetching modules by student"
+            }), "Expected the correct error message");
+        });
     });
 
     describe("updateSemester", () => {
@@ -312,6 +432,22 @@ describe("Module Controller Unit Tests", () => {
             await updateSemester(req, res);
             assert(initializeStub.calledOnce);
             assert(res.status.calledWith(200));
+        });
+        it("should return 400 if academicYear is missing", async () => {
+            req.body = { semester: "1" }; // Missing academicYear
+
+            await updateSemester(req, res);
+
+            assert(res.status.calledWith(400));
+            assert(res.json.calledWith({ message: "Academic year and semester are required." }));
+        });
+        it("should return 400 if semester is missing", async () => {
+            req.body = { academicYear: "2024-2025" }; // Missing semester
+
+            await updateSemester(req, res);
+
+            assert(res.status.calledWith(400));
+            assert(res.json.calledWith({ message: "Academic year and semester are required." }));
         });
          it("should return 400 for invalid academic year", async () => {
             req.body = { academicYear: "2024", semester: "1" };
@@ -328,36 +464,89 @@ describe("Module Controller Unit Tests", () => {
     });
 
     describe("bulkEnrollStudentsByModule", () => {
-        beforeEach(() => {
-            req.params.moduleCode = "CS1010";
-        });
-    
-        it("should return 400 for an invalid request body", async () => {
-            req.body = null;
-            await bulkEnrollStudentsByModule(req, res);
-            assert(res.status.calledWith(400));
-        });
-        it("should return 404 if the module does not exist", async () => {
-            req.body = [{ matrix_id: 'A123' }];
-            mockDb.oneOrNone.withArgs(sinon.match(/modules/), ["CS1010"]).resolves(null);
-            await bulkEnrollStudentsByModule(req, res);
-            assert(res.status.calledWith(404));
-        });   
-        it("should correctly categorize students into enrolled, already enrolled, and non-existent", async () => {
-            req.body = [{ matrix_id: "A001" }, { matrix_id: "A002" }, { matrix_id: "A003" }];
-    
-            mockDb.oneOrNone.resolves({ code: "CS1010" });
-            mockDb.any.withArgs(sinon.match(/SELECT matrix_id FROM request_management.users/), sinon.match.any).resolves([{ matrix_id: "A001" }, { matrix_id: "A002" }]);
-            mockDb.any.withArgs(sinon.match(/SELECT DISTINCT user_matrix_id/), sinon.match.any).resolves([{ user_matrix_id: "A002" }]);
-            
-            await bulkEnrollStudentsByModule(req, res);
-    
-            const responseData = res.json.firstCall.args[0].data;
-            assert.strictEqual(responseData.enrolled[0].matrix_id, "A001");
-            assert.strictEqual(responseData.alreadyEnrolled[0].matrix_id, "A002");
-            assert.strictEqual(responseData.nonExistent[0].matrix_id, "A003");
-        });
+    beforeEach(() => {
+        req.params.moduleCode = "CS1010";
     });
+
+    it("should return 400 for an invalid request body", async () => {
+        req.body = null;
+        await bulkEnrollStudentsByModule(req, res);
+        assert(res.status.calledWith(400));
+    });
+
+    it("should return 404 if the module does not exist", async () => {
+        req.body = [{ matrix_id: 'A123' }];
+        // Make the module check return null
+        mockDb.oneOrNone.withArgs(sinon.match(/modules/), ["CS1010"]).resolves(null);
+        await bulkEnrollStudentsByModule(req, res);
+        assert(res.status.calledWith(404));
+    });
+
+    it("should return 500 if DB fails when checking for existing users", async () => {
+        req.body = [{ matrix_id: "A001" }];
+
+        // Module check passes
+        mockDb.oneOrNone.resolves({ code: "CS1010" });
+
+        // User check fails
+        mockDb.any
+            .withArgs(
+                "SELECT matrix_id FROM request_management.users WHERE matrix_id = ANY($1::text[]) AND role = 'Student'",
+                [["A001"]] // Correctly match the nested array
+            )
+            .rejects(new Error("DB error on user check"));
+        
+        // Mock the second `db.any` call to remove interference
+        mockDb.any
+            .withArgs(sinon.match(/user_module_mapping/))
+            .resolves([]);
+
+        await bulkEnrollStudentsByModule(req, res);
+
+        assert(res.status.calledWith(500), "Expected status 500");
+        assert(res.json.calledWithMatch({ message: "Error bulk enrolling students" }));
+    });
+
+    it("should return 500 if DB fails during the final INSERT operation", async () => {
+        req.body = [{ matrix_id: "A001", classes: [{ class_type: 'L', class_no: '01' }] }];
+        // Arrange: All initial checks pass
+        mockDb.oneOrNone.resolves({ code: "CS1010" });
+        mockDb.any.withArgs(sinon.match(/users/)).resolves([{ matrix_id: "A001" }]);
+        mockDb.any.withArgs(sinon.match(/user_module_mapping/)).resolves([]);
+        // Arrange: The final INSERT operation fails
+        mockDb.none.rejects(new Error("INSERT FAILED"));
+
+        await bulkEnrollStudentsByModule(req, res);
+
+        assert(res.status.calledWith(500));
+        assert(res.json.calledWithMatch({ message: "Error bulk enrolling students" }));
+    });
+
+    it("should correctly categorize students (enrolled, already enrolled, non-existent)", async () => {
+        req.body = [
+            { matrix_id: "A001", name: "New" },
+            { matrix_id: "A002", name: "Existing" },
+            { matrix_id: "A003", name: "Non-Existent" },
+        ];
+
+        // 1. Module exists
+        mockDb.oneOrNone.resolves({ code: "CS1010" });
+        // 2. Which users exist?
+        mockDb.any.withArgs(sinon.match(/users/)).resolves([{ matrix_id: "A001" }, { matrix_id: "A002" }]);
+        // 3. Which are already enrolled?
+        mockDb.any.withArgs(sinon.match(/user_module_mapping/)).resolves([{ user_matrix_id: "A002" }]);
+        
+        await bulkEnrollStudentsByModule(req, res);
+
+        const responseData = res.json.firstCall.args[0].data;
+        assert.strictEqual(responseData.enrolled.length, 1);
+        assert.strictEqual(responseData.alreadyEnrolled.length, 1);
+        assert.strictEqual(responseData.nonExistent.length, 1);
+        assert.strictEqual(responseData.enrolled[0].matrix_id, "A001");
+        assert.strictEqual(responseData.alreadyEnrolled[0].matrix_id, "A002");
+        assert.strictEqual(responseData.nonExistent[0].matrix_id, "A003");
+    });
+});
 
     describe("getSemesterStartDate", () => {
         it("should return the semester start date successfully", async () => {
