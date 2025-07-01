@@ -57,14 +57,14 @@
                         <v-list-item
                             clickable
                             @click="editRequest(item)"
-                            v-if="userRole === 'Student'"
+                            v-if="userRole === 'Student' && item.status === 'Pending'"
                         >
                             <v-list-item-title>Edit</v-list-item-title>
                         </v-list-item>
                         <v-list-item
                             clickable
                             @click="deleteRequest(item)"
-                            v-if="userRole === 'Student'"
+                            v-if="userRole === 'Student' && item.status === 'Pending'"
                         >
                             <v-list-item-title>Delete</v-list-item-title>
                         </v-list-item>
@@ -76,7 +76,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import dayjs from "dayjs";
 import { requestApiService } from "@/utils/ApiService";
 
