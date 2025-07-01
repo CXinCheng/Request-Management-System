@@ -109,10 +109,10 @@ export const deleteRequestByStudent = async (req, res) => {
     try {
         // Ensure the request exists before deleting
         const existing = await db.oneOrNone(
-            `SELECT id 
+            `SELECT id, status 
             FROM request_management.requests r, request_management.sub_request sr
             WHERE r.id = sr.main_request_id
-            WHERE r.id = $1`, 
+            AND r.id = $1`, 
             [requestId]
         );
         
@@ -120,8 +120,8 @@ export const deleteRequestByStudent = async (req, res) => {
             success: false, 
             message: 'Request not found' 
         });
-
-        if (existing.status !== 'Pending') {
+        
+        if (existing.status != 'Pending') {
             return res.status(403).json({
                 success: false,
                 message: 'Cannot delete a request that has already been processed'

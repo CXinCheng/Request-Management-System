@@ -54,39 +54,43 @@
                 </span>
             </template>
 
-      <template v-slot:item.actions="{ item }">
-        <v-menu offset-y>
-          <template v-slot:activator="{ props }">
-            <v-icon v-bind="props" small>mdi-dots-vertical</v-icon>
-          </template>
-          <v-list>
-            <v-list-item clickable @click="seeRequestDetails(1, { item })">
-              <v-list-item-title>View Details</v-list-item-title>
-            </v-list-item>
-            <v-list-item
-              clickable
-              @click="editRequest(item)"
-              v-if="userRole === 'Student'"
-            >
-              <v-list-item-title>Edit</v-list-item-title>
-            </v-list-item>
-            <v-list-item
-              clickable
-              @click="deleteRequest(item)"
-              v-if="userRole === 'Student'"
-            >
-              <v-list-item-title>Delete</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </template>
-    </v-data-table>
-  </v-container>
+            <template v-slot:item.actions="{ item }">
+                <v-menu offset-y>
+                    <template v-slot:activator="{ props }">
+                        <v-icon v-bind="props" small>mdi-dots-vertical</v-icon>
+                    </template>
+                    <v-list>
+                        <v-list-item 
+                            clickable 
+                            @click="seeRequestDetails(1, { item })"
+                        >
+                            <v-list-item-title>View Details</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item
+                            clickable
+                            @click="editRequest(item)"
+                            v-if="userRole === 'Student' && item.status === 'Pending'"
+                        >
+                            <v-list-item-title>Edit</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item
+                            clickable
+                            @click="deleteRequest(item)"
+                            v-if="userRole === 'Student' && item.status === 'Pending'"
+                        >
+                            <v-list-item-title>Delete</v-list-item-title>
+                        </v-list-item>
+                    </v-list>
+                </v-menu>
+            </template>
+        </v-data-table>
+    </v-container>
 </template>
 
 <script>
 import dayjs from "dayjs";
 import { requestApiService } from "@/utils/ApiService";
+import { useNotificationStore } from "@/utils/NotificationStore";
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { saveAs } from "file-saver";
@@ -109,6 +113,7 @@ export default {
             search: "", // For search functionality
             selectedItem: false,
             sortBy: [{ key: 'created_at', order:'desc'}],
+            notificationStore: useNotificationStore(),
         };
     },
     mounted() {
@@ -132,6 +137,11 @@ export default {
                 this.requests = response.data;
             } catch (error) {
                 console.error("Error fetching requests on RequestsTable page:", error);
+                this.notificationStore.showNotification({
+                    message: error.response?.data?.message || "Failed to fetch requests",
+                    color: "error",
+                });
+
             }
         },
         formatDate(date) {
@@ -161,6 +171,10 @@ export default {
                 this.$router.push("/requests"); // redirect to Request List page after deletion
             } catch (error) {
                 console.error("Error deleting request:", error);
+                this.notificationStore.showNotification({
+                    message: error.response?.data?.message || "Failed to delete request",
+                    color: "error",
+                });
             }
         },
     },
