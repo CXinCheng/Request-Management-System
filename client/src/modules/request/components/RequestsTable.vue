@@ -78,6 +78,7 @@
 <script>
 import dayjs from "dayjs";
 import { requestApiService } from "@/utils/ApiService";
+import { useNotificationStore } from "@/utils/NotificationStore";
 
 export default {
     components: {},
@@ -97,6 +98,7 @@ export default {
             search: "", // For search functionality
             selectedItem: false,
             sortBy: [{ key: 'created_at', order:'desc'}],
+            notificationStore: useNotificationStore(),
         };
     },
     mounted() {
@@ -121,6 +123,11 @@ export default {
                 
             } catch (error) {
                 console.error("Error fetching requests on RequestsTable page:", error);
+                this.notificationStore.showNotification({
+                    message: error.response?.data?.message || "Failed to fetch requests",
+                    color: "error",
+                });
+
             }
         },
         formatDate(date) {
@@ -150,6 +157,10 @@ export default {
                 this.$router.push("/requests"); // redirect to Request List page after deletion
             } catch (error) {
                 console.error("Error deleting request:", error);
+                this.notificationStore.showNotification({
+                    message: error.response?.data?.message || "Failed to delete request",
+                    color: "error",
+                });
             }
         },
     },

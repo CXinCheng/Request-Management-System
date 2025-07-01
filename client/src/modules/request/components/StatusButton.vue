@@ -11,6 +11,7 @@
 <script>
 import axios from 'axios';
 import { requestApiService } from "@/utils/ApiService";
+import { useNotificationStore } from "@/utils/NotificationStore";
 
 export default {
   props: {
@@ -25,6 +26,7 @@ export default {
   data() {
     return {
       userId: '',
+      notificationStore: useNotificationStore(),
     };
   },
   mounted() {
@@ -37,13 +39,16 @@ export default {
     async updateStatus() {
       const newStatus = this.actionType === 'Approve' ? 'Approved' : 'Rejected';
       try {
-        // const updatedRequest = await axios.put(`http://localhost:3002/api/v1/requests/professor/${this.userId}/${this.request.id}`, { status: newStatus, module_code: this.request.module_code });
         const updatedRequest = await requestApiService.updateRequestStatus(this.userId, this.request.id, this.request.module_code, newStatus);
         console.log(`Request ${this.requestId} updated to ${newStatus}:`, updatedRequest);
         this.$emit('status-updated', newStatus); // Notify parent
         window.location.reload(); // Refresh page to reflect changes
       } catch (error) {
         console.error(`Error updating request to ${newStatus}:`, error);
+        this.notificationStore.showNotification({
+            color: "error",
+            message: error.response?.data?.message || "Failed to update request status",
+        });
       }
     }
   }

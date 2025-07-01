@@ -72,6 +72,7 @@
   import StatusButton from '../components/StatusButton.vue';
   import DetailItem from "../components/DetailItem.vue";
   import { requestApiService } from "@/utils/ApiService";
+  import { useNotificationStore } from "@/utils/NotificationStore";
   
   export default {
     name: "RequestDetailsView",
@@ -88,6 +89,7 @@
         requestId: '',
         module_code: '',
         request: null,
+        notificationStore: useNotificationStore(),
       };
     },
     mounted() {
@@ -108,6 +110,10 @@
           this.request = response.data;
         } catch (error) {
           console.error("Error fetching request:", error);
+          this.notificationStore.showNotification({
+            color: "error",
+            message: error.response?.data?.message || "Failed to fetch requests",
+          });
         }
       },
       formatDate(date) {

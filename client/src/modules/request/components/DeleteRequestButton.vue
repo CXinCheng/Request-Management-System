@@ -10,11 +10,13 @@
 <script>
 import axios from "axios";
 import { requestApiService } from "@/utils/ApiService";
+import { useNotificationStore } from "@/utils/NotificationStore";
 
 export default {
     data() {
         return {
             requestId: Number,
+            notificationStore: useNotificationStore(),
         };
     },
     mounted() {
@@ -33,6 +35,10 @@ export default {
                 this.$router.push("/requests"); // redirect to Request List page after deletion
             } catch (error) {
                 console.error("Error deleting request:", error);
+                this.notificationStore.showNotification({
+                    color: "error",
+                    message: error.response?.data?.message || "Failed to delete request",
+                });
             }
         },
     },
