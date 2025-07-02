@@ -4,7 +4,9 @@
       <h1>
         {{ moduleFilter ? `Requests for ${moduleFilter}` : "All Requests" }}
       </h1>
-      <create-request-button></create-request-button>
+      <create-request-button
+        v-if="userRole === 'Student'"
+      ></create-request-button>
     </div>
     <!-- Requests Table -->
     <RequestsTable :moduleFilter="moduleFilter" />
@@ -27,6 +29,12 @@ export default {
     return {
       username: "", // Replace with the actual student ID
     };
+  },
+  mounted() {
+    if (localStorage.getItem("user")) {
+      let user = JSON.parse(localStorage.getItem("user"));
+      this.userRole = user["role"];
+    }
   },
   setup() {
     const route = useRoute();
