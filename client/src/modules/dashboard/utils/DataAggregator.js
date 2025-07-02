@@ -31,7 +31,7 @@ const fetchUserMappedModules = async (userId) => {
 
 const fetchLeaveApplications = async (userId) => {
   try {
-    const response = await requestApiService.getRequestsByStudent(userId);
+    const response = await requestApiService.getAllRequestsByStudent(userId);
 
     console.log("API Response:", response.data);
 

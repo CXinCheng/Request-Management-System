@@ -129,10 +129,10 @@ export default {
             try {
                 let response = null;
                 if (this.userRole === "Student") {
-                    response = await requestApiService.getRequestsByStudent(this.userId);
+                    response = await requestApiService.getAllRequestsByStudent(this.userId);
                 }
                 else if (this.userRole === "Professor") {
-                    response = await requestApiService.getRequestsByProfessor(this.userId);
+                    response = await requestApiService.getAllRequestsByProfessor(this.userId);
                 }
                 this.requests = response.data;
             } catch (error) {
