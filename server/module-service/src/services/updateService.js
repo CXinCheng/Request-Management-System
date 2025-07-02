@@ -18,6 +18,7 @@ class UpdateService {
         // initialize should only be called whenit is a new sem
         await this.updateSystemSetting();
         await this.loadSettings();
+        await this.deleteStudentModuleMapping();
         await this.deleteModulesAndClasses();
         await this.populateModulesAndClasses();
         await this.updateFaculties();
@@ -67,7 +68,7 @@ class UpdateService {
         }
     }
 
-    async callNusModsModuleList() {
+    async callNusModsModuleList() { 
         // Production
         const response = await fetch(
             `https://api.nusmods.com/v2/${this.academicYear}/moduleList.json`
@@ -141,17 +142,27 @@ class UpdateService {
         }
     }
 
+    async deleteStudentModuleMapping() {
+        console.log("Deleting all student module mapping in user_module_mapping table...");
+        try {
+            await db.none("TRUNCATE TABLE request_management.user_module_mapping CASCADE");
+        } catch (error) {
+            console.error("Error deleting student module mapping:", error);
+            throw error;
+        }
+    }
+
     async deleteModulesAndClasses() {
         console.log("Deleting all modules in module table...");
         try {
             await db.none(
-                "TRUNCATE TABLE request_management.modules_copy CASCADE" 
+                "TRUNCATE TABLE request_management.modules CASCADE" 
             );
 
             console.log("Successfully removed all modules")
         } catch (error) {
             console.error(
-                `Error removing all modules from request_management.modules_copy ${error}`,
+                `Error removing all modules from request_management.modules ${error}`,
             );
         }
     }
@@ -198,7 +209,7 @@ class UpdateService {
                 }
             }
 
-            // Bulk insert into classes_copy
+            // Bulk insert into classes
             if (lessonRows.length > 0) {
                 console.log(`num of lessonRows to insert: ${lessonRows.length}`)
                 const values = [];
@@ -210,7 +221,7 @@ class UpdateService {
 
                 console.log("Forming classes insert query")
                 const query = `
-                    INSERT INTO request_management.classes_copy 
+                    INSERT INTO request_management.classes
                     (module_code, class_no, class_type, day_of_week, starting_time, ending_time, weeks, venue)
                     VALUES ${placeholders.join(', ')}
                 `;
@@ -220,7 +231,7 @@ class UpdateService {
                     await db.none(query, values);
                     console.log(`Inserted ${lessonRows.length} class rows`);
                 } catch (err) {
-                    console.error('Bulk insert for request_management.classes_copy failed:', err);
+                    console.error('Bulk insert for request_management.classes failed:', err);
                 }
             }
 
@@ -236,7 +247,7 @@ class UpdateService {
 
                 await db.none(
                     `
-                    UPDATE request_management.modules_copy AS m
+                    UPDATE request_management.modules AS m
                     SET
                         exam_date = v.exam_date,
                         class_last_updated_at = NOW()
@@ -272,7 +283,7 @@ class UpdateService {
         });
 
         const query = `
-            INSERT INTO request_management.modules_copy (code, name, class_last_updated_at)
+            INSERT INTO request_management.modules (code, name, class_last_updated_at)
             VALUES ${placeholders.join(', ')}
         `;
 
@@ -298,10 +309,10 @@ class UpdateService {
 
         try {
             console.log("Deleting all old faculties...")
-            await db.none("DELETE FROM request_management.faculties_copy");
+            await db.none("DELETE FROM request_management.faculties");
             for (let faculty of faculties) {
                 await db.none(
-                    "INSERT INTO request_management.faculties_copy (name) VALUES ($1)",
+                    "INSERT INTO request_management.faculties (name) VALUES ($1)",
                     [faculty]
                 );
             }
