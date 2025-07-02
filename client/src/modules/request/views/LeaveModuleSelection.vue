@@ -1,6 +1,6 @@
 <template>
     <v-container>
-    <div class="text-h5 pb-1"> AY24/25 SEMESTER 2 </div>
+    <div class="text-h5 pb-1">{{ semesterDisplay }}</div>
     <div class="text-subtitle-2 pb-4"> You are currently in Week {{ currentWeek }} </div>
     <v-row dense>
         <v-col cols="12" md="6">
@@ -77,6 +77,29 @@ const leaveDateStore = useLeaveDateStore()
 const moduleStore = useModuleStore()
 
 const weeksInSemester = ref({})
+const systemSemesterSetting = ref([]);
+
+const academicYear = computed(() => {
+  const entry = systemSemesterSetting.value?.find(item => item.key === 'academic_year');
+  return entry ? entry.value : '';
+});
+
+const semesterNumber = computed(() => {
+  const entry = systemSemesterSetting.value?.find(item => item.key === 'semester_number');
+  return entry ? entry.value : '';
+});
+
+const semesterDisplay = computed(() => {
+  if (semesterNumber.value === '3') {
+    return `Special Term Part 1 (AY ${academicYear.value})`;
+  } else if (semesterNumber.value === '4') {
+    return `Special Term Part 2 (AY ${academicYear.value})`;
+  } else if (semesterNumber.value && academicYear.value) {
+    return `AY${academicYear.value} Semester ${semesterNumber.value}`;
+  } else {
+    return '';
+  }
+});
 
 const getDayNumber = (day) => {
   const daysMap = { 
@@ -118,7 +141,7 @@ const getWeekOfSem = (date) => {
   const normalizedInputDate = new Date(date);
   normalizedInputDate.setHours(0, 0, 0, 0);
 
-  console.log("weeksInSemester.value", weeksInSemester.value)
+  console.log("weeksInSemester.value", weeksInSemester.value, date)
   for (let week in weeksInSemester.value) {
     console.log("week in weeksInSemester:", weeksInSemester.value[week].start)
     const startDate = new Date(weeksInSemester.value[week].start);
@@ -130,7 +153,6 @@ const getWeekOfSem = (date) => {
       return week
     }
   }
-  console.error("Date is out of semester range: ", date)
 };
 
 const currentWeek = computed(() => {
@@ -185,21 +207,26 @@ const allModules = ref(null)
 
 onMounted(async()=>{
   try {
-    const semesterStartDateResp = await moduleApiService.getSemesterStartDate();
-    console.log(`semesterStartDateResp:`,semesterStartDateResp.data.startDate.value)
-    const week1Start = new Date(semesterStartDateResp.data.startDate.value); 
+    const systemSemesterResp = await moduleApiService.getSystemSettings();
+    systemSemesterSetting.value = systemSemesterResp.data.systemSettings;
+    const semesterStartEntry = systemSemesterSetting.value.find(item => item.key === 'semester_start_date');
+    const week1Start = semesterStartEntry ? new Date(semesterStartEntry.value) : null;
+    console.log(`semesterStartDate:`, week1Start);
+    console.log(`systemSemesterSetting:`,systemSemesterSetting.value)
     const weeks = {};
 
     // Generate Weeks 1 to 13
-    for (let i = 1; i <= 13; i++) {
-      const weekStart = new Date(week1Start);
-      weekStart.setDate(week1Start.getDate() + (i - 1) * 7);
-      weeks[i] = { start: formatDate(weekStart) };
-    }
+    if (week1Start) {
+      for (let i = 1; i <= 13; i++) {
+        const weekStart = new Date(week1Start);
+        weekStart.setDate(week1Start.getDate() + (i - 1) * 7);
+        weeks[i] = { start: formatDate(weekStart) };
+      }
 
-    const recessWeekStart = new Date(week1Start);
-    recessWeekStart.setDate(recessWeekStart.getDate() + 6 * 7);
-    weeks[0] = { start: formatDate(recessWeekStart) };
+      const recessWeekStart = new Date(week1Start);
+      recessWeekStart.setDate(recessWeekStart.getDate() + 6 * 7);
+      weeks[0] = { start: formatDate(recessWeekStart) };
+    }
 
     weeksInSemester.value = weeks;
   } catch (err) {
