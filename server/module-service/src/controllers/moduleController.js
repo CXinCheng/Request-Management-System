@@ -379,7 +379,7 @@ export const getModulesByStudent = async (req, res) => {
             LEFT JOIN request_management.modules AS m
             ON um.module_code = m.code
             WHERE um.user_matrix_id = $1) AS um
-            JOIN request_management.classes c
+            LEFT JOIN request_management.classes c
             ON um.module_code = c.module_code
             AND um.class_no = c.class_no
             AND um.class_type = c.class_type`,
