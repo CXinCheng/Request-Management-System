@@ -11,7 +11,7 @@ import {
     getAllFaculties,
     updateSemester,
     bulkEnrollStudentsByModule,
-    getSemesterStartDate
+    getSystemSettings
 } from "../controllers/moduleController.js";
 import { ensureConnection } from "../configs/db.js";
 import { verifyToken, authorizeRoles } from "../middlewares/authMiddleware.js";
@@ -39,8 +39,8 @@ const router = express.Router();
 router.use(dbConnectionMiddleware, verifyToken);
 
 // Module routes
-router.get("/all", authorizeRoles(['Admin']), getAllModules);
-router.get("/getSemesterStartDate",authorizeRoles(['Admin', 'Professor', 'Student']),getSemesterStartDate); // called only internally
+router.get("/all", authorizeRoles(['Admin']), getAllModules);// called only internally
+router.get("/getSystemSettings",authorizeRoles(['Admin', 'Professor', 'Student']),getSystemSettings); 
 router.get("/all/faculties", authorizeRoles(['Admin', 'Professor', 'Student']), getAllFaculties);
 router.get("/all/enrolled", authorizeRoles(['Admin', 'Professor']), getAllModulesWithNumbersOfEnrolledStudents);
 router.get("/professor/modules/:professorId", authorizeRoles(['Admin', 'Professor']), getModulesByProfessor);

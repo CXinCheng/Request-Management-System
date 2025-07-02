@@ -548,24 +548,25 @@ describe("Module Controller Unit Tests", () => {
     });
 });
 
-    describe("getSemesterStartDate", () => {
-        it("should return the semester start date successfully", async () => {
-            const mockDate = { value: '2024-08-12' };
-            mockDb.one.resolves(mockDate);
-            await getSemesterStartDate(req, res);
-            assert(res.status.calledWith(200));
-            assert(res.json.calledWith({
-                success: true,
-                message: "Successfully retrieved Semester Start Date",
-                data: { startDate: mockDate }
-            }));
-        });
-        it("should return 500 on database error", async () => {
-            mockDb.one.rejects(new Error('DB connection lost'));
-            await getSemesterStartDate(req, res);
-            assert(res.status.calledWith(500));
-            assert(res.json.calledWithMatch({ message: "Error retrieving semester start date" 
-            }));
-        });
-    });
+    // removed and replaced with getSystemSettings
+    // describe("getSemesterStartDate", () => {
+    //     it("should return the semester start date successfully", async () => {
+    //         const mockDate = { value: '2024-08-12' };
+    //         mockDb.one.resolves(mockDate);
+    //         await getSemesterStartDate(req, res);
+    //         assert(res.status.calledWith(200));
+    //         assert(res.json.calledWith({
+    //             success: true,
+    //             message: "Successfully retrieved Semester Start Date",
+    //             data: { startDate: mockDate }
+    //         }));
+    //     });
+    //     it("should return 500 on database error", async () => {
+    //         mockDb.one.rejects(new Error('DB connection lost'));
+    //         await getSemesterStartDate(req, res);
+    //         assert(res.status.calledWith(500));
+    //         assert(res.json.calledWithMatch({ message: "Error retrieving semester start date" 
+    //         }));
+    //     });
+    // });
 });

@@ -200,22 +200,22 @@ export const updateSemester = async (req, res) => {
   }
 };
 
-export const getSemesterStartDate = async (req, res) => {
+export const getSystemSettings = async (req, res) => {
   try {
     const response = await axios.get(
-      `${MODULE_SERVICE_URL}/api/v1/module/getCurrentSemesterStartDate`,
+      `${MODULE_SERVICE_URL}/api/v1/module/getSystemSettings`,
     );
 
     res.status(200).json({
       success: true,
-      message: "Succesfully retrieved current semester start date",
+      message: "Succesfully retrieved current system semester settings",
       data: response.data,
     });
   } catch (error) {
-    console.error("Error retrieving current semester start date:", error.message);
+    console.error("Error retrieving current system semester settings:", error.message);
     res.status(500).json({
       success: false,
-      message: "Error retrieving current semester start date",
+      message: "Error retrieving current system semester settings",
       error: error.message,
     });
   }

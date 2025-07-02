@@ -109,8 +109,8 @@ export const moduleApiService = {
         moduleApi
             .post(`/bulkEnroll/${data.moduleCode}`, data.students)
             .then((res) => res.data),
-    getSemesterStartDate: () =>
-        moduleApi.get(`/getSemesterStartDate`).then((res) => res.data), 
+    getSystemSettings: () =>
+        moduleApi.get(`/getSystemSettings`).then((res) => res.data),
 };
 
 // Gateway API

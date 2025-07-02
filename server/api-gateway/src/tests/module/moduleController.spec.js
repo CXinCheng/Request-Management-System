@@ -6,8 +6,7 @@ import {
   getAllModulesWithEducators,
   getModulesWithRequestsByProfessor,
   getModulesTakenByStudent,
-  updateSemester,
-  getSemesterStartDate,
+  updateSemester
 } from "../../module/moduleController.js";
 
 describe("Module Controller", () => {
@@ -414,39 +413,40 @@ describe("Module Controller", () => {
     });
   });
 
-  describe("getSemesterStartDate", () => {
-    it("should successfully return semester start date", async () => {
-      const mockResponse = {
-        data: {
-          success: true,
-          data: { startDate: "2024-08-01" },
-        },
-      };
+  // this API has been removed and replaced with getSystemSettings
+  // describe("getSemesterStartDate", () => {
+  //   it("should successfully return semester start date", async () => {
+  //     const mockResponse = {
+  //       data: {
+  //         success: true,
+  //         data: { startDate: "2024-08-01" },
+  //       },
+  //     };
 
-      axiosStub.resolves(mockResponse);
+  //     axiosStub.resolves(mockResponse);
 
-      await getSemesterStartDate(req, res);
+  //     await getSemesterStartDate(req, res);
 
-      assert.strictEqual(res.statusCode, 200);
-      assert.strictEqual(res.body.success, true);
-      assert.strictEqual(
-        res.body.message,
-        "Succesfully retrieved current semester start date"
-      );
-      assert.deepStrictEqual(res.body.data, mockResponse.data);
-    });
+  //     assert.strictEqual(res.statusCode, 200);
+  //     assert.strictEqual(res.body.success, true);
+  //     assert.strictEqual(
+  //       res.body.message,
+  //       "Succesfully retrieved current semester start date"
+  //     );
+  //     assert.deepStrictEqual(res.body.data, mockResponse.data);
+  //   });
 
-    it("should handle error when module service fails", async () => {
-      axiosStub.rejects(new Error("Module service unavailable"));
+  //   it("should handle error when module service fails", async () => {
+  //     axiosStub.rejects(new Error("Module service unavailable"));
 
-      await getSemesterStartDate(req, res);
+  //     await getSemesterStartDate(req, res);
 
-      assert.strictEqual(res.statusCode, 500);
-      assert.strictEqual(res.body.success, false);
-      assert.strictEqual(
-        res.body.message,
-        "Error retrieving current semester start date"
-      );
-    });
-  });
+  //     assert.strictEqual(res.statusCode, 500);
+  //     assert.strictEqual(res.body.success, false);
+  //     assert.strictEqual(
+  //       res.body.message,
+  //       "Error retrieving current semester start date"
+  //     );
+  //   });
+  // });
 });
