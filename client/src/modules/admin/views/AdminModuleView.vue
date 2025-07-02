@@ -296,6 +296,13 @@ const headers = [
 const studentsTableHeaders = ref([]);
 
 const removeEducator = async (module) => {
+    if (modules.value.find(m => m.code === module.code).students !== "0") {
+        notify.showNotification({
+            message: "Cannot remove professor while students are enrolled",
+            color: "warning",
+        });
+        return;
+    }
     try {
         loading.value = true;
         const response = await moduleApiService.updateEducator({
@@ -331,6 +338,13 @@ const openAssignDialog = async (module) => {
 };
 
 async function openEnrollDialog(module) {
+    if (modules.value.find(m => m.code === module.code).educator_id === null) {
+        notify.showNotification({
+            message: "Please assign a professor before enrolling students",
+            color: "warning",
+        });
+        return;
+    }
     selectedModule.value = module;
     enrollDialog.value = true;
     fetchClasses();
