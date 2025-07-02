@@ -2,20 +2,28 @@
   <v-container class="semester-view-container" fluid>
     <v-card class="mx-auto larger-card" max-width="750" elevation="10">
       <v-card-title class="headline">Academic Term Management</v-card-title>
-
+      <v-card-subtitle>
+        Current Academic Year: <strong>{{ currentAcademicYear }}</strong>
+        <br />
+        Current Semester: <strong>{{ currentSemester }}</strong>
+      </v-card-subtitle>
       <v-card-text>
         <!-- COMBINED V-SELECT WITH INFINITE SCROLL -->
         <v-select
           v-model="selectedYear"
           :items="availableYears"
-          label="2024-2025"
+          label="Academic Year"
           outlined
           dense
         >
           <!-- Use the 'append-item' slot to add an element at the end of the list -->
           <template v-slot:append-item>
             <!-- This item will only show if there are more years to load -->
-            <v-list-item v-if="!allYearsLoaded" v-intersect="onIntersect" class="text-center">
+            <v-list-item
+              v-if="!allYearsLoaded"
+              v-intersect="onIntersect"
+              class="text-center"
+            >
               <v-list-item-title>
                 <v-progress-circular
                   indeterminate
@@ -31,7 +39,7 @@
         <v-select
           v-model="selectedSemester"
           :items="availableSemesters"
-          label="Semester 2"
+          label="Semester"
           outlined
           dense
         />
@@ -47,25 +55,22 @@
       </v-card-actions>
     </v-card>
 
-          
-<!-- Loading Indicator -->
-<v-dialog v-model="loading" persistent width="300">
-  <v-card>
-    <!-- Use v-card-text as a flexible container for the content -->
-    <v-card-text class="d-flex flex-column align-center pa-6">
-      <v-progress-circular
-        indeterminate
-        color="primary"
-        size="64"
-        class="mb-5"
-      ></v-progress-circular>
+    <!-- Loading Indicator -->
+    <v-dialog v-model="loading" persistent width="300">
+      <v-card>
+        <!-- Use v-card-text as a flexible container for the content -->
+        <v-card-text class="d-flex flex-column align-center pa-6">
+          <v-progress-circular
+            indeterminate
+            color="primary"
+            size="64"
+            class="mb-5"
+          ></v-progress-circular>
 
-      <span>Updating semester, please wait...</span>
-    </v-card-text>
-  </v-card>
-</v-dialog>
-
-    
+          <span>Updating semester, please wait...</span>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
 
     <!-- Confirmation Dialog -->
     <v-dialog v-model="dialog" max-width="500">
@@ -74,14 +79,17 @@
         <v-card-text>
           Change academic term to:
           <br />
-          <strong>{{ selectedYear }} - {{ selectedSemester }}</strong>?
+          <strong>{{ selectedYear }} - {{ selectedSemester }}</strong
+          >?
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn color="green darken-1" @click="submitSemesterChange" text>
             Confirm
           </v-btn>
-          <v-btn color="red darken-1" @click="dialog = false" text>Cancel</v-btn>
+          <v-btn color="red darken-1" @click="dialog = false" text
+            >Cancel</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -89,8 +97,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { gatewayApiService } from "@/utils/ApiService";
+import { ref, computed, onMounted } from "vue";
+import { gatewayApiService, moduleApiService } from "@/utils/ApiService";
 import { useNotificationStore } from "@/utils/NotificationStore";
 
 // --- EXISTING STATE ---
@@ -99,7 +107,12 @@ const loading = ref(false);
 const dialog = ref(false);
 const selectedYear = ref(null);
 const selectedSemester = ref(null);
-const availableYears = ref(["2023-2024", "2024-2025", "2025-2026", "2026-2027"]);
+const availableYears = ref([
+  "2023-2024",
+  "2024-2025",
+  "2025-2026",
+  "2026-2027",
+]);
 const availableSemesters = [
   "Semester 1",
   "Semester 2",
@@ -112,6 +125,21 @@ const semesterMapping = {
   "Special Semester 1": 3,
   "Special Semester 2": 4,
 };
+const systemSemesterSetting = ref([]);
+const currentAcademicYear = computed(() => {
+  const entry = systemSemesterSetting.value?.find(
+    (item) => item.key === "academic_year"
+  );
+
+  return entry ? entry.value : "";
+});
+
+const currentSemester = computed(() => {
+  const entry = systemSemesterSetting.value?.find(item => item.key === 'semester_number');
+  if (!entry) return '';
+  const semesterKey = Object.keys(semesterMapping).find(key => semesterMapping[key] === parseInt(entry.value));
+  return semesterKey || '';
+});
 
 // --- NEW STATE FOR INFINITE SCROLL ---
 const loadingYears = ref(false); // Prevents multiple simultaneous loads
@@ -125,7 +153,7 @@ async function addMoreYears(batchSize = 5) {
     setTimeout(() => {
       const newYearsBatch = [];
       let lastKnownYear = availableYears.value.at(-1);
-      let [start, end] = lastKnownYear.split('-').map(Number);
+      let [start, end] = lastKnownYear.split("-").map(Number);
 
       // Loop to generate the batch of new years
       for (let i = 0; i < batchSize; i++) {
@@ -138,14 +166,14 @@ async function addMoreYears(batchSize = 5) {
         }
 
         newYearsBatch.push(`${nextStart}-${nextEnd}`);
-        
+
         // Update the start/end for the next iteration of the loop
         start = nextStart;
         end = nextEnd;
       }
-      
+
       resolve(newYearsBatch);
-    }, 100); 
+    }, 100);
   });
 }
 
@@ -189,7 +217,7 @@ function onIntersect(isIntersecting) {
 // API call for semester change
 const submitSemesterChange = async () => {
   if (!selectedYear.value || !selectedSemester.value) return;
-  
+
   try {
     loading.value = true;
     dialog.value = false;
@@ -198,7 +226,7 @@ const submitSemesterChange = async () => {
       academicYear: selectedYear.value,
       semester: semesterInteger,
     });
-    
+
     if (response.success) {
       notificationStore.showNotification({
         message: "Semester updated successfully",
@@ -220,6 +248,18 @@ const submitSemesterChange = async () => {
     loading.value = false;
   }
 };
+
+onMounted(async () => {
+  const systemSemesterResp = await moduleApiService.getSystemSettings();
+  if (systemSemesterResp.success) {
+    systemSemesterSetting.value = systemSemesterResp.data.systemSettings;
+  } else {
+    notificationStore.showNotification({
+      message: "Failed to fetch system settings",
+      color: "error",
+    });
+  }
+});
 </script>
 
 <style scoped>

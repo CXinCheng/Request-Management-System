@@ -107,7 +107,7 @@ const routes = [
         path: "/admin/Semester",
         component: AdminSemesterView,
         name: "AdminSemesterView",
-        meta: { requiresAuth: true, title: "Semester" },
+        meta: { requiresAuth: true, title: "Semester Settings" },
     },
     {
         path: "/requestDetails/:requestId/:module_code",

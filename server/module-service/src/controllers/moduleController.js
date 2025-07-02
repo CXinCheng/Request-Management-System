@@ -559,8 +559,6 @@ export const getSystemSettings = async (req, res) => {
       "SELECT * FROM request_management.system_settings"
     );
 
-    console.log("systemSettings:", systemSettings)
-
     return res.status(200).json({
       success: true,
       message: `Successfully retrieved Semester Settings`,
