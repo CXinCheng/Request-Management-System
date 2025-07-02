@@ -12,7 +12,7 @@
             variant="solo"
             required
             :min="startDateOfSem"
-            :max="selectedEndDate"
+            :max="startDateMax"
             :allowed-dates="allowedDates"
           ></v-date-input>
         </v-col>
@@ -24,7 +24,7 @@
             prepend-icon=""
             variant="solo"
             required
-            :min="selectedStartDate"
+            :min="endDateMin"
             :max="endDateOfSem"
             :allowed-dates="allowedDates"
           ></v-date-input>
@@ -308,6 +308,40 @@ watch([selectedStartDate, selectedEndDate], () => {
 
 watch(selectedItems, (newSelection) => {
   moduleStore.setSelectedModules(newSelection)
+});
+
+const allowedDatesArray = computed(() => {
+  const dates = [];
+  if (weeksInSemester.value[1] && weeksInSemester.value[13]) {
+    const semStart = new Date(weeksInSemester.value[1].start);
+    const semEnd = new Date(weeksInSemester.value[13].start);
+    semEnd.setDate(semEnd.getDate() + 6);
+    for (
+      let d = new Date(semStart);
+      d <= semEnd;
+      d.setDate(d.getDate() + 1)
+    ) {
+      const dateString = d.toISOString().split('T')[0];
+      if (allowedDates(dateString)) {
+        dates.push(dateString);
+      }
+    }
+  }
+  return dates;
+});
+
+const startDateMax = computed(() => {
+  if (selectedEndDate.value) return selectedEndDate.value;
+  return allowedDatesArray.value.length
+    ? allowedDatesArray.value[allowedDatesArray.value.length - 1]
+    : null;
+});
+
+const endDateMin = computed(() => {
+  if (selectedStartDate.value) return selectedStartDate.value;
+  return allowedDatesArray.value.length
+    ? allowedDatesArray.value[0]
+    : null;
 });
 
 </script>
