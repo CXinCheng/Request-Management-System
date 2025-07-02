@@ -94,7 +94,6 @@
                     >mdi-file-excel</v-icon
                   >
                   <p class="text-center">
-                    Drag&Drop file here or
                     <v-btn
                       color="primary"
                       variant="text"
