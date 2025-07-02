@@ -442,6 +442,7 @@ export const bulkEnrollStudentsByModule = async (req, res) => {
   const moduleCode = req.params.moduleCode;
   const students = req.body;
 
+
   if (!moduleCode || !students || !Array.isArray(students)) {
     return res.status(400).json({
       success: false,
@@ -498,7 +499,8 @@ export const bulkEnrollStudentsByModule = async (req, res) => {
 
       for (const student of studentsToEnroll) {
         // Process class assignments if provided
-        if (student.classes && Array.isArray(student.classes)) {
+        if (student.classes && Array.isArray(student.classes) && student.classes.length > 0) {
+          console.log("valid class info provided, adding student-module mapping")
           for (const classInfo of student.classes) {
             enrollmentQueries.push(
               db.none(
@@ -514,10 +516,11 @@ export const bulkEnrollStudentsByModule = async (req, res) => {
           }
         } else {
           // If no class information provided, just add the student-module mapping
+          console.log("no class info provided, adding student-module mapping with default class type (No Class) and class no (0)")
           enrollmentQueries.push(
             db.none(
-              "INSERT INTO request_management.user_module_mapping (user_matrix_id, module_code) VALUES ($1, $2)",
-              [student.matrix_id, moduleCode]
+              "INSERT INTO request_management.user_module_mapping (user_matrix_id, module_code, class_type, class_no) VALUES ($1, $2, $3, $4)",
+              [student.matrix_id, moduleCode, "No Class", "0"]
             )
           );
         }
