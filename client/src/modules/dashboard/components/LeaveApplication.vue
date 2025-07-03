@@ -38,9 +38,9 @@
               <v-list-item clickable @click="viewRequestDetails(item)">
                 <v-list-item-title>View Details</v-list-item-title>
               </v-list-item>
-              <v-list-item v-if="userRole === 'Student'" clickable @click="editRequest(item)">
+              <!-- <v-list-item v-if="userRole === 'Student'" clickable @click="editRequest(item)">
                 <v-list-item-title>Edit</v-list-item-title>
-              </v-list-item>
+              </v-list-item> -->
               <v-list-item v-if="userRole === 'Student'" clickable @click="deleteRequest(item)">
                 <v-list-item-title>Delete</v-list-item-title>
               </v-list-item>
@@ -87,9 +87,9 @@ export default defineComponent({
     viewRequestDetails(item) {
       this.$router.push({ name: "RequestDetailsView", params: { requestId: item.id } });
     },
-    editRequest(item) {
-      this.$router.push({ name: "EditRequestView", params: { requestId: item.id } });
-    },
+    // editRequest(item) {
+    //   this.$router.push({ name: "EditRequestView", params: { requestId: item.id } });
+    // },
     async deleteRequest(item) {
       console.log("Delete Request button clicked");
       try {

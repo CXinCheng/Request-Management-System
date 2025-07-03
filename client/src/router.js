@@ -116,14 +116,14 @@ const routes = [
             allowedRoles: ["Student", "Professor"],
          },
     },
-    {
-        path: "/editRequest/:requestId/:module_code",
-        component: LeaveModuleSelection,
-        name: "EditRequestView",
-        meta: { requiresAuth: true, title: "Edit Request",
-            allowedRoles: ["Student"],
-         },
-    },
+    // {
+    //     path: "/editRequest/:requestId/:module_code",
+    //     component: LeaveModuleSelection,
+    //     name: "EditRequestView",
+    //     meta: { requiresAuth: true, title: "Edit Request",
+    //         allowedRoles: ["Student"],
+    //      },
+    // },
     {
         path: "/profile",
         component: ProfileView,

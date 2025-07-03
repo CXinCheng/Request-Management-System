@@ -50,7 +50,7 @@
       />
       
       <div v-if="userRole === 'Student' && request.status === 'Pending'">
-        <EditRequestButton />
+        <!-- <EditRequestButton /> -->
         <DeleteRequestButton />
       </div>
       <div v-else-if="userRole === 'Professor'">
@@ -67,7 +67,7 @@
 <script>
   import axios from "axios";
   import dayjs from "dayjs";
-  import EditRequestButton from '../components/EditRequestButton.vue';
+  // import EditRequestButton from '../components/EditRequestButton.vue';
   import DeleteRequestButton from '../components/DeleteRequestButton.vue';
   import StatusButton from '../components/StatusButton.vue';
   import DetailItem from "../components/DetailItem.vue";
@@ -77,7 +77,7 @@
   export default {
     name: "RequestDetailsView",
     components: {
-        EditRequestButton,
+        // EditRequestButton,
         DeleteRequestButton,
         StatusButton,
         DetailItem

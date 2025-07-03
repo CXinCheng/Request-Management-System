@@ -66,13 +66,13 @@
                         >
                             <v-list-item-title>View Details</v-list-item-title>
                         </v-list-item>
-                        <v-list-item
+                        <!-- <v-list-item
                             clickable
                             @click="editRequest(item)"
                             v-if="userRole === 'Student' && item.status === 'Pending'"
                         >
                             <v-list-item-title>Edit</v-list-item-title>
-                        </v-list-item>
+                        </v-list-item> -->
                         <v-list-item
                             clickable
                             @click="deleteRequest(item)"
@@ -161,16 +161,16 @@ export default {
                 },
             });
         },
-        editRequest(item) {
-            this.$router.push({
-                name: "EditRequestView",
-                params: { 
-                    requestId: item.id, 
-                    module_code: item.module_code,
-                    request: JSON.stringify(item) 
-                },
-            });
-        },
+        // editRequest(item) {
+        //     this.$router.push({
+        //         name: "EditRequestView",
+        //         params: { 
+        //             requestId: item.id, 
+        //             module_code: item.module_code,
+        //             request: JSON.stringify(item) 
+        //         },
+        //     });
+        // },
         async deleteRequest(item) {
             console.log("Delete Request button clicked");
             try {
