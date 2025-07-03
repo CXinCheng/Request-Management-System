@@ -98,7 +98,7 @@ export const moduleApiService = {
         moduleApi.get(`/classes/${moduleCode}`).then((res) => res.data),
     updateEnrollmentByModule: (data) =>
         moduleApi
-            .post(`/updateEnrollment/${data.moduleCode}`, data.modifiedStudents)
+            .post(`/updateEnrollment/${data.moduleCode}`, data)
             .then((res) => res.data),
     getModulesByProfessor: (professorId) =>
         moduleApi.get(`/professor/modules/${professorId}`).then((res) => res.data),

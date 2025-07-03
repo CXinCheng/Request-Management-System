@@ -389,13 +389,17 @@ const confirmDelete = (user) => {
 const handleDelete = async () => {
   try {
     loading.value = true;
+    console.log('moduleData.value', moduleData.value.code)
+    console.log('selectedUser.value', selectedUser.value)
     const response = await moduleApiService.updateEnrollmentByModule({
-      moduleCode: selectedModule.value.code,
-      modifiedStudents: modifiedStudents,
+      moduleCode: moduleData.value.code,
+      deletedStudents: [selectedUser.value.matrix_id],
     });
     if (response.success) {
-      await fetchUsers();
+      await refreshEnrolledStudents();
+      console.log('response', response);
       deleteDialog.value = false;
+      enrolledStudents.value = [...enrolledStudents.value];
     } else {
       notificationStore.showNotification({
         message: response.message || "Error deleting user",
@@ -405,7 +409,7 @@ const handleDelete = async () => {
     }
   } catch (error) {
     notificationStore.showNotification({
-      message: response.message || "Error deleting user",
+      message: error || "Error deleting user",
       color: "error",
       timeout: 3000,
     });
