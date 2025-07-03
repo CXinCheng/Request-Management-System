@@ -276,7 +276,7 @@ const fetchUsers = async () => {
         }
     } catch (error) {
         notificationStore.showNotification({
-            message: response.message || "Error fetching users",
+            message: error || "Error fetching users",
             color: "error",
             timeout: 3000,
         });
