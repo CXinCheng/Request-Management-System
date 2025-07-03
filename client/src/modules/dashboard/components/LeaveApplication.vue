@@ -129,7 +129,7 @@ export default defineComponent({
 }
 
 /* Table Header - Bold & Centered */
-.v-data-table >>> th {
+:deep(th) {
   font-weight: bold;
   text-align: center !important;
   background-color: #1976d2 !important; /* Dark blue header */

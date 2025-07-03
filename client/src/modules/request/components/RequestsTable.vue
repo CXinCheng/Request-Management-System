@@ -162,7 +162,14 @@ export default {
             });
         },
         editRequest(item) {
-            this.$router.push(`/editRequest/${this.requestId}`);
+            this.$router.push({
+                name: "EditRequestView",
+                params: { 
+                    requestId: item.id, 
+                    module_code: item.module_code,
+                    request: JSON.stringify(item) 
+                },
+            });
         },
         async deleteRequest(item) {
             console.log("Delete Request button clicked");

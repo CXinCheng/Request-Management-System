@@ -8,7 +8,6 @@ import RequestView from "./modules/request/views/RequestView.vue";
 import LeaveModuleSelection from "./modules/request/views/LeaveModuleSelection.vue";
 import RequestListView from "./modules/request/views/RequestList.vue";
 import RequestDetailsView from "./modules/request/views/RequestDetails.vue";
-import EditRequestView from "./modules/request/views/EditRequest.vue";
 import AdminUsersView from "./modules/admin/views/AdminUsersView.vue";
 import AdminModuleView from "./modules/admin/views/AdminModuleView.vue";
 import AdminSemesterView from "./modules/admin/views/AdminSemesterView.vue"
@@ -118,8 +117,8 @@ const routes = [
          },
     },
     {
-        path: "/editRequest/:requestId",
-        component: EditRequestView,
+        path: "/editRequest/:requestId/:module_code",
+        component: LeaveModuleSelection,
         name: "EditRequestView",
         meta: { requiresAuth: true, title: "Edit Request",
             allowedRoles: ["Student"],
