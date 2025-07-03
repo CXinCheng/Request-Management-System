@@ -56,6 +56,16 @@
     return-object
     show-select
     >
+      <template #item.weeks="{ item }">
+        <div v-if="item.weeksDisplayInfo">
+          <div>Start: {{ item.weeksDisplayInfo.start }}</div>
+          <div>End: {{ item.weeksDisplayInfo.end }}</div>
+          <div>Weeks: [{{ item.weeksDisplayInfo.weeks.join(', ') }}]</div>
+        </div>
+        <div v-else>
+          [{{ item.weeks.join(', ') }}]
+        </div>
+      </template>
     </v-data-table>
 
 
@@ -277,12 +287,92 @@ onMounted(async()=>{
   }
 })
 
+// Helper to extract week numbers from various formats
+function extractWeeks(weeksData) {
+  if (!weeksData) return [];
+  // If already an array
+  if (Array.isArray(weeksData)) return weeksData;
+  // If stringified array
+  if (typeof weeksData === 'string' && weeksData.trim().startsWith('[')) {
+    try {
+      const arr = JSON.parse(weeksData);
+      if (Array.isArray(arr)) return arr;
+    } catch {}
+  }
+  // If stringified object
+  if (typeof weeksData === 'string' && weeksData.trim().startsWith('{')) {
+    try {
+      const obj = JSON.parse(weeksData);
+      if (Array.isArray(obj.weeks)) return obj.weeks;
+      if (obj.start && obj.end) {
+        return obj; // Return the object for special handling
+      }
+    } catch {}
+  }
+  // If object with weeks property
+  if (typeof weeksData === 'object' && weeksData !== null && Array.isArray(weeksData.weeks)) {
+    return weeksData.weeks;
+  }
+  // If object with start/end only, return the object for special handling
+  if (typeof weeksData === 'object' && weeksData !== null && weeksData.start && weeksData.end) {
+    return weeksData;
+  }
+  return [];
+}
+
+// Helper to calculate weeks array from start/end and weekInterval
+function calculateWeeksFromRange(start, end, weekInterval = 1) {
+  const weeks = [];
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  for (let weekNum in weeksInSemester.value) {
+    if (weekNum === '0') continue; // skip recess week
+    const weekInfo = weeksInSemester.value[weekNum];
+    if (!weekInfo) continue;
+    const weekStart = new Date(weekInfo.start);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6); // end of the week
+    // If the module's date range overlaps with this week
+    if (weekEnd >= startDate && weekStart <= endDate) {
+      if ((parseInt(weekNum) - 1) % weekInterval === 0) {
+        weeks.push(parseInt(weekNum));
+      }
+    }
+  }
+  return weeks;
+}
+
 const formattedModules = computed(() => {
-  let filtered = modules.value.map((module) => ({
-    ...module,
-    educator_name: module.professor ? module.professor.name : "N/A",
-    educator_id: module.professor ? module.professor.matrix_id : "" 
-  }));
+  let filtered = modules.value.map((module) => {
+    let normalizedWeeks = extractWeeks(module.weeks);
+    let start = null, end = null, weekInterval = 1, displayWeeks = [];
+    if (
+      normalizedWeeks &&
+      typeof normalizedWeeks === 'object' &&
+      normalizedWeeks.start &&
+      normalizedWeeks.end
+    ) {
+      start = normalizedWeeks.start;
+      end = normalizedWeeks.end;
+      weekInterval = normalizedWeeks.weekInterval || 1;
+      // If explicit weeks array, use it, else calculate
+      if (Array.isArray(normalizedWeeks.weeks)) {
+        displayWeeks = normalizedWeeks.weeks;
+      } else {
+        displayWeeks = calculateWeeksFromRange(start, end, weekInterval);
+      }
+      normalizedWeeks = displayWeeks;
+    } else if (Array.isArray(normalizedWeeks)) {
+      displayWeeks = normalizedWeeks;
+    }
+    return {
+      ...module,
+      educator_name: module.professor ? module.professor.name : "N/A",
+      educator_id: module.professor ? module.professor.matrix_id : "",
+      weeks: displayWeeks,
+      weeksDisplayInfo: start && end ? { start, end, weeks: displayWeeks } : null
+    };
+  });
 
   if (selectedStartDate.value && selectedEndDate.value) {
     console.log("selectedStartDate.value: ", selectedStartDate.value)
@@ -292,23 +382,100 @@ const formattedModules = computed(() => {
 
     // Apply first filter on weeks 
     filtered = filtered.filter(item => {
-      const weekOfModulesObj = item.weeks;
-      let isWithinRange = false;
-      
-      for (let index in weekOfModulesObj) {
-        const week = weekOfModulesObj[index]
-
-        if (parseInt(week) >= weekOfStartDate && parseInt(week) <= weekOfEndDate) {
-          isWithinRange = true;
-          break;
-        } 
+      const weekNumbersOrObj = item.weeks;
+      // If weeks is an array, use the week range logic
+      if (Array.isArray(weekNumbersOrObj)) {
+        let isWithinRange = false;
+        for (let i = 0; i < weekNumbersOrObj.length; i++) {
+          const week = parseInt(weekNumbersOrObj[i]);
+          if (!isNaN(week) && week >= weekOfStartDate && week <= weekOfEndDate) {
+            isWithinRange = true;
+            break;
+          }
+        }
+        return isWithinRange;
       }
-
-      return isWithinRange;
+      // If weeks is an object with start/end, check if any class date in that range matches the selected range and class day
+      if (
+        weekNumbersOrObj &&
+        typeof weekNumbersOrObj === 'object' &&
+        weekNumbersOrObj.start &&
+        weekNumbersOrObj.end
+      ) {
+        const classDay = getDayNumber(item.day_of_week);
+        const start = normalizeDate(weekNumbersOrObj.start);
+        const end = normalizeDate(weekNumbersOrObj.end);
+        const selStart = normalizeDate(selectedStartDate.value);
+        const selEnd = normalizeDate(selectedEndDate.value);
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const nd = normalizeDate(d);
+          console.log(
+            'Checking date:', nd,
+            'classDay:', classDay,
+            'd.getDay():', nd.getDay(),
+            'selStart:', selStart,
+            'selEnd:', selEnd,
+            'd >= selStart:', nd >= selStart,
+            'd <= selEnd:', nd <= selEnd
+          );
+          if (nd.getDay() === classDay && nd >= selStart && nd <= selEnd) {
+            console.log('MATCHED:', nd);
+            return true;
+          }
+        }
+        return false;
+      }
+      return false;
     });
 
-    // Apply first filter on days
-    filtered = filterByWeekday(filtered, selectedStartDate.value, selectedEndDate.value);
+    // New: Filter by actual class dates in selected date range
+    const startDate = normalizeDate(selectedStartDate.value);
+    const endDate = normalizeDate(selectedEndDate.value);
+    filtered = filtered.filter(item => {
+      const weekNumbersOrObj = item.weeks;
+      const classDay = getDayNumber(item.day_of_week);
+      // If weeks is an array, use the week logic
+      if (Array.isArray(weekNumbersOrObj)) {
+        for (let i = 0; i < weekNumbersOrObj.length; i++) {
+          const week = weekNumbersOrObj[i];
+          const weekInfo = weeksInSemester.value[week];
+          if (!weekInfo) continue;
+          const weekStart = normalizeDate(weekInfo.start);
+          // Calculate offset: if weekStart is Monday (1), Friday (5) is +4 days
+          const weekStartDay = weekStart.getDay(); // 1 for Monday
+          let offset = classDay - weekStartDay;
+          if (offset < 0) offset += 7; // wrap around if needed
+          const classDate = new Date(weekStart);
+          classDate.setDate(weekStart.getDate() + offset);
+          const nd = normalizeDate(classDate);
+          console.log('Module', item.module_code, 'week', week, 'weekStart:', weekStart, 'classDate:', nd, 'classDay:', classDay, 'selected range:', startDate, endDate);
+          if (nd >= startDate && nd <= endDate) {
+            return true;
+          }
+        }
+        return false;
+      }
+      // If weeks is an object with start/end, check if any class date in that range matches the selected range and class day
+      if (
+        weekNumbersOrObj &&
+        typeof weekNumbersOrObj === 'object' &&
+        weekNumbersOrObj.start &&
+        weekNumbersOrObj.end
+      ) {
+        const start = normalizeDate(weekNumbersOrObj.start);
+        const end = normalizeDate(weekNumbersOrObj.end);
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const nd = normalizeDate(d);
+          console.log('Module', item.module_code, 'checking classDate:', nd, 'classDay:', classDay, 'd.getDay():', nd.getDay(), 'selected range:', startDate, endDate);
+          if (nd.getDay() === classDay && nd >= startDate && nd <= endDate) {
+            console.log('MATCHED (actual class date):', nd);
+            return true;
+          }
+        }
+        return false;
+      }
+      return false;
+    });
   }
 
   return filtered
@@ -381,6 +548,13 @@ const isCurrentWeekValid = computed(() => {
   if (!currentWeek.value || !weeksInSemester.value[currentWeek.value]) return false;
   return true;
 });
+
+// Helper to normalize a date to midnight
+function normalizeDate(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
 
 </script>
 
