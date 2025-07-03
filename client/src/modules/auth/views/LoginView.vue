@@ -75,13 +75,13 @@
             block
             >Sign up</v-btn
         >
-        <v-btn
+        <!-- <v-btn
             class="text-none text-subtitle-1"
             color="primary"
             variant="outlined"
             block
             >Log in with NUS SSO</v-btn
-        >
+        > -->
     </div>
 </template>
 
