@@ -1,5 +1,7 @@
 <template>
     <v-container>
+    <v-skeleton-loader v-if="loading" type="card, table, actions" />
+    <template v-else>
     <div class="text-h5 pb-1">{{ semesterDisplay }}</div>
     <div class="text-subtitle-2 pb-4"> You are currently in Week {{ currentWeek }} </div>
     <v-row dense>
@@ -57,7 +59,7 @@
     <v-btn color="blue-darken-4" class="ml-2" @click="resetDates">
       Reset
     </v-btn>
-    
+    </template>
   </v-container>
 
 </template>
@@ -75,6 +77,7 @@ const router = useRouter();
 const modules = ref([]);
 const selectedStartDate = ref(null); 
 const selectedEndDate = ref(null); 
+const loading = ref(true);
 
 const leaveDateStore = useLeaveDateStore()
 const moduleStore = useModuleStore()
@@ -209,6 +212,7 @@ const endDateOfSem = computed(() => {
 const allModules = ref(null)
 
 onMounted(async()=>{
+  loading.value = true;
   try {
     const systemSemesterResp = await moduleApiService.getSystemSettings();
     systemSemesterSetting.value = systemSemesterResp.data.systemSettings;
@@ -217,7 +221,6 @@ onMounted(async()=>{
     console.log(`semesterStartDate:`, week1Start);
     console.log(`systemSemesterSetting:`,systemSemesterSetting.value)
     const weeks = {};
-
     // Generate Weeks 1 to 13
     if (week1Start) {
       for (let i = 1; i <= 13; i++) {
@@ -225,32 +228,25 @@ onMounted(async()=>{
         weekStart.setDate(week1Start.getDate() + (i - 1) * 7);
         weeks[i] = { start: formatDate(weekStart) };
       }
-
       const recessWeekStart = new Date(week1Start);
       recessWeekStart.setDate(recessWeekStart.getDate() + 6 * 7);
       weeks[0] = { start: formatDate(recessWeekStart) };
     }
-
     weeksInSemester.value = weeks;
-  } catch (err) {
-    console.error('Error fetching semester start date:', err);
-  }
-
-  try { 
     const studentID = JSON.parse(localStorage.getItem("user")).matrix_id;
     const response = await gatewayApiService.getModulesTakenByStudent(studentID);
-
     if (response.success) {
-        modules.value = response.data;
-        allModules.value = response.data
+      modules.value = response.data;
+      allModules.value = response.data
     } else {
       console.log("something went wrong: ", response)
     }
-    } catch (error) {
-        console.error("Error fetching modules:", error);
-    }
-
     console.log("startDateOfSem:", startDateOfSem.value)
+  } catch (err) {
+    console.error('Error during initial API calls:', err);
+  } finally {
+    loading.value = false;
+  }
 })
 
 const formattedModules = computed(() => {
