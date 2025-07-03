@@ -3,7 +3,13 @@
     <v-skeleton-loader v-if="loading" type="card, table, actions" />
     <template v-else>
     <div class="text-h5 pb-1">{{ semesterDisplay }}</div>
-    <div class="text-subtitle-2 pb-4"> You are currently in Week {{ currentWeek }} </div>
+    <div v-if="isCurrentWeekValid" class="text-subtitle-2 pb-4"> You are currently in Week {{ currentWeek }} </div>
+    <template v-if="!isCurrentWeekValid">
+      <v-alert type="error" class="mt-4">
+        Semester settings not updated by admin or you are not in a valid semester period.
+      </v-alert>
+    </template>
+    <template v-else>
     <v-row dense>
         <v-col cols="12" md="6">
           <v-date-input    
@@ -59,6 +65,7 @@
     <v-btn color="blue-darken-4" class="ml-2" @click="resetDates">
       Reset
     </v-btn>
+    </template>
     </template>
   </v-container>
 
@@ -347,6 +354,12 @@ const resetDates = () => {
   selectedStartDate.value = null;
   selectedEndDate.value = null;
 };
+
+const isCurrentWeekValid = computed(() => {
+  // currentWeek is null/undefined or not a valid week number
+  if (!currentWeek.value || !weeksInSemester.value[currentWeek.value]) return false;
+  return true;
+});
 
 </script>
 
