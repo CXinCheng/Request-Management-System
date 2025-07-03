@@ -54,6 +54,9 @@
     <v-btn @click="goToLeaveDetails" :disabled="!selectedItems.length || !selectedEndDate || !selectedStartDate">
       Next
     </v-btn>
+    <v-btn color="blue-darken-4" class="ml-2" @click="resetDates">
+      Reset
+    </v-btn>
     
   </v-container>
 
@@ -343,6 +346,11 @@ const endDateMin = computed(() => {
     ? allowedDatesArray.value[0]
     : null;
 });
+
+const resetDates = () => {
+  selectedStartDate.value = null;
+  selectedEndDate.value = null;
+};
 
 </script>
 
