@@ -8,14 +8,19 @@
 </template>
 
 <script>
+import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
+import { useModuleStore } from "../stores/useModuleStore";
+
 export default {
     data() {
       return {
-        requestId: Number
+        requestId: Number,
+        module_code: String
       };
     },
     mounted() {
-        this.requestId = this.$route.params.requestId; 
+        this.requestId = this.$route.params.requestId;
+        this.module_code = this.$route.params.module_code;
         if (localStorage.getItem('user')) {
             let user = JSON.parse(localStorage.getItem('user'));
             this.studentId = user['matrix_id'];
@@ -25,7 +30,9 @@ export default {
   methods: {
     editRequest() {
       console.log("Edit Request button clicked");
-      this.$router.push(`/editRequest/${this.requestId}`);
+      this.$router.push({
+        path: `/editRequest/${this.requestId}/${this.module_code}`,
+      });
     }
   }
 }

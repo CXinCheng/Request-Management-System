@@ -4,11 +4,11 @@
       <p v-if="!isLink" class="text-grey-darken-1">{{ value }}</p>
       <p v-else>
         <a :href="value" target="_blank" rel="noopener noreferrer">{{ value }}</a>
-        <p><img 
+        <img 
           :src="value" 
           style="max-width: 100%; max-height: 70vh;"
           alt="Full size attachment"
-        /></p>
+        />
       </p>
     </div>
   </template>

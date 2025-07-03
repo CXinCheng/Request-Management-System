@@ -34,11 +34,28 @@ const dbConnectionMiddleware = async (req, res, next) => {
     }
   };
 
+const requestValidationRules = [
+    body("student").notEmpty().withMessage("Student is required"),
+    body("reasonOfLeave").notEmpty().withMessage("Reason of leave is required"),
+    body("startDateOfLeave")
+        .notEmpty()
+        .withMessage("Start Date of leave is required")
+        .isISO8601()
+        .withMessage("Start Date of leave must be in ISO 8601 format (YYYY-MM-DD)"),
+    body("endDateOfLeave")
+        .notEmpty()
+        .withMessage("End Date of leave is required")
+        .isISO8601()
+        .withMessage("End Date of leave must be in ISO 8601 format (YYYY-MM-DD)"),
+    body("modules").notEmpty().withMessage("List of modules is required"),
+    body("approvers").notEmpty().withMessage("List of approvers is required"),
+];
+
 const router = express.Router();
 router.use(dbConnectionMiddleware, verifyToken);
 
 router.get('/student/:studentId', authorizeRoles(['Student']), getAllRequestsByStudent);
-router.put('/student/:requestId', authorizeRoles(['Student', 'Professor']), updateRequestByStudent);
+router.put('/student/:requestId', authorizeRoles(['Student']), requestValidationRules, updateRequestByStudent);
 router.delete('/student/:requestId', authorizeRoles(['Student']), deleteRequestByStudent);
 
 router.get('/module/:moduleCode', authorizeRoles(['Student', 'Professor']), getAllRequestsByModule);
@@ -52,22 +69,7 @@ router.post('/archive', authorizeRoles(['Admin']), archiveAllRequests);
 
 router.post('/submit', authorizeRoles(["Student"]),
     upload.single('uploadFile'), 
-    [
-        body("student").notEmpty().withMessage("Student is required"),
-        body("reasonOfLeave").notEmpty().withMessage("Reason of leave is required"),
-        body("startDateOfLeave")
-            .notEmpty()
-            .withMessage("Start Date of leave is required")
-            .isISO8601()
-            .withMessage("Start Date of leave must be in ISO 8601 format (YYYY-MM-DD)"),
-        body("endDateOfLeave")
-            .notEmpty()
-            .withMessage("End Date of leave is required")
-            .isISO8601()
-            .withMessage("End Date of leave must be in ISO 8601 format (YYYY-MM-DD)"),
-        body("modules").notEmpty().withMessage("List of modules is required"),
-        body("approvers").notEmpty().withMessage("List of approvers is required"),
-    ],
+    requestValidationRules,
     submitForm);
 
 export default router;

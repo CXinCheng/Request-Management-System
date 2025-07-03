@@ -73,11 +73,12 @@
 
 <script setup>
 import { ref, onMounted, watch, computed, watchEffect } from "vue";
-import { gatewayApiService, moduleApiService } from "@/utils/ApiService";
+import { gatewayApiService, moduleApiService, requestApiService } from "@/utils/ApiService";
 import { useLeaveDateStore } from "../stores/useLeaveDatesStore";
 import { useModuleStore } from "../stores/useModuleStore";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { VDateInput } from 'vuetify/labs/VDateInput'
+import { useNotificationStore } from "@/utils/NotificationStore";
 
 const selectedItems = ref([]);
 const router = useRouter();
@@ -218,6 +219,11 @@ const endDateOfSem = computed(() => {
 
 const allModules = ref(null)
 
+const route = useRoute();
+const requestId = route.params.requestId || null;
+const module_code = route.params.module_code || null;
+console.log("request:", requestId, module_code);
+
 onMounted(async()=>{
   loading.value = true;
   try {
@@ -249,6 +255,21 @@ onMounted(async()=>{
       console.log("something went wrong: ", response)
     }
     console.log("startDateOfSem:", startDateOfSem.value)
+    // If requestId is provided, fetch the request details
+    if (requestId) {
+      try {
+        const response = await requestApiService.getRequestDetails(requestId, module_code);
+        console.log("Request to edit:", response);
+        selectedStartDate.value = response.data.start_date_of_leave;
+        selectedEndDate.value = response.data.end_date_of_leave;
+      } catch (error) {
+        console.error("Error fetching request:", error);
+        this.notificationStore.showNotification({
+            message: error.response?.data?.message || "Failed to retrieve request",
+            color: "error",
+        });
+      }
+    }
   } catch (err) {
     console.error('Error during initial API calls:', err);
   } finally {
