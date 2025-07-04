@@ -71,7 +71,7 @@
           Delete
         </v-btn>
       </div>
-      <div v-else-if="userRole === 'Professor'">
+      <div v-else-if="userRole === 'Professor' && request.status === 'Pending'">
         <StatusButton :request="request" actionType="Approve" />
         <StatusButton :request="request" actionType="Reject" />
       </div>
