@@ -321,7 +321,7 @@ export const getModulesByProfessor = async (req, res) => {
 
   try {
     data = await db.manyOrNone(
-      `SELECT code, name, COUNT(user_matrix_id) students FROM request_management.modules
+      `SELECT code, name, COUNT(distinct(user_matrix_id)) students FROM request_management.modules
             LEFT JOIN request_management.user_module_mapping
             ON request_management.modules.code = request_management.user_module_mapping.module_code
             WHERE educator_id = $1
