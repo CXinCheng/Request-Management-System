@@ -37,11 +37,12 @@ export const getRequestDetails = async (req, res) => {
 
     try {
         const request = await db.oneOrNone(
-            `SELECT r.*, sr.*, u1.name AS user_name, u2.name AS approver_name
-            FROM request_management.requests r, request_management.sub_request sr, request_management.users u1, request_management.users u2
+            `SELECT r.*, sr.*, u1.name AS user_name, u2.name AS approver_name, mod.name AS module_name
+            FROM request_management.requests r, request_management.sub_request sr, request_management.users u1, request_management.users u2, request_management.modules mod
             WHERE r.id = sr.main_request_id
             AND r.user_id = u1.matrix_id
             AND sr.approver_id = u2.matrix_id
+            AND sr.module_code = mod.code
             AND r.id = $1
             AND sr.module_code = $2`,
             [requestId, module_code]

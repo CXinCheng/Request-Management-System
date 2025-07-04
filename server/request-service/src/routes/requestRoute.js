@@ -54,22 +54,21 @@ const requestValidationRules = [
 const router = express.Router();
 router.use(dbConnectionMiddleware, verifyToken);
 
-router.get('/student/:studentId', authorizeRoles(['Student']), getAllRequestsByStudent);
-router.put('/student/:requestId', authorizeRoles(['Student']), requestValidationRules, updateRequestByStudent);
-router.delete('/student/:requestId', authorizeRoles(['Student']), deleteRequestByStudent);
-
-router.get('/module/:moduleCode', authorizeRoles(['Student', 'Professor']), getAllRequestsByModule);
-router.get('/details/:requestId', authorizeRoles(['Student', 'Professor']), getRequestDetails);
-
-router.get('/professor/details/:profId', authorizeRoles(['Professor']), getAllRequestsDetailsByProfessor);
-router.get('/professor/:profId',  authorizeRoles(['Professor']), getAllRequestsByProfessor);
-router.put('/professor/:profId/:requestId',authorizeRoles(['Professor']), updateRequestStatus);
-
-router.post('/archive', authorizeRoles(['Admin']), archiveAllRequests);
-
 router.post('/submit', authorizeRoles(["Student"]),
     upload.single('uploadFile'), 
     requestValidationRules,
     submitForm);
+
+router.get('/student/:studentId', authorizeRoles(['Student']), getAllRequestsByStudent);
+router.put('/student/:requestId', authorizeRoles(['Student']), requestValidationRules, updateRequestByStudent);
+router.delete('/student/:requestId', authorizeRoles(['Student']), deleteRequestByStudent);
+
+router.get('/professor/:profId',  authorizeRoles(['Professor']), getAllRequestsByProfessor);
+router.put('/professor/:profId/:requestId',authorizeRoles(['Professor']), updateRequestStatus);
+router.get('/professor/details/:profId', authorizeRoles(['Professor']), getAllRequestsDetailsByProfessor);
+
+router.get('/module/:moduleCode', authorizeRoles(['Student', 'Professor']), getAllRequestsByModule);
+router.get('/details/:requestId', authorizeRoles(['Student', 'Professor']), getRequestDetails);
+router.post('/archive', authorizeRoles(['Admin']), archiveAllRequests);
 
 export default router;

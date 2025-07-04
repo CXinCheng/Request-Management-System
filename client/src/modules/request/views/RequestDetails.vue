@@ -37,8 +37,12 @@
         :value="`${formatDate(request.start_date_of_leave)} - ${formatDate(request.end_date_of_leave)}`"
       />
       <DetailItem
-        :title="'Module'"
+        :title="'Module Code'"
         :value="request.module_code"
+      />
+      <DetailItem
+        :title="'Module Name'"
+        :value="request.module_name"
       />
       <DetailItem
         :title="'Reason'"
