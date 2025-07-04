@@ -63,12 +63,24 @@
       
       <div v-if="userRole === 'Student' && request.status === 'Pending'">
         <!-- <EditRequestButton /> -->
-        <DeleteRequestButton />
+        <v-btn color="error" text @click="showDeleteDialog = true">
+          Delete
+        </v-btn>
       </div>
       <div v-else-if="userRole === 'Professor'">
         <StatusButton :request="request" actionType="Approve" />
         <StatusButton :request="request" actionType="Reject" />
       </div>
+
+      <DeleteConfirmationDialog
+        v-model="showDeleteDialog"
+        title="Confirm Delete"
+        message="Are you sure you want to delete this request?"
+      >
+        <template #confirm>
+          <DeleteRequestButton :requestId="requestId" @deleted="showDeleteDialog = false" />
+        </template>
+      </DeleteConfirmationDialog>
     </div>
     <div v-else>
       <p>Loading...</p>
@@ -86,6 +98,7 @@
   import StatusPill from "../components/StatusPill.vue";
   import { requestApiService } from "@/utils/ApiService";
   import { useNotificationStore } from "@/utils/NotificationStore";
+  import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog.vue';
   
   export default {
     name: "RequestDetailsView",
@@ -94,7 +107,8 @@
         DeleteRequestButton,
         StatusButton,
         StatusPill,
-        DetailItem
+        DetailItem,
+        DeleteConfirmationDialog
     },
     data() {
       return {
@@ -104,6 +118,7 @@
         module_code: '',
         request: null,
         notificationStore: useNotificationStore(),
+        showDeleteDialog: false,
       };
     },
     mounted() {

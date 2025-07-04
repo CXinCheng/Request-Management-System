@@ -13,14 +13,18 @@ import { requestApiService } from "@/utils/ApiService";
 import { useNotificationStore } from "@/utils/NotificationStore";
 
 export default {
+    props: {
+        requestId: {
+            type: [String, Number],
+            required: true,
+        },
+    },
     data() {
         return {
-            requestId: Number,
             notificationStore: useNotificationStore(),
         };
     },
     mounted() {
-        this.requestId = this.$route.params.requestId;
         if (localStorage.getItem("user")) {
             let user = JSON.parse(localStorage.getItem("user"));
             this.studentId = user["matrix_id"];
@@ -32,7 +36,15 @@ export default {
             console.log("Delete Request button clicked");
             try {
                 await requestApiService.deleteRequest(this.requestId);
-                this.$router.push("/requests"); // redirect to Request List page after deletion
+                if (this.$route.path === "/requests") {
+                    this.$router.go(); // Refresh the current page
+                } else {
+                    this.$router.push("/requests");
+                }
+                this.notificationStore.showNotification({
+                    color: "success",
+                    message: "Request deleted successfully.",
+                });
             } catch (error) {
                 console.error("Error deleting request:", error);
                 this.notificationStore.showNotification({

@@ -73,13 +73,23 @@
             </v-list-item> -->
             <v-list-item
               clickable
-              @click="deleteRequest(item)"
+              @click="openDeleteDialog(item.id)"
               v-if="userRole === 'Student' && item.status === 'Pending'"
             >
               <v-list-item-title>Delete</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
+
+        <DeleteConfirmationDialog
+            v-model="showDeleteDialog"
+            title="Confirm Delete"
+            message="Are you sure you want to delete this request?"
+        >
+            <template #confirm>
+              <DeleteRequestButton :requestId="deleteRequestId" @deleted="showDeleteDialog = false" />
+            </template>
+        </DeleteConfirmationDialog>
       </template>
     </v-data-table>
   </v-container>
@@ -93,10 +103,14 @@ import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { saveAs } from "file-saver";
 import StatusPill from "./StatusPill.vue";
+import DeleteRequestButton from '../components/DeleteRequestButton.vue';
+import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog.vue';
 
 export default {
   components: {
     StatusPill,
+    DeleteConfirmationDialog,
+    DeleteRequestButton,
   },
   data() {
     return {
@@ -115,6 +129,8 @@ export default {
       selectedItem: false,
       sortBy: [{ key: 'created_at', order:'desc'}],
       notificationStore: useNotificationStore(),
+      showDeleteDialog: false,
+      deleteRequestId: null,
     };
   },
   mounted() {
@@ -172,18 +188,9 @@ export default {
     //         },
     //     });
     // },
-    async deleteRequest(item) {
-      console.log("Delete Request button clicked");
-      try {
-        await requestApiService.deleteRequest(item.id);
-        this.$router.push("/requests"); // redirect to Request List page after deletion
-      } catch (error) {
-        console.error("Error deleting request:", error);
-        this.notificationStore.showNotification({
-          message: error.response?.data?.message || "Failed to delete request",
-          color: "error",
-        });
-      }
+    openDeleteDialog(requestId) {
+      this.deleteRequestId = requestId;
+      this.showDeleteDialog = true;
     },
   },
 };
