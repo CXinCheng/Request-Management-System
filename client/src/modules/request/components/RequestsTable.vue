@@ -122,6 +122,7 @@ export default {
         { title: "Submitted At", value: "created_at" },
         { title: "Status", value: "status" },
         { title: "Module", value: "module_code" },
+        { title: "Class Type", value: "class_type" },
         { title: "Actions", value: "actions", sortable: false },
       ],
       requests: [],
@@ -170,11 +171,13 @@ export default {
     seeRequestDetails(event, { item }) {
       console.log("Item clicked:", item);
       if (!item) return; // Prevent errors
+      console.log("item.class_type:", item.class_type)
       this.$router.push({
         name: "RequestDetailsView",
         params: {
           requestId: item.id,
           module_code: item.module_code,
+          class_type: item.class_type,
         },
       });
     },

@@ -8,7 +8,7 @@ export const getAllRequestsByStudent = async (req, res) => {
 
   try {
     const requests = await db.any(
-      `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, sr.module_code, u1.name AS user_name, u2.name AS approver_name
+      `SELECT r.id AS id, r.created_at, r.start_date_of_leave, r.end_date_of_leave, sr.status, sr.module_code, u1.name AS user_name, u2.name AS approver_name, sr.class_type
         FROM request_management.requests r, request_management.sub_request sr, request_management.users u1, request_management.users u2
         WHERE r.id = sr.main_request_id
         AND r.user_id = u1.matrix_id
@@ -17,6 +17,7 @@ export const getAllRequestsByStudent = async (req, res) => {
         AND r.user_id = $1`, 
         [studentId]
         );
+        console.log("requests:", requests)
         res.status(200).json({
             success: true,
             data: requests,
@@ -30,10 +31,10 @@ export const getAllRequestsByStudent = async (req, res) => {
 
 // API to get a request's details for a student
 export const getRequestDetails = async (req, res) => {
-  console.log("API hit for getRequestDetails:");
+  console.log("API hit for getRequestDetails:", req.query);
 
   const { requestId } = req.params;
-  const { module_code } = req.query;
+  const { module_code, class_type } = req.query;
 
     try {
         const request = await db.oneOrNone(
@@ -44,14 +45,16 @@ export const getRequestDetails = async (req, res) => {
             AND sr.approver_id = u2.matrix_id
             AND sr.module_code = mod.code
             AND r.id = $1
-            AND sr.module_code = $2`,
-            [requestId, module_code]
+            AND sr.module_code = $2
+            AND sr.class_type = $3`,
+            [requestId, module_code, class_type]
         );
-
+      
         if (!request) {
             return res.status(404).json({ success: false, message: 'Request not found' });
         }
 
+        console.log("getRequestDetails:", request)
         if (request.is_archived) {
             return res.status(403).json({ success: false, message: 'Request is archived and cannot be accessed' });
         }
@@ -109,7 +112,7 @@ export const deleteRequestByStudent = async (req, res) => {
 
     try {
         // Ensure the request exists before deleting
-        const existing = await db.oneOrNone(
+        const existing = await db.any(
             `SELECT id, status 
             FROM request_management.requests r, request_management.sub_request sr
             WHERE r.id = sr.main_request_id

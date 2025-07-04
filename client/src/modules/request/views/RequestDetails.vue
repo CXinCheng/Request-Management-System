@@ -116,6 +116,7 @@
         userRole: 'unknown',
         requestId: '',
         module_code: '',
+        class_type: '',
         request: null,
         notificationStore: useNotificationStore(),
         showDeleteDialog: false,
@@ -124,6 +125,10 @@
     mounted() {
         this.requestId = this.$route.params.requestId; 
         this.module_code = this.$route.params.module_code;
+        this.class_type = this.$route.params.class_type;
+        console.log("requestId:", this.requestId)
+        console.log("module_code:", this.module_code)
+        console.log("class_type:", this.class_type)
         if (localStorage.getItem('user')) {
             let user = JSON.parse(localStorage.getItem('user'));
             this.userId = user['matrix_id'];
@@ -134,7 +139,7 @@
     methods: {
       async fetchRequest() {
         try {
-          const response = await requestApiService.getRequestDetails(this.requestId, this.module_code);
+          const response = await requestApiService.getRequestDetails(this.requestId, this.module_code, this.class_type);
           console.log("Response for RequestDetailsView:", response);
           this.request = response.data;
         } catch (error) {

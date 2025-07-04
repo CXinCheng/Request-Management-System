@@ -206,6 +206,9 @@ watch(submit, async(newVal) => {
         approverIDs.push({...selectedMod}.educator_id)
     })
 
+    // Gather class types of selected modules
+    const classTypes = moduleStore.selectedModules.map(mod => mod.class_type);
+    console.log("classTypes:", classTypes)
     const startDateISO = new Date(leaveDateStore.selectedLeaveDates.startDate).toISOString().split('T')[0];
     const endDateISO = new Date(leaveDateStore.selectedLeaveDates.endDate).toISOString().split('T')[0];
 
@@ -217,6 +220,7 @@ watch(submit, async(newVal) => {
     formData.append("modules", moduleIDs)
     formData.append("approvers", approverIDs)
     formData.append("uploadFile", file.value)
+    formData.append("classTypes", JSON.stringify(classTypes))
 
     let response = ''
     try {
