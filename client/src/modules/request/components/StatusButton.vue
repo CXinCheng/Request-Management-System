@@ -39,7 +39,7 @@ export default {
     async updateStatus() {
       const newStatus = this.actionType === 'Approve' ? 'Approved' : 'Rejected';
       try {
-        const updatedRequest = await requestApiService.updateRequestStatus(this.userId, this.request.id, this.request.module_code, newStatus);
+        const updatedRequest = await requestApiService.updateRequestStatus(this.userId, this.request.id, this.request.module_code, newStatus, this.request.class_type);
         console.log(`Request ${this.requestId} updated to ${newStatus}:`, updatedRequest);
         this.$emit('status-updated', newStatus); // Notify parent
         window.location.reload(); // Refresh page to reflect changes

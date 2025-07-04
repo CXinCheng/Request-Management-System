@@ -70,8 +70,8 @@ export const requestApiService = {
         requestApi.put(`/student/${requestId}`).then((res) => res.data),
     deleteRequest: (requestId, class_type) =>
         requestApi.delete(`/student/${requestId}`, { params: { class_type: class_type } }).then((res) => res.data),
-    updateRequestStatus: (userId, requestId, module_code, newStatus) =>
-        requestApi.put(`/professor/${userId}/${requestId}`, { status: newStatus, module_code: module_code }).then((res) => res.data),
+    updateRequestStatus: (userId, requestId, module_code, newStatus, class_type) =>
+        requestApi.put(`/professor/${userId}/${requestId}`, { status: newStatus, module_code: module_code, class_type: class_type }).then((res) => res.data),
     getAllRequestsDetailsByProfessor: (professorId) =>
         requestApi.get(`/professor/details/${professorId}`).then((res) => res.data),
 };

@@ -201,7 +201,7 @@ export const updateRequestStatus = async (req, res) => {
   console.log("API hit for updateRequestStatus:");
 
   const { profId, requestId } = req.params;
-  const { status, module_code } = req.body;
+  const { status, module_code, class_type } = req.body;
 
   try {
     const updatedRequest = await db.oneOrNone(
@@ -210,8 +210,9 @@ export const updateRequestStatus = async (req, res) => {
         WHERE main_request_id = $2
         AND approver_id = $3
         AND module_code = $4
+        AND class_type = $5
         RETURNING *`,
-      [status, requestId, profId, module_code]
+      [status, requestId, profId, module_code, class_type]
     );
 
         if (!updatedRequest) {
