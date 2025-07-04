@@ -541,6 +541,8 @@ const endDateMin = computed(() => {
 const resetDates = () => {
   selectedStartDate.value = null;
   selectedEndDate.value = null;
+  selectedItems.value = [];
+  moduleStore.setSelectedModules([]);
 };
 
 const isCurrentWeekValid = computed(() => {
