@@ -45,6 +45,11 @@
         :value="request.module_name"
       />
       <DetailItem
+        :title="'Approver'"
+        :value="request.approver_name"
+        v-if="userRole === 'Student'"
+      />
+      <DetailItem
         :title="'Reason'"
         :value="request.reason_of_leave"
       />
