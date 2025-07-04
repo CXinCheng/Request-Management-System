@@ -133,6 +133,7 @@ export default {
       showDeleteDialog: false,
       deleteRequestId: null,
       deleteClassType: null,
+      downloading: false, 
     };
   },
   mounted() {
@@ -197,6 +198,84 @@ export default {
       this.deleteClassType = item.class_type;
       this.showDeleteDialog = true;
     },
+    async downloadRequests() {
+      if (this.userRole !== "Professor") return;
+
+      try {
+        this.downloading = true;
+
+        // Fetch detailed request data using the API
+        const response =
+          await requestApiService.getAllRequestsDetailsByProfessor(
+            this.userId
+          );
+
+        if (!response || !response.success || !response.data) {
+          throw new Error("Failed to fetch request details");
+        }
+
+        const requestsData = response.data;
+
+        // Create CSV content
+        let csvContent =
+          "Request ID,Status,Module Code,Student Matrix ID,Student Name,Student Email,Request Date,Start Date,End Date,Reason,Attachment URL\n";
+
+        requestsData.forEach((request) => {
+          // Format dates
+          const requestDate = request.request_date
+            ? dayjs(request.request_date).format("YYYY-MM-DD HH:mm:ss")
+            : "";
+          const startDate = request.start_date
+            ? dayjs(request.start_date).format("YYYY-MM-DD")
+            : "";
+          const endDate = request.end_date
+            ? dayjs(request.end_date).format("YYYY-MM-DD")
+            : "";
+
+          // Escape fields to handle commas, quotes, and newlines in the data
+          const escapeField = (field) => {
+            if (field === null || field === undefined) return "";
+            const stringField = String(field);
+            if (
+              stringField.includes(",") ||
+              stringField.includes('"') ||
+              stringField.includes("\n")
+            ) {
+              return `"${stringField.replace(/"/g, '""')}"`;
+            }
+            return stringField;
+          };
+
+          // Add row to CSV
+          csvContent +=
+            [
+              escapeField(request.id),
+              escapeField(request.status),
+              escapeField(request.module_code),
+              escapeField(request.matrix_id),
+              escapeField(request.user_name),
+              escapeField(request.email),
+              escapeField(requestDate),
+              escapeField(startDate),
+              escapeField(endDate),
+              escapeField(request.reason),
+              escapeField(request.attachment_url),
+            ].join(",") + "\n";
+        });
+
+        // Create and download file
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const filename = `leave_requests_${dayjs().format("YYYY-MM-DD")}.csv`;
+        saveAs(blob, filename);
+      } catch (error) {
+        console.error("Error downloading requests:", error);
+        alert("Failed to download requests. Please try again.");
+      } finally {
+        this.downloading = false;
+      }
+    }
   },
 };
 </script>

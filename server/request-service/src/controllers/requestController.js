@@ -278,10 +278,11 @@ export const getAllRequestsDetailsByProfessor = async (req, res) => {
   try {
     const requests = await db.any(
       `SELECT r.id AS id, r.created_at AS request_date, r.start_date_of_leave AS start_date, r.end_date_of_leave AS end_date, r.reason_of_leave AS reason, 
-            r.blob_url AS attachment_url, sr.status, sr.module_code, u.name AS user_name, u.email
+            r.blob_url AS attachment_url, sr.status, sr.module_code, u.name AS user_name, u.matrix_id, u.email
             FROM request_management.requests r, request_management.sub_request sr, request_management.users u
             WHERE r.id = sr.main_request_id
             AND r.user_id = u.matrix_id
+            AND r.is_archived = FALSE
             AND sr.approver_id = $1`,
       [profId]
     );
