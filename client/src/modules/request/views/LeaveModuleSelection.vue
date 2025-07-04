@@ -55,6 +55,7 @@
     item-value="module_code" 
     return-object
     show-select
+    :item-selectable="isRowSelectable"
     >
       <template #item.weeks="{ item }">
         <div v-if="item.weeksDisplayInfo">
@@ -557,6 +558,11 @@ function normalizeDate(date) {
   d.setHours(0, 0, 0, 0);
   return d;
 }
+
+// Function to determine if a row is selectable
+const isRowSelectable = (item) => {
+  return item.class_type !== 'No Class';
+};
 
 </script>
 
