@@ -22,8 +22,11 @@
       
       <DetailItem
         :title="'Status'"
-        :value="request.status"
-      />
+      >
+        <template #value>
+          <StatusPill :status="request.status" />
+        </template>
+      </DetailItem>
       <DetailItem
         :title="'Created At'"
         :value="formatDate(request.created_at)"
@@ -80,6 +83,7 @@
   import DeleteRequestButton from '../components/DeleteRequestButton.vue';
   import StatusButton from '../components/StatusButton.vue';
   import DetailItem from "../components/DetailItem.vue";
+  import StatusPill from "../components/StatusPill.vue";
   import { requestApiService } from "@/utils/ApiService";
   import { useNotificationStore } from "@/utils/NotificationStore";
   
@@ -89,6 +93,7 @@
         // EditRequestButton,
         DeleteRequestButton,
         StatusButton,
+        StatusPill,
         DetailItem
     },
     data() {
