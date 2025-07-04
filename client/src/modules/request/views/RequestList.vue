@@ -28,6 +28,7 @@ export default {
   data() {
     return {
       username: "", // Replace with the actual student ID
+      userRole: "unknown", // Default role
     };
   },
   mounted() {
