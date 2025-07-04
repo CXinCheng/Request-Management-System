@@ -106,26 +106,29 @@ export const updateRequestByStudent = async (req, res) => {
 
 // API for student to delete a request
 export const deleteRequestByStudent = async (req, res) => {
-  console.log("API hit for deleteRequestByStudent:");
-
+  console.log("API hit for deleteRequestByStudent for class type:", req.query);
   const { requestId } = req.params;
+  const { class_type } = req.query;
 
     try {
         // Ensure the request exists before deleting
         const existing = await db.any(
-            `SELECT id, status 
+            `SELECT id, status
             FROM request_management.requests r, request_management.sub_request sr
             WHERE r.id = sr.main_request_id
-            AND r.id = $1`, 
-            [requestId]
+            AND r.id = $1
+            AND sr.class_type = $2`, 
+            [requestId, class_type]
         );
         
-        if (!existing) return res.status(404).json({ 
+        if (existing.length === 0) return res.status(404).json({ 
             success: false, 
             message: 'Request not found' 
         });
+
+        console.log("existing:", existing)
         
-        if (existing.status != 'Pending') {
+        if (existing[0].status != 'Pending') {
             return res.status(403).json({
                 success: false,
                 message: 'Cannot delete a request that has already been processed'
@@ -136,15 +139,25 @@ export const deleteRequestByStudent = async (req, res) => {
       // Update sub_request table
       await t.none(
         `DELETE FROM request_management.sub_request sr 
-                WHERE sr.main_request_id = $1`,
+                WHERE sr.main_request_id = $1
+                AND sr.class_type = $2`,
+        [requestId, class_type]
+      );
+      // Check if any sub_requests remain for this main_request_id
+      const remainingSubRequests = await t.oneOrNone(
+        `SELECT 1 FROM request_management.sub_request WHERE main_request_id = $1 LIMIT 1`,
         [requestId]
       );
-      // Update requests table
-      await t.none(
-        `DELETE FROM request_management.requests r 
-                WHERE r.id = $1`,
-        [requestId]
-      );
+      // Only delete the main request if no sub_requests remain
+      if (!remainingSubRequests) {
+        // delete only when sub_request is 0 
+        // Update requests table
+        await t.none(
+          `DELETE FROM request_management.requests r 
+                  WHERE r.id = $1`,
+          [requestId]
+        );
+      }
     });
 
         res.status(200).json({ message: 'Request deleted successfully' });

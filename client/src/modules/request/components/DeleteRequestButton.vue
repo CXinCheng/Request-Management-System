@@ -18,6 +18,10 @@ export default {
             type: [String, Number],
             required: true,
         },
+        class_type: {
+            type: String,
+            required: true,
+        },
     },
     data() {
         return {
@@ -33,9 +37,9 @@ export default {
     },
     methods: {
         async deleteRequest() {
-            console.log("Delete Request button clicked");
+            console.log("Delete Request button clicked, passing in:", this.requestId, this.class_type);
             try {
-                await requestApiService.deleteRequest(this.requestId);
+                await requestApiService.deleteRequest(this.requestId, this.class_type);
                 if (this.$route.path === "/requests") {
                     this.$router.go(); // Refresh the current page
                 } else {

@@ -48,6 +48,10 @@
         :value="request.module_name"
       />
       <DetailItem
+        :title="'Class Type'"
+        :value="request.class_type"
+      />
+      <DetailItem
         :title="'Approver'"
         :value="request.approver_name"
         v-if="userRole === 'Student'"
@@ -78,7 +82,7 @@
         message="Are you sure you want to delete this request?"
       >
         <template #confirm>
-          <DeleteRequestButton :requestId="requestId" @deleted="showDeleteDialog = false" />
+          <DeleteRequestButton :requestId="requestId" :class_type="class_type" @deleted="showDeleteDialog = false" />
         </template>
       </DeleteConfirmationDialog>
     </div>

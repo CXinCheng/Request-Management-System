@@ -73,7 +73,7 @@
             </v-list-item> -->
             <v-list-item
               clickable
-              @click="openDeleteDialog(item.id)"
+              @click="openDeleteDialog(item)"
               v-if="userRole === 'Student' && item.status === 'Pending'"
             >
               <v-list-item-title>Delete</v-list-item-title>
@@ -87,7 +87,7 @@
             message="Are you sure you want to delete this request?"
         >
             <template #confirm>
-              <DeleteRequestButton :requestId="deleteRequestId" @deleted="showDeleteDialog = false" />
+              <DeleteRequestButton :requestId="deleteRequestId" :class_type="deleteClassType" @deleted="showDeleteDialog = false" />
             </template>
         </DeleteConfirmationDialog>
       </template>
@@ -132,6 +132,7 @@ export default {
       notificationStore: useNotificationStore(),
       showDeleteDialog: false,
       deleteRequestId: null,
+      deleteClassType: null,
     };
   },
   mounted() {
@@ -191,8 +192,9 @@ export default {
     //         },
     //     });
     // },
-    openDeleteDialog(requestId) {
-      this.deleteRequestId = requestId;
+    openDeleteDialog(item) {
+      this.deleteRequestId = item.id;
+      this.deleteClassType = item.class_type;
       this.showDeleteDialog = true;
     },
   },
